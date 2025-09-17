@@ -1,0 +1,8 @@
+{
+    "/Api": {
+        "target": "http://16.16.6.110",
+        "secure": false,
+        "changeOrigin": true,
+        "logLevel": "debug"
+    }
+}
