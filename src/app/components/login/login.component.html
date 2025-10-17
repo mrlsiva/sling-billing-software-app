@@ -1,0 +1,21 @@
+<div class="login-container">
+    <h2>Login</h2>
+
+    <form [formGroup]="form" (ngSubmit)="submit()">
+        <div class="mb-3">
+            <label>Phone</label>
+            <input type="text" formControlName="phone" class="form-control" placeholder="Enter phone" />
+        </div>
+
+        <div class="mb-3">
+            <label>Password</label>
+            <input type="password" formControlName="password" class="form-control" placeholder="Enter password" />
+        </div>
+
+        <button type="submit" [disabled]="loading" class="btn btn-primary w-100">
+            {{ loading ? 'Logging in...' : 'Login' }}
+        </button>
+
+        <div *ngIf="error" class="text-danger mt-3">{{ error }}</div>
+    </form>
+</div>

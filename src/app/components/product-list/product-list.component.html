@@ -1,0 +1,12 @@
+<div>
+    <button (click)="logout()">Logout</button>
+    <h2>Products</h2>
+    <div *ngIf="loading">Loading...</div>
+    <div *ngIf="error">{{error}}</div>
+    <ul *ngIf="products?.length">
+        <li *ngFor="let p of products">
+            {{ p.name }} - {{ p.price }}
+        </li>
+    </ul>
+    <div *ngIf="!products?.length && !loading">No products</div>
+</div>
