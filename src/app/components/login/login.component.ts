@@ -32,15 +32,25 @@ export class LoginComponent {
         const { phone, password } = this.form.value;
 
         this.auth.login(phone, password).subscribe({
-            next: (res) => {
+            next: (res: any) => {
                 this.loading = false;
-                const token = res.token || res.access_token || res.auth_token;
+                // Accept token in multiple common locations, including nested `data` (Laravel-style)
+                const token = res?.token || res?.access_token || res?.auth_token || res?.data?.token || res?.data?.access_token || res?.data?.auth_token;
                 if (token) {
                     sessionStorage.setItem('auth_token', token);
                     this.router.navigate(['/products']);
-                } else {
-                    this.error = 'Invalid login response';
+                    return;
                 }
+
+                // If the API responded with success=true but no token field (e.g. cookie-based sessions),
+                // attempt to navigate anyway — note: AuthGuard checks for token in sessionStorage, so
+                // this path will work only if the backend uses cookies or you add an alternative isLoggedIn check.
+                if (res?.success) {
+                    this.router.navigate(['/products']);
+                    return;
+                }
+
+                this.error = 'Invalid login response';
             },
             error: (err) => {
                 this.loading = false;

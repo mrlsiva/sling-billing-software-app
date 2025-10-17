@@ -1,11 +1,19 @@
 <div>
-    <button (click)="logout()">Logout</button>
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+        <div>
+            <strong *ngIf="username">{{ username }}</strong>
+            <div *ngIf="userEmail" style="font-size:0.9rem;color:var(--gray-700);">{{ userEmail }}</div>
+        </div>
+        <div>
+            <button (click)="logout()">Logout</button>
+        </div>
+    </div>
     <h2>Products</h2>
     <div *ngIf="loading">Loading...</div>
     <div *ngIf="error">{{error}}</div>
     <ul *ngIf="products?.length">
         <li *ngFor="let p of products">
-            {{ p.name }} - {{ p.price }}
+            {{ p.unique_number }} - {{ p.price }}
         </li>
     </ul>
     <div *ngIf="!products?.length && !loading">No products</div>
