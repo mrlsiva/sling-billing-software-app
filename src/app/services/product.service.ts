@@ -6,35 +6,82 @@ import { catchError, map, switchMap } from 'rxjs/operators';
 
 @Injectable({ providedIn: 'root' })
 export class ProductService {
-    private url = `${environment.apiBase}/products/list`;
+    private url = `${environment.apiBase}/pos/product`;
 
     constructor(private http: HttpClient) { }
 
-    list(): Observable<any> {
-        return this.http.get(this.url);
+    /**
+     * Fetch product list using POS API.
+     * Optional filters: { category, sub_category, product, filter }
+     */
+    list(filters?: { category?: string; sub_category?: string; product?: string; filter?: string }): Observable<any> {
+        const params: any = {};
+        if (filters) {
+            if (filters.category) params.category = filters.category;
+            if (filters.sub_category) params.sub_category = filters.sub_category;
+            if (filters.product) params.product = filters.product;
+            if (filters.filter) params.filter = filters.filter;
+        }
+        return this.http.get(this.url, { params });
     }
 
-    /** Fetch single product by id */
+    /** Fetch single product by id using POS detail endpoint, fallback to list lookup */
     getById(id: number | string): Observable<any> {
-        // First try to find the product in the list to avoid calling a non-existent detail endpoint
-        return this.list().pipe(
-            map((res: any) => (res && res.data) ? res.data : res),
-            switchMap((items: any[]) => {
-                if (Array.isArray(items)) {
-                    const found = items.find((p: any) => String(p.id) === String(id) || p.unique_id === id || p.unique_number === id);
-                    if (found) {
-                        return of(found);
-                    }
-                }
-                // Not found in list — try the conventional REST endpoint as a fallback
-                return this.http.get(`${environment.apiBase}/products/${id}`).pipe(
-                    catchError(err => {
-                        // propagate a clearer error
-                        return throwError(() => new Error('Product not found'));
-                    })
-                );
+        const detailUrl = `${environment.apiBase}/pos/${id}/get_product_detail`;
+        return this.http.get(detailUrl).pipe(
+            map((res: any) => {
+                const raw = (res && res.data) ? res.data : res;
+                // if the API returns a wrapper with `product`, return that
+                return raw?.product ? raw.product : raw;
+            }),
+            catchError(() => {
+                // fallback: search through paginated product list pages
+                return this.searchPagesForId(id);
             })
         );
+    }
+
+    /**
+     * Walks paginated pos/product pages following next_page_url until the product is found
+     */
+    private searchPagesForId(id: number | string): Observable<any> {
+        const startUrl = this.url; // this is environment.apiBase + '/pos/product'
+
+        return new Observable<any>((observer) => {
+            const httpGet = (url: string) => {
+                this.http.get(url).subscribe({
+                    next: (res: any) => {
+                        const pageItems = (res && res.data) ? res.data : (Array.isArray(res) ? res : []);
+                        if (Array.isArray(pageItems)) {
+                            const found = pageItems.find((p: any) => {
+                                // items may be wrapper objects with `.product`
+                                const candidate = p?.product ? p.product : p;
+                                return String(candidate?.id) === String(id) || candidate?.unique_id === id || candidate?.unique_number === id;
+                            });
+                            if (found) {
+                                const product = found?.product ? found.product : found;
+                                observer.next(product);
+                                observer.complete();
+                                return;
+                            }
+                        }
+
+                        const nextUrl = res?.next_page_url || res?.links?.find?.((l: any) => l?.label?.toString().includes('Next'))?.url;
+                        if (nextUrl) {
+                            // follow next page
+                            httpGet(nextUrl);
+                        } else {
+                            observer.error(new Error('Product not found'));
+                        }
+                    },
+                    error: (err) => {
+                        observer.error(err);
+                    }
+                });
+            };
+
+            httpGet(startUrl);
+        });
     }
 
     /** Resolve image URL: if value already looks like a URL, return it; otherwise prefix with environment.assetsBase */

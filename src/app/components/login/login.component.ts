@@ -33,18 +33,34 @@ export class LoginComponent {
 
         this.auth.login(slug_name, password).subscribe({
             next: (res: any) => {
+                debugger; // Optional: to inspect response in dev tools
                 this.loading = false;
-                // Accept token in multiple common locations, including nested `data` (Laravel-style)
-                const token = res?.token || res?.access_token || res?.auth_token || res?.data?.token || res?.data?.access_token || res?.data?.auth_token;
+                console.log('Login Response:', res);
+
+                const userDetail = res?.data?.user_detail;
+                const paymentMethod = userDetail?.payment_method;
+
+                // 🔒 Check payment method before proceeding
+                if (paymentMethod === '1') {
+                    this.error = 'Payment expired. Please Contact Admin.';
+                    return;
+                }
+
+                // ✅ Proceed with login if payment is valid
+                const token =
+                    res?.token ||
+                    res?.access_token ||
+                    res?.auth_token ||
+                    res?.data?.token ||
+                    res?.data?.access_token ||
+                    res?.data?.auth_token;
+
                 if (token) {
                     sessionStorage.setItem('auth_token', token);
                     this.router.navigate(['/products']);
                     return;
                 }
 
-                // If the API responded with success=true but no token field (e.g. cookie-based sessions),
-                // attempt to navigate anyway — note: AuthGuard checks for token in sessionStorage, so
-                // this path will work only if the backend uses cookies or you add an alternative isLoggedIn check.
                 if (res?.success) {
                     this.router.navigate(['/products']);
                     return;
@@ -55,7 +71,8 @@ export class LoginComponent {
             error: (err) => {
                 this.loading = false;
                 this.error = err?.error?.message || 'Invalid credentials';
-            }
+            },
         });
     }
+
 }

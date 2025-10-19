@@ -1,20 +1,26 @@
 <div>
-    <div style="display:flex;justify-content:space-between;align-items:center;">
-        <div>
-            <strong *ngIf="username">{{ username }}</strong>
-            <div *ngIf="userEmail" style="font-size:0.9rem;color:var(--gray-700);">{{ userEmail }}</div>
-        </div>
-        <div>
-            <button (click)="logout()">Logout</button>
-        </div>
-    </div>
-    <h2>Products</h2>
+    <app-header></app-header>
     <div *ngIf="loading">Loading...</div>
     <div *ngIf="error">{{error}}</div>
-    <ul *ngIf="products?.length">
-        <li *ngFor="let p of products">
-            <a [routerLink]="['/products', p.id || p.unique_id]">{{ p.unique_number || p.unique_id || ('#' + p.id) }} -
-                {{ p.price }}</a>
+    <ul *ngIf="products?.length" class="product-list">
+        <li *ngFor="let p of products" class="product-item"
+            [ngClass]="{ 'qty-warning': p.quantity > 0 && p.quantity < 5, 'qty-danger': p.quantity === 0 }">
+            <div class="product-item-listing">
+                <div class="product-main">
+                    <div class="product-title">{{ p.product.code }} - {{ p.product.name }}</div>
+
+                </div>
+                <div class="product-main">
+
+                    <div class="product-meta mb-3">{{ p.product.category.name }} • {{ p.product.sub_category.name }}
+                    </div>
+                </div>
+                <div class="product-main">
+                    <div class="product-title">Rs. <strong>{{ p.product.price }}</strong> </div>
+                    <div class="product-meta">{{ p.quantity }} <span>Qty</span></div>
+                </div>
+            </div>
+
         </li>
     </ul>
     <div *ngIf="!products?.length && !loading">No products</div>

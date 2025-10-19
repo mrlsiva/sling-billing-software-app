@@ -1,0 +1,79 @@
+.app-header {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem;
+    border-bottom: 1px solid #eee
+}
+
+.hamburger {
+    font-size: 20px;
+    border: 0;
+    background: transparent;
+    cursor: pointer
+}
+
+.logo-wrap img {
+    height: 40px;
+    object-fit: contain
+}
+
+.spacer {
+    flex: 1
+}
+
+.side-menu {
+    position: fixed;
+    top: 0;
+    left: -280px;
+    width: 280px;
+    height: 100%;
+    background: #fff;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+    transition: left .22s ease;
+    z-index: 1000;
+    padding: 1rem 0
+}
+
+.side-menu.open {
+    left: 0;
+    padding: 1rem
+}
+
+.side-head {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #eee;
+    margin-bottom: 1rem
+}
+
+.side-menu ul {
+    list-style: none;
+    padding: 0;
+    margin: 0
+}
+
+.menu-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.35);
+    z-index: 900
+}
+
+.side-close {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: transparent;
+    border: 0;
+    font-size: 20px;
+    cursor: pointer
+}
+
+.side-menu li {
+    margin: 0.6rem 0
+}
+
+.side-menu a {
+    cursor: pointer;
+    color: #333;
+    text-decoration: none
+}

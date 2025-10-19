@@ -1,0 +1,21 @@
+<header class="app-header">
+    <button class="hamburger" (click)="toggle()">☰</button>
+    <div class="logo-wrap">
+        <img [src]="logoUrl" alt="logo" width="120" />
+    </div>
+    <div class="spacer"></div>
+</header>
+
+<div class="menu-backdrop" *ngIf="open" (click)="close()"></div>
+
+<nav class="side-menu" [class.open]="open">
+    <div class="side-head">
+        <button class="side-close" (click)="close()" aria-label="Close menu">✕</button>
+        <strong>{{ userName }}</strong>
+    </div>
+    <ul>
+        <li><a routerLink="/products" (click)="close()">Products</a></li>
+        <li><a routerLink="/profile" (click)="close()">Profile</a></li>
+        <li><a (click)="onLogout()">Logout</a></li>
+    </ul>
+</nav>

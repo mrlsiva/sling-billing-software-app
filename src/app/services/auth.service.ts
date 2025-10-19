@@ -36,8 +36,8 @@ export class AuthService {
     }
 
     /** Perform login */
-    login(phone: string, password: string): Observable<LoginResponse> {
-        return this.http.post<LoginResponse>(this.loginUrl, { phone, password }).pipe(
+    login(slug_name: string, password: string): Observable<LoginResponse> {
+        return this.http.post<LoginResponse>(this.loginUrl, { slug_name, password }).pipe(
             tap(res => {
                 // Support token returned directly or inside `data` (Laravel-style)
                 const token = res.token || res.access_token || res.auth_token || (res as any)?.data?.token || (res as any)?.data?.access_token || (res as any)?.data?.auth_token;
