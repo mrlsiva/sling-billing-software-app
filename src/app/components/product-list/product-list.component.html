@@ -13,7 +13,8 @@
     <div *ngIf="error">{{error}}</div>
     <ul *ngIf="products?.length">
         <li *ngFor="let p of products">
-            {{ p.unique_number }} - {{ p.price }}
+            <a [routerLink]="['/products', p.id || p.unique_id]">{{ p.unique_number || p.unique_id || ('#' + p.id) }} -
+                {{ p.price }}</a>
         </li>
     </ul>
     <div *ngIf="!products?.length && !loading">No products</div>

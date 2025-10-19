@@ -18,7 +18,7 @@ export class LoginComponent {
 
     constructor(private fb: FormBuilder, private auth: AuthService, private router: Router) {
         this.form = this.fb.group({
-            phone: ['', Validators.required],
+            slug_name: ['', Validators.required],
             password: ['', Validators.required]
         });
     }
@@ -29,9 +29,9 @@ export class LoginComponent {
         this.loading = true;
         this.error = '';
 
-        const { phone, password } = this.form.value;
+        const { slug_name, password } = this.form.value;
 
-        this.auth.login(phone, password).subscribe({
+        this.auth.login(slug_name, password).subscribe({
             next: (res: any) => {
                 this.loading = false;
                 // Accept token in multiple common locations, including nested `data` (Laravel-style)

@@ -1,4 +1,6 @@
 export const environment = {
     production: false,
-    apiBase: 'http://3.110.13.56/api'
+    apiBase: 'https://test.slingbillings.com/api',
+    // base URL used to prefix image filenames returned by the API
+    assetsBase: 'https://test.slingbillings.com'
 };
