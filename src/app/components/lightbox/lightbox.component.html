@@ -1,0 +1,6 @@
+<div class="lb-backdrop" (click)="close()">
+    <div class="lb-content" (click)="$event.stopPropagation()">
+        <button class="lb-close" (click)="close()"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
+        <img [src]="src" alt="lightbox-image" />
+    </div>
+</div>

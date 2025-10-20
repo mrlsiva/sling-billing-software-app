@@ -1,16 +1,21 @@
 <header class="app-header">
-    <button class="hamburger" (click)="toggle()">☰</button>
+    <button class="hamburger" (click)="toggle()"><i class="fa-solid fa-bars" aria-hidden="true"></i></button>
     <div class="logo-wrap">
         <img [src]="logoUrl" alt="logo" width="120" />
     </div>
     <div class="spacer"></div>
+    <button class="fullscreen-btn" (click)="toggleFullscreen()"
+        [attr.title]="isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'">
+        <i [class]="isFullscreen ? 'fa-solid fa-compress' : 'fa-solid fa-expand'" aria-hidden="true"></i>
+    </button>
 </header>
 
 <div class="menu-backdrop" *ngIf="open" (click)="close()"></div>
 
-<nav class="side-menu" [class.open]="open">
+<nav #sideMenu class="side-menu" [class.open]="open">
     <div class="side-head">
-        <button class="side-close" (click)="close()" aria-label="Close menu">✕</button>
+        <button class="side-close" (click)="close()" aria-label="Close menu"><i class="fa-solid fa-xmark"
+                aria-hidden="true"></i></button>
         <strong>{{ userName }}</strong>
     </div>
     <ul>

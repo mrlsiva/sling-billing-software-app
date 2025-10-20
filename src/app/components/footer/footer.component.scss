@@ -1,0 +1,63 @@
+.app-footer {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    background: var(--color-primary-bg);
+    color: var(--color-primary-text);
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    z-index: 1000;
+}
+
+.app-footer .btn {
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.9);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 52px;
+    height: 52px;
+    padding: 6px;
+    text-decoration: none;
+    border-radius: 12px;
+    transition: background .12s ease, color .12s ease, transform .08s ease;
+}
+
+.app-footer .btn svg {
+    display: block;
+    width: 24px;
+    height: 24px;
+}
+
+.app-footer .btn i,
+.app-footer .btn svg {
+    line-height: 0;
+    vertical-align: middle;
+    display: inline-block;
+    color: inherit;
+}
+
+/* active state */
+.app-footer .btn.router-link-active,
+.app-footer .btn.router-link-active i,
+.app-footer .btn.router-link-active svg {
+    background: var(--color-primary-bg);
+    color: var(--color-primary-text);
+    box-shadow: 0 6px 16px rgba(13, 110, 253, 0.12);
+    transform: translateY(-2px);
+}
+
+.app-footer .btn:hover {
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--color-primary-text);
+}
+
+/* Provide some spacing so content doesn't hide behind footer */
+:host(.with-footer) {
+    padding-bottom: 56px;
+}

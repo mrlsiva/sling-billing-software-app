@@ -1,4 +1,5 @@
 import { Component, EventEmitter, Output, ElementRef, ViewChild, OnInit, OnDestroy } from '@angular/core';
+import { HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
@@ -16,6 +17,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
     open = false;
     userName = '';
     logoUrl = `${environment.assetsBase.replace(/\/$/, '')}/no-image-icon.jpg`;
+    isFullscreen = false;
     private previousFocus: Element | null = null;
     @ViewChild('sideMenu', { read: ElementRef, static: false }) sideMenuRef?: ElementRef<HTMLElement>;
 
@@ -66,6 +68,37 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
     ngOnDestroy(): void {
         document.removeEventListener('keydown', this.onKeydown);
+    }
+
+    @HostListener('document:fullscreenchange', [])
+    @HostListener('document:webkitfullscreenchange', [])
+    @HostListener('document:mozfullscreenchange', [])
+    @HostListener('document:MSFullscreenChange', [])
+    onFsChange() {
+        const doc: any = document as any;
+        this.isFullscreen = !!(doc.fullscreenElement || doc.webkitFullscreenElement || doc.mozFullScreenElement || doc.msFullscreenElement);
+    }
+
+    async toggleFullscreen() {
+        try {
+            const doc: any = document as any;
+            if (this.isFullscreen) {
+                if (doc.exitFullscreen) await doc.exitFullscreen();
+                else if (doc.webkitExitFullscreen) await doc.webkitExitFullscreen();
+                else if (doc.mozCancelFullScreen) await doc.mozCancelFullScreen();
+                else if (doc.msExitFullscreen) await doc.msExitFullscreen();
+                this.isFullscreen = false;
+            } else {
+                const el: any = document.documentElement as any;
+                if (el.requestFullscreen) await el.requestFullscreen();
+                else if (el.webkitRequestFullscreen) await el.webkitRequestFullscreen();
+                else if (el.mozRequestFullScreen) await el.mozRequestFullScreen();
+                else if (el.msRequestFullscreen) await el.msRequestFullscreen();
+                this.isFullscreen = true;
+            }
+        } catch (e) {
+            // ignore errors (user may block fullscreen)
+        }
     }
 
     // Keep focus inside the side menu when it's open

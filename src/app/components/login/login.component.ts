@@ -33,7 +33,6 @@ export class LoginComponent {
 
         this.auth.login(slug_name, password).subscribe({
             next: (res: any) => {
-                debugger; // Optional: to inspect response in dev tools
                 this.loading = false;
                 console.log('Login Response:', res);
 

@@ -1,0 +1,31 @@
+.app-main {
+    padding: 1rem;
+    padding-bottom: 72px;
+    min-height: calc(100vh - 150px);
+    max-height: calc(100vh - 150px);
+    overflow-y: auto;
+    overflow-x: hidden;
+    /* give extra room for footer */
+}
+
+.app-layout {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+app-header {
+    flex: 0 0 auto;
+}
+
+.app-main {
+    flex: 1 1 auto;
+    /* allow only main to scroll while header/footer stay fixed */
+    overflow: auto;
+    /* ensure main accounts for fixed header height */
+    -webkit-overflow-scrolling: touch;
+}
+
+app-footer {
+    flex: 0 0 auto;
+}

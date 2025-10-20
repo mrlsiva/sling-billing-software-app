@@ -5,12 +5,11 @@ import { AuthService } from '../../services/auth.service';
 import { environment } from '../../../environments/environment';
 import { Subscription } from 'rxjs';
 import { RouterModule } from '@angular/router';
-import { HeaderComponent } from '../header/header.component';
 
 @Component({
     selector: 'app-product-list',
     standalone: true,
-    imports: [CommonModule, RouterModule, HeaderComponent],
+    imports: [CommonModule, RouterModule],
     templateUrl: './product-list.component.html',
     styleUrls: ['./product-list.component.scss']
 })

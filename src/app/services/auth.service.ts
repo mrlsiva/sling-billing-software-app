@@ -51,6 +51,10 @@ export class AuthService {
                     try { sessionStorage.setItem(this.userKey, JSON.stringify(user)); } catch { }
                     // emit to subscribers
                     this.user$.next(user);
+                    // update favicon if API provided one
+                    try { this.setFaviconFromUser(user); } catch { }
+                    // update document title if API provided an app/company/title
+                    try { this.setDocumentTitleFromUser(user); } catch { }
                 }
             })
         );
@@ -76,9 +80,76 @@ export class AuthService {
     initFromStorage(): void {
         const raw = sessionStorage.getItem(this.userKey);
         if (raw) {
-            try { this.user$.next(JSON.parse(raw)); } catch { this.user$.next(null); }
+            try {
+                const parsed = JSON.parse(raw);
+                this.user$.next(parsed);
+                try { this.setFaviconFromUser(parsed); } catch { }
+                try { this.setDocumentTitleFromUser(parsed); } catch { }
+            } catch { this.user$.next(null); }
         } else {
             this.user$.next(null);
+        }
+    }
+
+    /** Set document.title using likely fields from API-provided user/app object */
+    private setDocumentTitleFromUser(user: any): void {
+        if (!user) return;
+        const candidates = [
+            user.app_title,
+            user.appName,
+            user.company_name,
+            user.company,
+            user.business_name,
+            user.org_name,
+            user.name,
+            user.title,
+            user.slug_name
+        ].filter(Boolean).map(String);
+        if (!candidates.length) return;
+        const title = candidates[0];
+        try { document.title = title; } catch { }
+    }
+
+    /** Resolve and set favicon based on user data if provided by API */
+    private setFaviconFromUser(user: any): void {
+        if (!user) return;
+        const possible = [
+            user.fav_icon,
+            user.favicon,
+            user.favIcon,
+            user.icon,
+            user.logo,
+            user.logo_url,
+            user.fav_icon_url,
+            (user.data && user.data.fav_icon) || undefined
+        ].filter(Boolean) as string[];
+        if (!possible.length) return;
+        const icon = possible[0];
+        let href = icon;
+        // If it's a relative path, resolve against assetsBase
+        if (!/^https?:\/\//i.test(icon)) {
+            const base = (environment.assetsBase || '').replace(/\/$/, '');
+            href = base ? `${base}/${icon.replace(/^\//, '')}` : icon;
+        }
+        this.updateFavicon(href);
+    }
+
+    /** Update or create the <link rel="icon"> element on the page */
+    private updateFavicon(href: string): void {
+        if (!href) return;
+        try {
+            const doc = document;
+            let link: HTMLLinkElement | null = doc.querySelector("link[rel~='icon']");
+            if (!link) {
+                link = doc.createElement('link');
+                link.rel = 'icon';
+                doc.getElementsByTagName('head')[0].appendChild(link);
+            }
+            if (link.href !== href) {
+                link.href = href;
+            }
+        } catch (e) {
+            // ignore in non-browser contexts
         }
     }
 

@@ -2,7 +2,10 @@
 :host {
     display: block;
     padding: 0.75rem;
-    background-color: #f5f5f5;
+    background-color: var(--color-neutral-300);
+    font-size: 13px;
+    /* slightly smaller base font */
+    line-height: 1.35;
 }
 
 h2 {
@@ -13,11 +16,12 @@ h2 {
 :host {
     display: block;
     padding: 0;
-    background-color: #f5f5f5;
-    min-height: 100vh;
-    overflow-y: auto;
-    overflow-x: hidden;
+    background-color: var(--color-neutral-300);
+    min-height: calc(100vh - 150px);
     /* prevent horizontal scroll */
+    font-size: 13px;
+    /* ensure consistent smaller font across component */
+    line-height: 1.35;
 }
 
 /* ensure padding doesn't add to computed widths */
@@ -28,7 +32,10 @@ h2 {
 }
 
 h2 {
-    margin-bottom: 1rem;
+    margin-bottom: 0.6rem;
+    font-size: 1.05rem;
+    /* smaller heading */
+    margin-top: 0;
 }
 
 ul {
@@ -36,16 +43,16 @@ ul {
     padding: 0.5rem;
     margin: 0;
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 0.75rem;
     box-sizing: border-box;
 }
 
 li {
     &.product-item {
-        background: #fff;
+        background: var(--color-neutral-100);
         border-radius: 6px;
-        box-shadow: 0 0 5px rgba(0, 0, 0, 0.05);
+        box-shadow: 0 0 5px var(--shadow-xxs);
     }
 
     & .product-item-listing {
@@ -55,15 +62,15 @@ li {
 
 /* warning/danger states for product rows */
 li.product-item.qty-warning {
-    background: #fff8e1;
+    background: var(--color-warning-bg);
     /* light yellow */
-    border: 1px solid #ffecb3;
+    border: 1px solid var(--color-warning-border);
 }
 
 li.product-item.qty-danger {
-    background: #ffe6e6;
+    background: var(--color-danger-bg);
     /* light red */
-    border: 1px solid #ffb3b3;
+    border: 1px solid var(--color-danger-border);
 }
 
 .product-main {
@@ -78,7 +85,7 @@ li.product-item.qty-danger {
 }
 
 .product-main[role="button"]:hover {
-    background: #fafafa;
+    background: var(--color-neutral-200);
 }
 
 .product-title {
@@ -96,20 +103,29 @@ li.product-item.qty-danger {
 }
 
 .product-meta {
-    color: #666;
-    font-size: 0.9rem;
+    color: var(--color-neutral-600);
+    font-size: 0.75rem;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    padding: 4px 0px;
 
     &.mb-3 {
-        margin-bottom: 1rem;
+        margin-bottom: 0.25rem;
+    }
+
+    & span {
+        background-color: var(--color-primary-bg-light);
+        border: 1px solid var(--color-primary-bg);
+        color: var(--color-primary-bg);
+        padding: 0 4px;
+        border-radius: 4px;
     }
 }
 
 .product-footer {
     margin-top: 0.5rem;
-    color: #333;
+    color: var(--color-neutral-800);
 }
 
 .expanded {
@@ -127,9 +143,9 @@ li.product-item.qty-danger {
     gap: 0.75rem;
     align-items: flex-start;
     padding: 0.5rem;
-    border: 1px solid #eee;
+    border: 1px solid var(--color-neutral-400);
     border-radius: 6px;
-    background: #fafafa;
+    background: var(--color-neutral-200);
     min-width: 0;
 }
 
@@ -153,7 +169,7 @@ img {
 
 .expanded-loading {
     padding: 0.5rem;
-    color: #666;
+    color: var(--color-neutral-600);
 }
 
 .loading,
@@ -162,21 +178,52 @@ img {
     text-align: center;
     margin: 1rem 0;
     font-weight: bold;
-    color: #555;
+    color: var(--color-neutral-700);
 }
 
 button.logout {
     margin-top: 1rem;
     padding: 0.5rem 1rem;
-    background-color: #dc3545;
-    color: #fff;
+    background-color: var(--color-primary-bg);
+    color: var(--color-primary-text);
     border: none;
     border-radius: 4px;
     cursor: pointer;
 }
 
-// @media (max-width: 700px) {
-//     ul {
-//         grid-template-columns: 1fr;
-//     }
-// }
+/* Small screens and up (from 0px to 600px) */
+@media (min-width: 0px) {
+    ul {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Medium screens and up (from 600px) */
+@media (min-width: 420px) {
+    ul {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+/* Large screens and up (from 1200px) */
+@media (min-width: 800px) {
+    ul {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+/* Extra large screens and up (from 1400px) */
+@media (min-width: 1100px) {
+    ul {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        /* optional */
+    }
+}
+
+/* Extra large screens and up (from 1400px) */
+@media (min-width: 1280px) {
+    ul {
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        /* optional */
+    }
+}

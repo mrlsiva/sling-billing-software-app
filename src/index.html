@@ -11,6 +11,34 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <!-- Font Awesome (latest) -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <script>
+    (function () {
+      try {
+        var raw = sessionStorage.getItem('auth_user');
+        if (!raw) return;
+        var u = JSON.parse(raw);
+        var candidates = [u && u.app_title, u && u.appName, u && u.company_name, u && u.company, u && u.business_name, u && u.org_name, u && u.name, u && u.title, u && u.slug_name].filter(Boolean);
+        if (candidates.length) document.title = candidates[0];
+        var icon = u && (u.fav_icon || u.favicon || u.favIcon || u.icon || u.logo || u.logo_url || u.fav_icon_url);
+        if (icon) {
+          try {
+            var href = icon;
+            if (!/^https?:\/\//i.test(icon)) {
+              var base = (window.__env && window.__env.assetsBase) || '';
+              base = base.replace(/\/$/, '');
+              href = base ? base + '/' + icon.replace(/^\//, '') : icon;
+            }
+            var link = document.querySelector("link[rel~='icon']") || document.createElement('link');
+            link.rel = 'icon';
+            link.href = href;
+            if (!document.querySelector("link[rel~='icon']")) document.getElementsByTagName('head')[0].appendChild(link);
+          } catch (e) { }
+        }
+      } catch (e) { }
+    })();
+  </script>
 </head>
 
 <body>
