@@ -14,13 +14,28 @@
 
 <nav #sideMenu class="side-menu" [class.open]="open">
     <div class="side-head">
+        <strong class="side-title">{{ userName }}</strong>
         <button class="side-close" (click)="close()" aria-label="Close menu"><i class="fa-solid fa-xmark"
                 aria-hidden="true"></i></button>
-        <strong>{{ userName }}</strong>
     </div>
     <ul>
-        <li><a routerLink="/products" (click)="close()">Products</a></li>
-        <li><a routerLink="/profile" (click)="close()">Profile</a></li>
-        <li><a (click)="onLogout()">Logout</a></li>
+        <li>
+            <a routerLink="/products" (click)="close()">
+                <i class="fa-solid fa-box"></i>
+                <span>Products</span>
+            </a>
+        </li>
+        <li>
+            <a routerLink="/profile" (click)="close()">
+                <i class="fa-solid fa-user"></i>
+                <span>Profile</span>
+            </a>
+        </li>
+        <li>
+            <a (click)="onLogout()">
+                <i class="fa-solid fa-right-from-bracket"></i>
+                <span>Logout</span>
+            </a>
+        </li>
     </ul>
 </nav>

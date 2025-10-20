@@ -1,12 +1,35 @@
-<div class="profile">
-    <h2>Profile</h2>
-    <div *ngIf="user; else noUser">
-        <img [src]="imgUrl" alt="avatar" width="120" />
-        <div><strong>Name:</strong> {{ user.name || user.full_name || user.username }}</div>
-        <div *ngIf="user.email"><strong>Email:</strong> {{ user.email }}</div>
-        <div *ngIf="user.company"><strong>Company:</strong> {{ user.company }}</div>
+<div class="profile-page">
+    <div class="profile-nav">
+        <button class="nav-icon" aria-label="Back" (click)="goBack()"><i class="fa-solid fa-arrow-left"></i></button>
+        <h2>Profile</h2>
     </div>
+
+    <ng-container *ngIf="user; else noUser">
+        <section class="profile-card">
+            <div class="profile-avatar">
+                <img [src]="imgUrl || (user?.avatar || user?.logo || 'assets/no-avatar.png')" alt="avatar" />
+            </div>
+            <div class="profile-main">
+                <h2>{{ user.name || user.full_name || user.username }}</h2>
+                <p *ngIf="user.email"><span class="label">Email</span><span class="value">{{ user.email }}</span></p>
+                <p *ngIf="user.phone"><span class="label">Phone</span><span class="value">{{ user.phone }}</span></p>
+                <p *ngIf="user.company"><span class="label">Company</span><span class="value">{{ user.company }}</span>
+                </p>
+                <p *ngIf="user.user_detail.address"><span class="label">Address</span><span class="value">{{
+                        user.user_detail.address }}</span></p>
+                <p *ngIf="user.user_detail.plan_end"><span class="label">Next Payment</span><span class="value">{{
+                        user.user_detail.plan_end }}</span></p>
+                <!-- <div class="profile-actions">
+                    <button class="button-primary" (click)="editProfile()"><i
+                            class="fa-solid fa-pen-to-square"></i>&nbsp;Edit</button>
+                    <button class="button-outline" (click)="goBack()"><i
+                            class="fa-solid fa-home"></i>&nbsp;Home</button>
+                </div> -->
+            </div>
+        </section>
+    </ng-container>
+
     <ng-template #noUser>
-        <div>Not logged in</div>
+        <div class="no-user">Not logged in</div>
     </ng-template>
 </div>

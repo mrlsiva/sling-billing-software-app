@@ -1,0 +1,6 @@
+{
+    "appId": "com.example.slingbilling",
+    "appName": "SlingBilling",
+    "webDir": "dist/sling-billing-software-app/browser",
+    "bundledWebRuntime": false
+}
