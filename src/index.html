@@ -3,10 +3,11 @@
 
 <head>
   <meta charset="utf-8">
-  <title>SlingBillingSoftwareApp</title>
+  <title>Sling Billing Software App</title>
+
   <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="icon" type="image/png" href="fav.png">
   <!-- Poppins font -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -16,8 +17,30 @@
   <script>
     (function () {
       try {
+        // Only apply custom favicon if not on login page
+        if (window.location.pathname === '/login' || window.location.pathname === '/') {
+          // Ensure default favicon on login page
+          var defaultLink = document.querySelector("link[rel~='icon']");
+          if (defaultLink && defaultLink.href && !defaultLink.href.endsWith('fav.png')) {
+            defaultLink.href = 'fav.png';
+          }
+          return;
+        }
+
         var raw = sessionStorage.getItem('auth_user');
-        if (!raw) return;
+        var token = sessionStorage.getItem('auth_token');
+
+        // Only apply custom settings if user data exists AND user is actually authenticated
+        if (!raw || !token) {
+          // Reset to default if no valid auth
+          var defaultLink = document.querySelector("link[rel~='icon']");
+          if (defaultLink) {
+            defaultLink.href = 'fav.png';
+          }
+          document.title = 'Sling Billing Software App';
+          return;
+        }
+
         var u = JSON.parse(raw);
         var candidates = [u && u.app_title, u && u.appName, u && u.company_name, u && u.company, u && u.business_name, u && u.org_name, u && u.name, u && u.title, u && u.slug_name].filter(Boolean);
         if (candidates.length) document.title = candidates[0];

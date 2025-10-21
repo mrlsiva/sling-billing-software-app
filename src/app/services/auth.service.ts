@@ -80,6 +80,15 @@ export class AuthService {
     /** Clear session */
     clearSession(): void {
         sessionStorage.removeItem(this.tokenKey);
+        sessionStorage.removeItem(this.userKey);
+        this.user$.next(null);
+
+        // Reset favicon to default
+        this.updateFavicon('fav.png');
+
+        // Reset document title to default
+        document.title = 'Sling Billing Software App';
+
         this.router.navigate(['/login']);
     }
 
