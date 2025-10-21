@@ -96,6 +96,174 @@
             </div>
         </div>
     </section>
+
+    <!-- Payment Methods Section -->
+    <section class="payment-section">
+        <h3>Payment Methods</h3>
+        <div class="payment-summary">
+            <div class="total-amount">
+                <span>Total Bill Amount: {{ cart.totalPrice() | number:'1.2-2' }}</span>
+            </div>
+            <div class="remaining-amount" *ngIf="getRemainingAmount() > 0">
+                <span>Remaining Amount: {{ getRemainingAmount() | number:'1.2-2' }}</span>
+            </div>
+        </div>
+
+        <!-- Payment Methods List -->
+        <div class="payment-methods-container">
+            <div class="payment-method-search">
+                <div class="search-input-wrapper">
+                    <input type="text" placeholder="Search payment methods..." [(ngModel)]="paymentSearchTerm"
+                        (input)="onPaymentSearch()" (focus)="showPaymentDropdown = true" class="payment-search-input">
+                    <i class="fas fa-search search-icon"></i>
+                    <button *ngIf="paymentSearchTerm" class="clear-search" (click)="clearPaymentSearch()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <!-- Payment Methods Dropdown -->
+                <div *ngIf="showPaymentDropdown && (searchedPaymentMethods?.length || paymentSearchLoading)"
+                    class="payment-dropdown">
+                    <div *ngIf="paymentSearchLoading" class="dropdown-loading">
+                        <i class="fas fa-spinner fa-spin"></i> Loading payment methods...
+                    </div>
+                    <div *ngFor="let method of searchedPaymentMethods" class="payment-option"
+                        (click)="addPaymentMethod(method)">
+                        <div class="payment-name">{{ method.name }}</div>
+                        <div class="payment-description" *ngIf="method.description">{{ method.description }}</div>
+                    </div>
+                    <div *ngIf="!paymentSearchLoading && searchedPaymentMethods?.length === 0 && paymentSearchTerm"
+                        class="no-payments">
+                        No payment methods found
+                    </div>
+                </div>
+            </div>
+
+            <!-- Selected Payment Methods -->
+            <div class="selected-payments" *ngIf="selectedPayments?.length">
+                <h4>Selected Payment Methods</h4>
+                <div class="payment-item" *ngFor="let payment of selectedPayments; let i = index">
+                    <div class="payment-details">
+                        <div class="payment-method-name">{{ payment.method.name }}</div>
+
+                        <!-- Cash Payment -->
+                        <div *ngIf="payment.method.name.toLowerCase() === 'cash'" class="payment-inputs">
+                            <label>Amount:</label>
+                            <input type="number" [(ngModel)]="payment.amount" (input)="updatePaymentAmount(i)"
+                                placeholder="Enter cash amount" class="amount-input">
+                            <div class="remaining-amount-checkbox">
+                                <input type="checkbox" [(ngModel)]="payment.useRemainingAmount"
+                                    (change)="toggleRemainingAmount(i)" id="remaining-cash-{{i}}"
+                                    class="checkbox-input">
+                                <label for="remaining-cash-{{i}}" class="checkbox-label">Remaining Amount</label>
+                            </div>
+                        </div>
+
+                        <!-- Finance Payment -->
+                        <div *ngIf="payment.method.name.toLowerCase() === 'finance'" class="payment-inputs">
+                            <div class="input-group">
+                                <label>Amount:</label>
+                                <input type="number" [(ngModel)]="payment.amount" (input)="updatePaymentAmount(i)"
+                                    placeholder="Enter finance amount" class="amount-input">
+                                <div class="remaining-amount-checkbox">
+                                    <input type="checkbox" [(ngModel)]="payment.useRemainingAmount"
+                                        (change)="toggleRemainingAmount(i)" id="remaining-finance-{{i}}"
+                                        class="checkbox-input">
+                                    <label for="remaining-finance-{{i}}" class="checkbox-label">Remaining Amount</label>
+                                </div>
+                            </div>
+                            <div class="input-group">
+                                <label>Finance Reference Number:</label>
+                                <input type="text" [(ngModel)]="payment.financeRefNo"
+                                    placeholder="Enter finance reference number" class="card-input">
+                            </div>
+                            <div class="input-group">
+                                <label>Finance:</label>
+                                <select [(ngModel)]="payment.selectedFinance" class="finance-select">
+                                    <option value="">Select Finance Option</option>
+                                    <option *ngFor="let finance of financeOptions" [ngValue]="finance">
+                                        {{ finance.name }}
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Card Payment -->
+                        <div *ngIf="payment.method.name.toLowerCase() === 'card'" class="payment-inputs">
+                            <div class="input-group">
+                                <label>Amount:</label>
+                                <input type="number" [(ngModel)]="payment.amount" (input)="updatePaymentAmount(i)"
+                                    placeholder="Enter card amount" class="amount-input">
+                                <div class="remaining-amount-checkbox">
+                                    <input type="checkbox" [(ngModel)]="payment.useRemainingAmount"
+                                        (change)="toggleRemainingAmount(i)" id="remaining-card-{{i}}"
+                                        class="checkbox-input">
+                                    <label for="remaining-card-{{i}}" class="checkbox-label">Remaining Amount</label>
+                                </div>
+                            </div>
+                            <div class="input-group">
+                                <label>Card Number:</label>
+                                <input type="text" [(ngModel)]="payment.cardNo" placeholder="Enter card number"
+                                    class="card-input">
+                            </div>
+                            <div class="input-group">
+                                <label>Card Name:</label>
+                                <input type="text" [(ngModel)]="payment.cardName" placeholder="Enter card holder name"
+                                    class="card-input">
+                            </div>
+                        </div>
+
+                        <!-- Cheque Payment -->
+                        <div *ngIf="payment.method.name.toLowerCase() === 'cheque'" class="payment-inputs">
+                            <div class="input-group">
+                                <label>Amount:</label>
+                                <input type="number" [(ngModel)]="payment.amount" (input)="updatePaymentAmount(i)"
+                                    placeholder="Enter cheque amount" class="amount-input">
+                                <div class="remaining-amount-checkbox">
+                                    <input type="checkbox" [(ngModel)]="payment.useRemainingAmount"
+                                        (change)="toggleRemainingAmount(i)" id="remaining-cheque-{{i}}"
+                                        class="checkbox-input">
+                                    <label for="remaining-cheque-{{i}}" class="checkbox-label">Remaining Amount</label>
+                                </div>
+                            </div>
+                            <div class="input-group">
+                                <label>Cheque Number:</label>
+                                <input type="text" [(ngModel)]="payment.chequeNo" placeholder="Enter cheque number"
+                                    class="card-input">
+                            </div>
+                        </div>
+
+                        <!-- Other Payment Methods -->
+                        <div *ngIf="payment.method.name.toLowerCase() !== 'cash' && 
+                                   payment.method.name.toLowerCase() !== 'finance' && 
+                                   payment.method.name.toLowerCase() !== 'card' && 
+                                   payment.method.name.toLowerCase() !== 'cheque'" class="payment-inputs">
+                            <label>Amount:</label>
+                            <input type="number" [(ngModel)]="payment.amount" (input)="updatePaymentAmount(i)"
+                                placeholder="Enter amount" class="amount-input">
+                            <div class="remaining-amount-checkbox">
+                                <input type="checkbox" [(ngModel)]="payment.useRemainingAmount"
+                                    (change)="toggleRemainingAmount(i)" id="remaining-other-{{i}}"
+                                    class="checkbox-input">
+                                <label for="remaining-other-{{i}}" class="checkbox-label">Remaining Amount</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="remove-payment" (click)="removePaymentMethod(i)">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- No Payment Methods Selected -->
+            <div *ngIf="!selectedPayments?.length" class="no-payments-selected">
+                <i class="fas fa-credit-card"></i>
+                <span>No payment methods selected. Choose payment methods above.</span>
+            </div>
+        </div>
+    </section>
+
     <section class="order-items">
         <table>
             <thead>

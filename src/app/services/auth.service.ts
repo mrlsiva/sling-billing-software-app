@@ -25,11 +25,10 @@ export class AuthService {
     /** Public observable for current user (null when not set) */
     public user$ = new BehaviorSubject<any | null>(null);
 
-    constructor(private http: HttpClient, private router: Router, private cartService: CartService) { }
-
-    // initialize stored user on service creation
-    ngOnInit?: never;
-    constructorInit? = (() => { this.initFromStorage(); return null; })();
+    constructor(private http: HttpClient, private router: Router, private cartService: CartService) {
+        // Initialize user data from storage on service creation
+        this.initFromStorage();
+    }
 
     /** Get saved token */
     getToken(): string | null {

@@ -1,8 +1,226 @@
 <div>
-    <div *ngIf="loading">Loading...</div>
-    <div *ngIf="error">{{error}}</div>
-    <ul *ngIf="products?.length" class="product-list">
-        <li *ngFor="let p of products" class="product-item" (click)="addToCart(p)"
+    <!-- Search Section -->
+    <div class="search-container">
+        <div class="search-input-wrapper">
+            <div class="search-input-group">
+                <svg class="input-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <path d="m21 21-4.35-4.35"></path>
+                </svg>
+                <input type="text" class="search-input"
+                    placeholder="Search by product code, name, category or sub-category..." [(ngModel)]="searchTerm"
+                    (input)="onSearch()" autocomplete="off">
+                <button *ngIf="searchTerm" class="clear-search-btn" (click)="clearSearch()" type="button"
+                    aria-label="Clear search">
+                    <i class="clear-icon">✕</i>
+                </button>
+            </div>
+            <button class="filter-btn" (click)="openFilterModal()" type="button" aria-label="Filter products"
+                [class.active]="selectedCategory || selectedSubCategory">
+                <div class="filter-icon-wrapper">
+                    <svg class="filter-icon" viewBox="0 0 24 24" fill="currentColor">
+                        <path
+                            d="M3 17v2h6v-2H3zM3 5v2h10V5H3zm10 16v-2h8v-2h-8v-2h-2v6h2zM7 9v2H3v2h4v2h2V9H7zm14 4v-2H11v2h10zm-6-4h2V7h4V5h-4V3h-2v6z" />
+                    </svg>
+                    <span *ngIf="selectedCategory || selectedSubCategory" class="filter-badge">
+                        {{(selectedCategory ? 1 : 0) + (selectedSubCategory ? 1 : 0)}}
+                    </span>
+                </div>
+            </button>
+        </div>
+        <div *ngIf="searchTerm || selectedCategory || selectedSubCategory" class="search-results-info">
+            <div class="results-summary">
+                <span class="results-text">Showing {{filteredProducts.length}} of {{products.length}} products</span>
+            </div>
+            <div *ngIf="selectedCategory || selectedSubCategory" class="active-filters">
+                <span class="filters-label">Active Filters:</span>
+                <span *ngIf="selectedCategory" class="filter-chip category-chip">
+                    {{selectedCategory.name}}
+                    <button class="chip-remove" (click)="clearCategoryFilter()" type="button">✕</button>
+                </span>
+                <span *ngIf="selectedSubCategory" class="filter-chip subcategory-chip">
+                    {{selectedSubCategory.name}}
+                    <button class="chip-remove" (click)="clearSubCategoryFilter()" type="button">✕</button>
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Professional Filter Modal -->
+    <div *ngIf="showFilterModal" class="modal-overlay" (click)="closeFilterModal()">
+        <div class="modal-content" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+                <h3 class="modal-title">Filter Products</h3>
+                <button class="modal-close-btn" (click)="closeFilterModal()" type="button">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Category Selection -->
+                <div class="filter-group">
+                    <label class="filter-label">Category</label>
+                    <div class="custom-select-wrapper" (click)="toggleCategoryDropdown()">
+                        <div class="custom-select-display">
+                            <span *ngIf="!selectedCategory" class="placeholder">Select Category</span>
+                            <span *ngIf="selectedCategory" class="selected-value">{{selectedCategory.name}}</span>
+                            <svg class="dropdown-arrow" [class.open]="showCategoryDropdown" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="6,9 12,15 18,9"></polyline>
+                            </svg>
+                        </div>
+                        <div *ngIf="showCategoryDropdown" class="custom-dropdown">
+                            <!-- Search input for categories -->
+                            <div class="dropdown-search">
+                                <div class="search-input-container">
+                                    <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <circle cx="11" cy="11" r="8"></circle>
+                                        <path d="m21 21-4.35-4.35"></path>
+                                    </svg>
+                                    <input type="text" class="dropdown-search-input" placeholder="Search categories..."
+                                        [(ngModel)]="categorySearchTerm" (input)="onCategorySearch()"
+                                        (click)="$event.stopPropagation()" autocomplete="off">
+                                    <button *ngIf="categorySearchTerm" class="clear-search-btn"
+                                        (click)="clearCategorySearch(); $event.stopPropagation()" type="button">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- "All Categories" option -->
+                            <div class="dropdown-option" (click)="selectCategory(null); $event.stopPropagation()"
+                                [class.selected]="!selectedCategory">
+                                <span class="option-text">All Categories</span>
+                                <svg *ngIf="!selectedCategory" class="check-icon" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor" stroke-width="2">
+                                    <polyline points="20,6 9,17 4,12"></polyline>
+                                </svg>
+                            </div>
+
+                            <!-- Category options -->
+                            <div *ngFor="let category of filteredCategories" class="dropdown-option"
+                                (click)="selectCategory(category); $event.stopPropagation()"
+                                [class.selected]="selectedCategory?.id === category.id">
+                                <span class="option-text">{{category.name}}</span>
+                                <svg *ngIf="selectedCategory?.id === category.id" class="check-icon" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="20,6 9,17 4,12"></polyline>
+                                </svg>
+                            </div>
+
+                            <!-- No results message for category search -->
+                            <div *ngIf="categorySearchTerm && filteredCategories.length === 0"
+                                class="no-options-message">
+                                No categories found matching "{{categorySearchTerm}}"
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sub-Category Selection -->
+                <div class="filter-group">
+                    <label class="filter-label">Sub-Category</label>
+                    <div class="custom-select-wrapper" [class.disabled]="!selectedCategory"
+                        (click)="selectedCategory && toggleSubCategoryDropdown()">
+                        <div class="custom-select-display">
+                            <span *ngIf="!selectedSubCategory" class="placeholder">
+                                {{!selectedCategory ? 'Select category first' : 'Select Sub-Category'}}
+                            </span>
+                            <span *ngIf="selectedSubCategory" class="selected-value">{{selectedSubCategory.name}}</span>
+                            <svg class="dropdown-arrow" [class.open]="showSubCategoryDropdown" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="6,9 12,15 18,9"></polyline>
+                            </svg>
+                        </div>
+                        <div *ngIf="showSubCategoryDropdown && selectedCategory" class="custom-dropdown">
+                            <!-- Search input for sub-categories -->
+                            <div class="dropdown-search">
+                                <div class="search-input-container">
+                                    <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <circle cx="11" cy="11" r="8"></circle>
+                                        <path d="m21 21-4.35-4.35"></path>
+                                    </svg>
+                                    <input type="text" class="dropdown-search-input"
+                                        placeholder="Search sub-categories..." [(ngModel)]="subCategorySearchTerm"
+                                        (input)="onSubCategorySearch()" (click)="$event.stopPropagation()"
+                                        autocomplete="off">
+                                    <button *ngIf="subCategorySearchTerm" class="clear-search-btn"
+                                        (click)="clearSubCategorySearch(); $event.stopPropagation()" type="button">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- "All Sub-Categories" option -->
+                            <div class="dropdown-option" (click)="selectSubCategory(null); $event.stopPropagation()"
+                                [class.selected]="!selectedSubCategory">
+                                <span class="option-text">All Sub-Categories</span>
+                                <svg *ngIf="!selectedSubCategory" class="check-icon" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor" stroke-width="2">
+                                    <polyline points="20,6 9,17 4,12"></polyline>
+                                </svg>
+                            </div>
+
+                            <!-- Sub-category options -->
+                            <div *ngFor="let subCategory of filteredSubCategories" class="dropdown-option"
+                                (click)="selectSubCategory(subCategory); $event.stopPropagation()"
+                                [class.selected]="selectedSubCategory?.id === subCategory.id">
+                                <span class="option-text">{{subCategory.name}}</span>
+                                <svg *ngIf="selectedSubCategory?.id === subCategory.id" class="check-icon"
+                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="20,6 9,17 4,12"></polyline>
+                                </svg>
+                            </div>
+
+                            <!-- No results message for sub-category search -->
+                            <div *ngIf="subCategorySearchTerm && filteredSubCategories.length === 0"
+                                class="no-options-message">
+                                No sub-categories found matching "{{subCategorySearchTerm}}"
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" (click)="clearAllFilters()" type="button">
+                    Clear All
+                </button>
+                <button class="btn-primary" (click)="applyFilters()" type="button">
+                    Apply Filters
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div *ngIf="loading" class="loading-container">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Loading POS items...</div>
+    </div>
+
+    <div *ngIf="error" class="error-container">
+        <div class="error-icon">⚠️</div>
+        <div class="error-message">{{error}}</div>
+        <button *ngIf="error.includes('Unauthenticated') || error.includes('authenticated')" class="retry-btn"
+            (click)="goToLogin()">
+            Go to Login
+        </button>
+        <button *ngIf="!error.includes('Unauthenticated') && !error.includes('authenticated')" class="retry-btn"
+            (click)="fetchProducts()">
+            Retry
+        </button>
+    </div>
+    <ul *ngIf="filteredProducts?.length" class="product-list">
+        <li *ngFor="let p of filteredProducts" class="product-item" (click)="addToCart(p)"
             [ngClass]="{ 'qty-warning': p.quantity > 0 && p.quantity < 5, 'qty-danger': p.quantity === 0 }">
             <div class="product-item-listing">
                 <div class="product-main">
@@ -22,5 +240,18 @@
 
         </li>
     </ul>
-    <div *ngIf="!products?.length && !loading">No POS items</div>
+    <div *ngIf="!filteredProducts?.length && !loading && !error && products?.length === 0"
+        class="no-products-container">
+        <div class="no-products-icon">📦</div>
+        <div class="no-products-title">No POS Items Found</div>
+        <div class="no-products-message">There are currently no products available in the system.</div>
+        <button class="retry-btn" (click)="fetchProducts()">Refresh</button>
+    </div>
+
+    <div *ngIf="!filteredProducts?.length && !loading && !error && searchTerm" class="no-results-container">
+        <div class="no-results-icon">🔍</div>
+        <div class="no-results-title">No Results Found</div>
+        <div class="no-results-message">No products found matching "{{searchTerm}}"</div>
+        <button class="clear-btn" (click)="clearSearch()">Clear Search</button>
+    </div>
 </div>
