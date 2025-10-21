@@ -1,0 +1,30 @@
+<div class="settings-page">
+    <div class="d-flex space-between">
+        <h3>Staff</h3>
+        <button class="settings-back p-0" (click)="goBack()"><i class="fa-solid fa-arrow-left"></i> Back</button>
+    </div>
+    <div *ngIf="loading">Loading...</div>
+    <div *ngIf="items?.length" class="settings-grid">
+        <article *ngFor="let it of items; let i = index" class="settings-card">
+            <header class="sc-header">
+                <div class="sc-title">{{ it.name || it.full_name || '-' }}</div>
+                <div class="sc-sno">
+                    <span class="status-badge" [class.active]="it.is_active === 1"
+                        [class.inactive]="it.is_active !== 1">
+                        {{ it.is_active === 1 ? 'Active' : 'Inactive' }}
+                    </span>
+                    <button class="btn btn-toggle card-toggle p-0"
+                        (click)="$event.stopPropagation(); toggleItemActive(it)"
+                        [attr.aria-pressed]="it.is_active === 1" aria-label="Toggle active">
+                        <i class="fa-solid" [ngClass]="it.is_active === 1 ? 'fa-toggle-on' : 'fa-toggle-off'"></i>
+                    </button>
+                </div>
+            </header>
+            <div class="sc-body">
+                <div class="sc-row" *ngIf="it.phone"><strong>Phone:</strong> {{ it.phone }}</div>
+                <div class="sc-row" *ngIf="it.role"><strong>Role:</strong> {{ it.role }}</div>
+            </div>
+        </article>
+    </div>
+    <div *ngIf="!items?.length && !loading">No items</div>
+</div>

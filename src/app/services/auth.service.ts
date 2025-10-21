@@ -35,6 +35,13 @@ export class AuthService {
         return sessionStorage.getItem(this.tokenKey);
     }
 
+    /** Convenience: return Http headers with Authorization if token present */
+    authHeaders(): { [header: string]: string } | undefined {
+        const token = this.getToken();
+        if (!token) return undefined;
+        return { Authorization: `Bearer ${token}` };
+    }
+
     /** Perform login */
     login(slug_name: string, password: string): Observable<LoginResponse> {
         return this.http.post<LoginResponse>(this.loginUrl, { slug_name, password }).pipe(

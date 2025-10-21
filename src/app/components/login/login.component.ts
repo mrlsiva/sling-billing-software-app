@@ -56,12 +56,12 @@ export class LoginComponent {
 
                 if (token) {
                     sessionStorage.setItem('auth_token', token);
-                    this.router.navigate(['/products']);
+                    this.router.navigate(['/pos']);
                     return;
                 }
 
                 if (res?.success) {
-                    this.router.navigate(['/products']);
+                    this.router.navigate(['/pos']);
                     return;
                 }
 

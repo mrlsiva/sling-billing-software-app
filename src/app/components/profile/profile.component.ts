@@ -25,7 +25,7 @@ export class ProfileComponent {
     }
 
     goBack() {
-        try { this.router.navigate(['/products']); } catch { history.back(); }
+        try { this.router.navigate(['/pos']); } catch { history.back(); }
     }
 
     editProfile() {

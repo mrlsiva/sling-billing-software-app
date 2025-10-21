@@ -1,0 +1,25 @@
+.toast {
+    position: fixed;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 1.5rem;
+    z-index: 2000
+}
+
+.toast-inner {
+    padding: .6rem 1rem;
+    border-radius: 6px;
+    color: #fff
+}
+
+.toast-inner.error {
+    background: #ff4d4f
+}
+
+.toast-inner.success {
+    background: #28a745
+}
+
+.toast-inner.info {
+    background: #333
+}

@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ProductService } from '../../services/product.service';
 import { AuthService } from '../../services/auth.service';
+import { CartService } from '../../services/cart.service';
 import { environment } from '../../../environments/environment';
 import { Subscription } from 'rxjs';
 import { RouterModule } from '@angular/router';
@@ -24,7 +25,7 @@ export class ProductListComponent implements OnInit {
     private subs: Subscription | null = null;
     // previously used for inline expansion; removed when details page was deprecated
 
-    constructor(private productService: ProductService, private auth: AuthService) { }
+    constructor(private productService: ProductService, private auth: AuthService, private cart: CartService) { }
 
     ngOnInit() {
         // subscribe to reactive user updates
@@ -65,7 +66,7 @@ export class ProductListComponent implements OnInit {
                 this.loading = false;
             },
             error: (err) => {
-                this.error = err?.error?.message || 'Failed to load products';
+                this.error = err?.error?.message || 'Failed to load POS items';
                 this.loading = false;
             }
         });
@@ -101,5 +102,9 @@ export class ProductListComponent implements OnInit {
         if (!d) return null;
         const img = d.image || d.file || d.image_path || d.photo || null;
         return this.productService.resolveImageUrl(img);
+    }
+
+    addToCart(item: any) {
+        this.cart.add(item.product ?? item);
     }
 }

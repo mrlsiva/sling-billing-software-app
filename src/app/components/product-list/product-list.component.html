@@ -2,7 +2,7 @@
     <div *ngIf="loading">Loading...</div>
     <div *ngIf="error">{{error}}</div>
     <ul *ngIf="products?.length" class="product-list">
-        <li *ngFor="let p of products" class="product-item"
+        <li *ngFor="let p of products" class="product-item" (click)="addToCart(p)"
             [ngClass]="{ 'qty-warning': p.quantity > 0 && p.quantity < 5, 'qty-danger': p.quantity === 0 }">
             <div class="product-item-listing">
                 <div class="product-main">
@@ -22,5 +22,5 @@
 
         </li>
     </ul>
-    <div *ngIf="!products?.length && !loading">No products</div>
+    <div *ngIf="!products?.length && !loading">No POS items</div>
 </div>

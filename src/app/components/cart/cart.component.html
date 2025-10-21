@@ -1,0 +1,44 @@
+<div class="cart-panel" [class.open]="open" [class.pulse]="pulse" role="dialog" aria-label="Cart">
+    <header class="cart-header">
+        <strong>Cart</strong>
+        <div class="cart-controls">
+            <button (click)="clear()" title="Clear cart" aria-label="Clear cart"><i
+                    class="fa-solid fa-trash-can"></i></button>
+            <button (click)="close()" title="Close" aria-label="Close cart"><i
+                    class="fa-solid fa-chevron-down"></i></button>
+        </div>
+    </header>
+    <div *ngIf="pulse" class="cart-added">Added</div>
+
+    <div class="cart-body">
+        <div *ngIf="items?.length" class="has-items">
+            <ul class="cart-items">
+                <li *ngFor="let it of items" class="cart-item">
+                    <div class="ci-main">
+                        <div class="ci-title">{{ it.product.product?.name || it.product.name }}</div>
+                        <div class="ci-meta">Qty: {{ it.qty }} • Price: Rs. {{ (it.product.product?.price ||
+                            it.product.price) }}</div>
+                    </div>
+                    <div class="ci-actions">
+                        <button (click)="inc(it.id)" aria-label="Increase"><i class="fa-solid fa-plus"></i></button>
+                        <button (click)="dec(it.id)" aria-label="Decrease"><i class="fa-solid fa-minus"></i></button>
+                        <button (click)="del(it.id)" aria-label="Remove"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                </li>
+            </ul>
+        </div>
+        <div *ngIf="!items?.length" class="empty">Cart is empty</div>
+    </div>
+
+    <footer class="cart-footer">
+        <div class="cart-summary">Total: Rs. {{ cart.totalPrice() }} — Items: {{ cart.totalItems() }}</div>
+        <button class="checkout" title="Checkout">Checkout</button>
+    </footer>
+</div>
+
+<button *ngIf="cart.totalItems() > 0" class="cart-toggle" (click)="toggle()" aria-label="Open cart">
+    <i class="fa-solid fa-cart-shopping"></i>
+    <span class="badge">{{ cart.totalItems() }}</span>
+</button>
+
+<div class="cart-toast" *ngIf="toast">{{ toast }}</div>

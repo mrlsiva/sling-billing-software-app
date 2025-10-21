@@ -1,0 +1,100 @@
+/* Shared styles for settings pages: cards, grid, badges, toggles */
+.d-flex {
+    display: flex;
+    align-items: center;
+}
+
+.space-between {
+    justify-content: space-between;
+}
+
+.settings-page {
+    padding: 12px;
+}
+
+.settings-back {
+    background: none;
+    border: 0;
+    color: var(--primary, #0b5cff);
+    margin-bottom: 8px;
+    padding: 6px 0;
+}
+
+.settings-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 12px;
+    margin-top: 8px;
+}
+
+.settings-card {
+    background: #fff;
+    border: 1px solid #eee;
+    border-radius: 10px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px
+}
+
+.sc-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center
+}
+
+.sc-title {
+    font-weight: 700
+}
+
+.sc-sno {
+    color: #777;
+    font-size: .9rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 999px;
+    font-weight: 600;
+    font-size: .85rem
+}
+
+.status-badge.active {
+    background: #28a745;
+    color: #fff
+}
+
+.status-badge.inactive {
+    background: #f0f0f0;
+    color: #666
+}
+
+.card-toggle {
+    margin-left: 8px;
+    background: transparent;
+    color: var(--primary, #0b5cff);
+    padding: 4px 6px;
+    border-radius: 6px;
+    border: 1px solid rgba(11, 92, 255, 0.12)
+}
+
+.sc-body {
+    font-size: .95rem
+}
+
+.sc-row {
+    margin: 6px 0
+}
+
+.btn {
+    background: var(--primary, #0b5cff);
+    color: #fff;
+    border: 0;
+    padding: 6px 10px;
+    border-radius: 6px;
+    cursor: pointer
+}
