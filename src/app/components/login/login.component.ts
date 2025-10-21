@@ -15,12 +15,17 @@ export class LoginComponent {
     form: FormGroup;
     loading = false;
     error = '';
+    showPassword = false;
 
     constructor(private fb: FormBuilder, private auth: AuthService, private router: Router) {
         this.form = this.fb.group({
             slug_name: ['', Validators.required],
             password: ['', Validators.required]
         });
+    }
+
+    togglePasswordVisibility() {
+        this.showPassword = !this.showPassword;
     }
 
     submit() {

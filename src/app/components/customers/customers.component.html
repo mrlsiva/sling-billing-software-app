@@ -1,0 +1,91 @@
+<div class="settings-page">
+    <!-- Fixed Header -->
+    <div class="fixed-header">
+        <div class="d-flex space-between">
+            <h3><i class="fa-solid fa-users"></i> Customers</h3>
+            <div class="button-group">
+                <button class="settings-back p-0" (click)="refreshCustomers()" [disabled]="loading">
+                    <i class="fa-solid fa-refresh" [class.spinning]="loading"></i> Refresh
+                </button>
+                <button class="settings-back p-0" (click)="goBack()">
+                    <i class="fa-solid fa-arrow-left"></i> Back
+                </button>
+            </div>
+        </div>
+
+        <!-- Fixed Search Box -->
+        <div class="search-container" *ngIf="!loading">
+            <div class="search-box">
+                <i class="fa-solid fa-search search-icon"></i>
+                <input type="text" placeholder="Search by name or phone number..." [(ngModel)]="searchTerm"
+                    (input)="onSearchChange()" class="search-input">
+                <button *ngIf="searchTerm" class="clear-search" (click)="clearSearch()">
+                    <i class="fa-solid fa-times"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scrollable Content Area -->
+    <div class="content-container">
+        <div *ngIf="loading" class="loading-message">Loading customers...</div>
+
+        <div *ngIf="error" class="error-message">
+            {{ error }}
+            <button class="btn" (click)="refreshCustomers()">Try Again</button>
+        </div>
+
+        <div *ngIf="paginatedCustomers?.length" class="scrollable-grid">
+            <div class="settings-grid">
+                <article *ngFor="let customer of paginatedCustomers; let i = index" class="settings-card">
+                    <header class="sc-header">
+                        <div class="sc-title">{{ customer.name || '-' }}</div>
+                        <div class="sc-sno">
+                            <span class="customer-id">#{{ customer.id }}</span>
+                        </div>
+                    </header>
+                    <div class="sc-body">
+                        <div class="customer-details-row">
+                            <div class="sc-row left-col" *ngIf="customer.phone">
+                                <strong>Phone:</strong> {{ customer.phone }}
+                            </div>
+                            <div class="sc-row right-col" *ngIf="customer.address">
+                                <strong>Address:</strong> {{ customer.address }}
+                            </div>
+                        </div>
+                    </div>
+                </article>
+            </div>
+        </div>
+
+        <div *ngIf="!filteredCustomers?.length && !loading && !error && customers?.length" class="no-results">
+            No customers found matching "{{ searchTerm }}"
+        </div>
+
+        <div *ngIf="!customers?.length && !loading && !error" class="empty-state">No customers found</div>
+    </div>
+
+    <!-- Fixed Pagination Controls -->
+    <div *ngIf="(filteredCustomers?.length || 0) > itemsPerPage" class="fixed-pagination">
+        <div class="pagination-info">
+            Showing {{ getStartIndex() + 1 }}-{{ getEndIndex() }} of {{ filteredCustomers.length }} customers
+        </div>
+        <div class="pagination-controls">
+            <button class="page-btn" (click)="goToFirstPage()" [disabled]="currentPage === 1">
+                <i class="fa-solid fa-angles-left"></i>
+            </button>
+            <button class="page-btn" (click)="previousPage()" [disabled]="currentPage === 1">
+                <i class="fa-solid fa-chevron-left"></i>
+            </button>
+            <span class="page-info">
+                Page {{ currentPage }} of {{ totalPages }}
+            </span>
+            <button class="page-btn" (click)="nextPage()" [disabled]="currentPage === totalPages">
+                <i class="fa-solid fa-chevron-right"></i>
+            </button>
+            <button class="page-btn" (click)="goToLastPage()" [disabled]="currentPage === totalPages">
+                <i class="fa-solid fa-angles-right"></i>
+            </button>
+        </div>
+    </div>
+</div>

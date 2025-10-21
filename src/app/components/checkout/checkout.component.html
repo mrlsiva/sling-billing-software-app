@@ -1,0 +1,133 @@
+<div class="checkout-container">
+    <h2>Checkout</h2>
+    <section class="selectors">
+        <div class="selector-group">
+            <label class="selector-label">Assign Staff</label>
+            <div class="staff-search-container">
+                <div class="search-input-wrapper">
+                    <input type="text" placeholder="Search staff by name or email..." [(ngModel)]="staffSearchTerm"
+                        (input)="onStaffSearch()" (focus)="showStaffDropdown = true" class="staff-search-input">
+                    <i class="fas fa-search search-icon"></i>
+                    <button *ngIf="staffSearchTerm" class="clear-search" (click)="clearStaffSearch()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <!-- Staff Dropdown -->
+                <div *ngIf="showStaffDropdown && (searchedStaff?.length || staffSearchLoading)" class="staff-dropdown">
+                    <div *ngIf="staffSearchLoading" class="dropdown-loading">
+                        <i class="fas fa-spinner fa-spin"></i> Searching staff...
+                    </div>
+                    <div *ngFor="let staff of searchedStaff" class="staff-option" (click)="selectStaff(staff)">
+                        <div class="staff-name">{{ staff.name || staff.full_name }}</div>
+                        <div class="staff-email" *ngIf="staff.email">{{ staff.email }}</div>
+                    </div>
+                    <div *ngIf="!staffSearchLoading && searchedStaff?.length === 0 && staffSearchTerm" class="no-staff">
+                        No staff found
+                    </div>
+                </div>
+
+                <!-- Selected Staff Display -->
+                <div *ngIf="selectedStaff" class="selected-staff">
+                    <div class="staff-info">
+                        <span class="staff-name">{{ selectedStaff.name || selectedStaff.full_name }}</span>
+                        <span class="staff-email" *ngIf="selectedStaff.email">• {{ selectedStaff.email }}</span>
+                    </div>
+                    <button class="remove-staff" (click)="clearSelectedStaff()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <!-- No Staff Selected Message -->
+                <div *ngIf="!selectedStaff && !showStaffDropdown" class="no-staff-selected">
+                    <i class="fas fa-info-circle"></i>
+                    <span>No staff selected. Search and select a staff member above.</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="selector-group">
+            <label class="selector-label">Choose Customer</label>
+            <div class="customer-search-container">
+                <div class="search-input-wrapper">
+                    <input type="text" placeholder="Search by mobile number or name..." [(ngModel)]="customerSearchTerm"
+                        (input)="onCustomerSearch()" (focus)="showCustomerDropdown = true"
+                        class="customer-search-input">
+                    <i class="fas fa-search search-icon"></i>
+                    <button *ngIf="customerSearchTerm" class="clear-search" (click)="clearCustomerSearch()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <!-- Customer Dropdown -->
+                <div *ngIf="showCustomerDropdown && (searchedCustomers?.length || customerSearchLoading)"
+                    class="customer-dropdown">
+                    <div *ngIf="customerSearchLoading" class="dropdown-loading">
+                        <i class="fas fa-spinner fa-spin"></i> Searching customers...
+                    </div>
+                    <div *ngFor="let customer of searchedCustomers" class="customer-option"
+                        (click)="selectCustomer(customer)">
+                        <div class="customer-name">{{ customer.name }}</div>
+                        <div class="customer-phone" *ngIf="customer.phone">{{ customer.phone }}</div>
+                    </div>
+                    <div *ngIf="!customerSearchLoading && searchedCustomers?.length === 0 && customerSearchTerm"
+                        class="no-customers">
+                        No customers found
+                    </div>
+                </div>
+
+                <!-- Selected Customer Display -->
+                <div *ngIf="selectedCustomer" class="selected-customer">
+                    <div class="customer-info">
+                        <span class="customer-name">{{ selectedCustomer.name }}</span>
+                        <span class="customer-phone" *ngIf="selectedCustomer.phone">• {{ selectedCustomer.phone
+                            }}</span>
+                    </div>
+                    <button class="remove-customer" (click)="clearSelectedCustomer()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <!-- No Customer Selected Message -->
+                <div *ngIf="!selectedCustomer && !showCustomerDropdown" class="no-customer-selected">
+                    <i class="fas fa-info-circle"></i>
+                    <span>No customer selected. Search and select a customer above.</span>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="order-items">
+        <table>
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Qty</th>
+                    <th>Price</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let it of items">
+                    <td>{{ it.product?.name || it.product?.title || it.id }}</td>
+                    <td>{{ it.qty }}</td>
+                    <td>{{ (it.product?.price || 0) | number:'1.2-2' }}</td>
+                    <td>{{ ((it.product?.price || 0) * it.qty) | number:'1.2-2' }}</td>
+                </tr>
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="3" class="right">Total</td>
+                    <td>{{ cart.totalPrice() | number:'1.2-2' }}</td>
+                </tr>
+            </tfoot>
+        </table>
+    </section>
+
+
+
+    <section class="actions">
+        <button (click)="clearCart()">Clear Cart</button>
+        <button (click)="generatePdf()">Generate PDF</button>
+        <button (click)="back()">Back to POS</button>
+    </section>
+</div>

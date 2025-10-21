@@ -8,14 +8,10 @@
     justify-content: space-between;
 }
 
-.settings-page {
-    padding: 12px;
-}
-
 .settings-back {
     background: none;
     border: 0;
-    color: var(--primary, #0b5cff);
+    color: var(--color-primary-bg);
     margin-bottom: 8px;
     padding: 6px 0;
 }
@@ -28,8 +24,8 @@
 }
 
 .settings-card {
-    background: #fff;
-    border: 1px solid #eee;
+    background: var(--color-neutral-100);
+    border: 1px solid var(--color-neutral-400);
     border-radius: 10px;
     padding: 12px;
     display: flex;
@@ -48,7 +44,7 @@
 }
 
 .sc-sno {
-    color: #777;
+    color: var(--color-neutral-600);
     font-size: .9rem;
     display: flex;
     align-items: flex-start;
@@ -64,22 +60,22 @@
 }
 
 .status-badge.active {
-    background: #28a745;
-    color: #fff
+    background: var(--color-secondary-bg);
+    color: var(--color-secondary-text)
 }
 
 .status-badge.inactive {
-    background: #f0f0f0;
-    color: #666
+    background: var(--color-neutral-300);
+    color: var(--color-neutral-600)
 }
 
 .card-toggle {
     margin-left: 8px;
     background: transparent;
-    color: var(--primary, #0b5cff);
+    color: var(--color-primary-bg);
     padding: 4px 6px;
     border-radius: 6px;
-    border: 1px solid rgba(11, 92, 255, 0.12)
+    border: 1px solid var(--color-primary-border)
 }
 
 .sc-body {
@@ -91,8 +87,8 @@
 }
 
 .btn {
-    background: var(--primary, #0b5cff);
-    color: #fff;
+    background: var(--color-primary-bg);
+    color: var(--color-primary-text);
     border: 0;
     padding: 6px 10px;
     border-radius: 6px;

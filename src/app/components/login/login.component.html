@@ -1,14 +1,47 @@
 <div class="login-container">
-    <!-- Cloud Background -->
-    <div class="cloud-container">
-        <div class="cloud cloud-1"></div>
-        <div class="cloud cloud-2"></div>
-        <div class="cloud cloud-3"></div>
+    <!-- POS Icons Background -->
+    <div class="pos-icons-container">
+        <div class="pos-icon pos-icon-1">
+            <i class="fas fa-cash-register"></i>
+        </div>
+        <div class="pos-icon pos-icon-2">
+            <i class="fas fa-credit-card"></i>
+        </div>
+        <div class="pos-icon pos-icon-3">
+            <i class="fas fa-receipt"></i>
+        </div>
+        <div class="pos-icon pos-icon-4">
+            <i class="fas fa-barcode"></i>
+        </div>
+        <div class="pos-icon pos-icon-5">
+            <i class="fas fa-shopping-cart"></i>
+        </div>
+        <div class="pos-icon pos-icon-6">
+            <i class="fas fa-coins"></i>
+        </div>
+        <div class="pos-icon pos-icon-7">
+            <i class="fas fa-calculator"></i>
+        </div>
+        <div class="pos-icon pos-icon-8">
+            <i class="fas fa-tag"></i>
+        </div>
+        <div class="pos-icon pos-icon-9">
+            <i class="fas fa-wallet"></i>
+        </div>
+        <div class="pos-icon pos-icon-10">
+            <i class="fas fa-money-bill"></i>
+        </div>
+        <div class="pos-icon pos-icon-11">
+            <i class="fas fa-store"></i>
+        </div>
+        <div class="pos-icon pos-icon-12">
+            <i class="fas fa-cart-plus"></i>
+        </div>
     </div>
 
     <!-- POS Branding -->
     <div class="pos-brand">
-        <img src="assets/images/logo.png" alt="POS Logo" />
+        <img src="assets/images/sling-logo.png" alt="POS Logo" style="    width: 280px;" />
         <!-- <h1>Sling Billings</h1> -->
     </div>
 
@@ -22,14 +55,17 @@
 
             <!-- Email Field -->
             <div class="input-group">
-                <i class="fas fa-envelope input-icon"></i>
-                <input type="text" formControlName="slug_name" class="form-input" placeholder="Enter Your Email" />
+                <i class="far fa-user input-icon"></i>
+                <input type="text" formControlName="slug_name" class="form-input" placeholder="Enter User Name" />
             </div>
 
             <!-- Password Field -->
             <div class="input-group">
-                <i class="fas fa-lock input-icon"></i>
-                <input type="password" formControlName="password" class="form-input" placeholder="Password" />
+                <i class="fas fa-shield-alt input-icon"></i>
+                <input [type]="showPassword ? 'text' : 'password'" formControlName="password" class="form-input"
+                    placeholder="Password" />
+                <i class="eye-icon" [class]="showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"
+                    (click)="togglePasswordVisibility()"></i>
             </div>
 
             <!-- Forgot Password Link -->
@@ -39,8 +75,9 @@
 
             <!-- Login Button -->
             <button type="submit" [disabled]="loading" class="login-btn">
-                <i class="fas fa-arrow-right"></i>
                 {{ loading ? 'Logging in...' : 'Login' }}
+                <i class="fas fa-arrow-right"></i>
+
             </button>
 
             <!-- Error Message -->

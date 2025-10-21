@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
+import { CartService } from './cart.service';
 
 interface LoginResponse {
     token?: string;
@@ -24,7 +25,7 @@ export class AuthService {
     /** Public observable for current user (null when not set) */
     public user$ = new BehaviorSubject<any | null>(null);
 
-    constructor(private http: HttpClient, private router: Router) { }
+    constructor(private http: HttpClient, private router: Router, private cartService: CartService) { }
 
     // initialize stored user on service creation
     ngOnInit?: never;
@@ -82,6 +83,9 @@ export class AuthService {
         sessionStorage.removeItem(this.tokenKey);
         sessionStorage.removeItem(this.userKey);
         this.user$.next(null);
+
+        // Clear cart data for the logged out user
+        this.cartService.clear();
 
         // Reset favicon to default
         this.updateFavicon('fav.png');

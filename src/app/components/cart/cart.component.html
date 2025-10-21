@@ -32,7 +32,7 @@
 
     <footer class="cart-footer">
         <div class="cart-summary">Total: Rs. {{ cart.totalPrice() }} — Items: {{ cart.totalItems() }}</div>
-        <button class="checkout" title="Checkout">Checkout</button>
+        <button class="checkout" title="Checkout" (click)="goToCheckout()">Checkout</button>
     </footer>
 </div>
 

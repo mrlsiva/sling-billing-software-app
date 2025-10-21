@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { CartService } from '../../services/cart.service';
 
 @Component({
@@ -16,7 +17,7 @@ export class CartComponent {
     toastTimer: any = null;
     pulse = false;
 
-    constructor(public cart: CartService) {
+    constructor(public cart: CartService, private router: Router) {
         this.cart.cart$.subscribe(i => {
             this.items = i;
             // auto-close when cart becomes empty
@@ -48,6 +49,14 @@ export class CartComponent {
     dec(id: string) { this.cart.decrement(id); }
     del(id: string) { this.cart.remove(id); }
     clear() { this.cart.clear(); }
+
+    goToCheckout() {
+        if (!this.items?.length) {
+            this.showToast('Cart is empty');
+            return;
+        }
+        this.router.navigate(['/checkout']);
+    }
 
     private showToast(msg: string) {
         this.toast = msg;

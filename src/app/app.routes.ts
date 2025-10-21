@@ -15,6 +15,7 @@ export const routes: Routes = [
         canActivate: [AuthGuard],
         children: [
             { path: 'pos', component: ProductListComponent },
+            { path: 'customers', loadComponent: () => import('./components/customers/customers.component').then(m => m.CustomersComponent) },
             { path: 'profile', component: ProfileComponent },
             { path: 'settings', component: SettingsComponent },
             { path: 'settings/gender', loadComponent: () => import('./components/settings-pages/gender/gender.component').then(m => m.GenderComponent) },
@@ -22,6 +23,7 @@ export const routes: Routes = [
             { path: 'settings/finance', loadComponent: () => import('./components/settings-pages/finance/finance.component').then(m => m.FinanceComponent) },
             { path: 'settings/staff', loadComponent: () => import('./components/settings-pages/staff/staff.component').then(m => m.StaffComponent) },
             { path: 'order', component: OrderComponent },
+            { path: 'checkout', loadComponent: () => import('./components/checkout/checkout.component').then(m => m.CheckoutComponent) },
             { path: '', redirectTo: 'pos', pathMatch: 'full' }
         ]
     },

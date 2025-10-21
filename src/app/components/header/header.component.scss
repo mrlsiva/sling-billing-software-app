@@ -1,7 +1,7 @@
 .app-header {
     display: flex;
     align-items: center;
-    padding: 0.5rem 0.75rem;
+    padding: 0.7rem 0.75rem;
     border-bottom: 1px solid var(--color-neutral-400);
     background: var(--color-primary-bg, var(--color-neutral-100));
     color: var(--color-primary-text, var(--color-neutral-800));
@@ -31,6 +31,15 @@
     justify-content: center;
     padding: 6px;
     cursor: pointer;
+}
+
+.logo-wrap {
+    background: #fff;
+    border-radius: 8px;
+    padding: 0px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .logo-wrap img {
@@ -105,12 +114,15 @@
     gap: 0.75rem;
     padding: 0.6rem 0rem;
     border-radius: 8px;
+    transition: all 0.3s ease;
 }
 
 .side-menu a i {
     width: 28px;
     text-align: center;
-    color: var(--color-neutral-700);
+    font-size: 18px;
+    color: var(--color-primary-bg);
+    transition: all 0.3s ease;
 }
 
 .side-menu a span {
@@ -118,5 +130,13 @@
 }
 
 .side-menu a:hover {
-    background: var(--color-neutral-200);
+    background: linear-gradient(90deg, var(--color-primary-bg) 0%, #ffffff 100%);
+    transform: translateX(5px);
+    padding-left: 16px;
+    color: var(--color-primary-text);
+}
+
+.side-menu a:hover i {
+    color: var(--color-primary-text);
+    transform: scale(1.1);
 }
