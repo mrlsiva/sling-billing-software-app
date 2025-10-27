@@ -8,26 +8,54 @@
                     class="fa-solid fa-chevron-down"></i></button>
         </div>
     </header>
+
     <div *ngIf="pulse" class="cart-added">Added</div>
 
     <div class="cart-body">
-        <div *ngIf="items?.length" class="has-items">
-            <ul class="cart-items">
-                <li *ngFor="let it of items" class="cart-item">
-                    <div class="ci-main">
+        <ul class="cart-items" *ngIf="items?.length; else emptyCart">
+            <li class="cart-item" *ngFor="let it of items">
+                <div class="ci-main">
+                    <div class="d-flex flex-row align-center space-between">
                         <div class="ci-title">{{ it.product.product?.name || it.product.name }}</div>
-                        <div class="ci-meta">Qty: {{ it.qty }} • Price: Rs. {{ (it.product.product?.price ||
-                            it.product.price) }}</div>
+                        <div class="quantity-info">Qty: {{ it.qty }}</div>
                     </div>
-                    <div class="ci-actions">
+                    <div class="ci-categories space-between d-flex align-center">
+                        <div class="d-flex flex-row">
+                            <div class="category">{{ it.product.product?.category?.name || it.product.category?.name }}
+                            </div>
+                            <div class="subcategory">{{ it.product.product?.sub_category?.name ||
+                                it.product.sub_category?.name }}</div>
+
+                        </div>
+
+                    </div>
+                </div>
+
+
+
+                <div class="ci-pricing d-flex flex-row align-center space-between">
+                    <div class="price-info d-flex align-center">
+                        <div class="base-price">{{ (it.product.product?.price || it.product.price || it.price) |
+                            currency:'INR':'symbol':'1.2-2' }}</div>
+                        <div class="base-price">{{ it.price | currency:'INR':'symbol':'1.2-2' }}</div>
+                        <div class="tax-amount">Tax: {{ (it.product.product?.tax_amount || it.product.tax_amount ||
+                            it.tax_amount || 0) | currency:'INR':'symbol':'1.2-2' }}
+                            <span *ngIf="taxPercent(it) !== null"> ({{ taxPercent(it) }}%)</span>
+                        </div>
+                    </div>
+                    <div class="ci-actions d-flex flex-row">
                         <button (click)="inc(it.id)" aria-label="Increase"><i class="fa-solid fa-plus"></i></button>
                         <button (click)="dec(it.id)" aria-label="Decrease"><i class="fa-solid fa-minus"></i></button>
                         <button (click)="del(it.id)" aria-label="Remove"><i class="fa-solid fa-trash"></i></button>
                     </div>
-                </li>
-            </ul>
-        </div>
-        <div *ngIf="!items?.length" class="empty">Cart is empty</div>
+
+                </div>
+            </li>
+        </ul>
+
+        <ng-template #emptyCart>
+            <div class="empty">Cart is empty</div>
+        </ng-template>
     </div>
 
     <footer class="cart-footer">

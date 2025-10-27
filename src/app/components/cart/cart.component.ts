@@ -25,6 +25,7 @@ export class CartComponent {
                 this.open = false;
             }
         });
+
         // open panel when a new item is added and show a brief toast
         this.cart.added$.subscribe(() => {
             if (this.cart.totalItems() > 0) {
@@ -34,6 +35,26 @@ export class CartComponent {
                 this.showToast('Added to cart');
             }
         });
+    }
+
+    /**
+     * Safely compute tax percentage for a cart item.
+     * If price is zero or invalid, returns null.
+     */
+    taxPercent(item: any): number | null {
+        try {
+            const product = item.product || {};
+            const priceRaw = product.price ?? product.selling_price ?? 0;
+            const taxRaw = product.tax_amount ?? product.taxAmount ?? item.tax_amount ?? 0;
+            const price = Number(priceRaw) || 0;
+            const tax = Number(taxRaw) || 0;
+            if (price <= 0 || tax <= 0) return null;
+            const pct = (tax / price) * 100;
+            // round to 2 decimals
+            return Math.round(pct * 100) / 100;
+        } catch (e) {
+            return null;
+        }
     }
 
     toggle() {

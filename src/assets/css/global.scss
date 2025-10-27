@@ -120,3 +120,23 @@ app-header {
     padding-top: 0.75rem;
     /* small padding retained; header space is reserved via top offset if necessary */
 }
+
+.d-flex {
+    display: flex !important;
+}
+
+.flex-row {
+    flex-direction: row !important;
+}
+
+.flex-column {
+    flex-direction: column !important;
+}
+
+.space-between {
+    justify-content: space-between !important;
+}
+
+.align-center {
+    align-items: center !important;
+}
