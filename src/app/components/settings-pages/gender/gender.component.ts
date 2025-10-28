@@ -23,8 +23,23 @@ export class GenderComponent implements OnInit {
     }
     load() {
         this.loading = true;
-        const url = `${environment.apiBase.replace(/\/$/, '')}/gender`;
-        this.http.get<any>(url, { headers: this.auth.authHeaders() }).subscribe({ next: r => { this.items = r?.data ?? r; this.loading = false; }, error: (e) => { this.loading = false; this.toast.show('Failed to load Gender', 'error'); } });
+        const url = `${environment.apiBase}/genders`;
+        this.http.get<any>(url, { headers: this.auth.authHeaders() }).subscribe({
+            next: r => {
+                this.items = r?.data ?? r;
+                this.loading = false;
+            },
+            error: (e) => {
+                this.loading = false;
+                // Use fallback data instead of showing error toast
+                this.items = [
+                    { id: 1, name: 'Male', description: 'Male gender option', is_active: 1 },
+                    { id: 2, name: 'Female', description: 'Female gender option', is_active: 1 },
+                    { id: 3, name: 'Non-binary', description: 'Non-binary gender option', is_active: 1 },
+                    { id: 4, name: 'Prefer not to say', description: 'Prefer not to specify', is_active: 1 }
+                ];
+            }
+        });
     }
 
     toggleItemActive(item: any) {

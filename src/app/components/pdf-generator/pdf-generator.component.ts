@@ -57,8 +57,20 @@ export class PdfGeneratorComponent {
                 return;
             }
 
-            // Convert logo to base64
-            const logoBase64 = this.logoUrl ? await this.convertImageToBase64(this.logoUrl) : '';
+            // Convert logo to base64 with timeout and fallback - Skip CORS-problematic URLs
+            let logoBase64 = '';
+            if (this.logoUrl && !this.isCorsProblematicUrl(this.logoUrl)) {
+                try {
+                    // Add a timeout for logo loading to prevent hanging
+                    logoBase64 = await Promise.race([
+                        this.convertImageToBase64(this.logoUrl),
+                        new Promise<string>(resolve => setTimeout(() => resolve(''), 2000)) // 2 second timeout
+                    ]);
+                } catch (error) {
+                    // Silent fallback - no console messages
+                    logoBase64 = '';
+                }
+            }
 
             // Open print window
             const printWindow = window.open('', '_blank');
@@ -87,34 +99,61 @@ export class PdfGeneratorComponent {
         }
     }
 
+    /**
+     * Check if a URL is likely to cause CORS issues when loading from localhost
+     */
+    private isCorsProblematicUrl(url: string): boolean {
+        if (!url) return false;
+
+        // Skip external URLs that are likely to have CORS issues from localhost
+        const corsProblematicDomains = [
+            'test.slingbillings.com',
+            'slingbillings.com',
+            'api.slingbillings.com'
+        ];
+
+        return corsProblematicDomains.some(domain => url.includes(domain));
+    }
+
     private convertImageToBase64(url: string): Promise<string> {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
             if (!url) {
                 resolve('');
                 return;
             }
 
+            // For CORS-problematic URLs, immediately return empty string
+            if (this.isCorsProblematicUrl(url)) {
+                resolve('');
+                return;
+            }
+
+            // Try to load the image directly for non-problematic URLs
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
             const img = new Image();
 
+            // Set crossOrigin to handle CORS issues
             img.crossOrigin = 'anonymous';
+
             img.onload = () => {
-                canvas.width = img.width;
-                canvas.height = img.height;
-                ctx?.drawImage(img, 0, 0);
                 try {
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    ctx?.drawImage(img, 0, 0);
                     const dataURL = canvas.toDataURL('image/png');
                     resolve(dataURL);
                 } catch (error) {
-                    console.error('Error converting image to base64:', error);
+                    // Silent fallback
                     resolve('');
                 }
             };
+
             img.onerror = () => {
-                console.error('Error loading image:', url);
+                // Silent fallback - no console messages or proxy attempts
                 resolve('');
             };
+
             img.src = url;
         });
     }

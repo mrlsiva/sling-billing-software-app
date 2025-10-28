@@ -1,5 +1,9 @@
 <div class="checkout-container">
-    <h2>Checkout</h2>
+    <div class="d-flex space-between">
+        <h3>Checkout</h3>
+        <button class="settings-back p-0" (click)="back()"><i class="fa-solid fa-arrow-left"></i> Puschase more</button>
+    </div>
+
     <section class="selectors">
         <div class="selector-group">
             <label class="selector-label">Assign Staff</label>
@@ -295,7 +299,9 @@
 
     <section class="actions">
         <button (click)="clearCart()">Clear Cart</button>
-        <button (click)="generatePdf()">Generate PDF</button>
-        <button (click)="back()">Back to POS</button>
+        <button (click)="placeOrderAndGeneratePdf()" [disabled]="loading" class="primary-action">
+            <i class="fas fa-shopping-cart"></i>
+            Place Order
+        </button>
     </section>
 </div>

@@ -12,15 +12,24 @@ export class ProductService {
 
     /**
      * Fetch product list using POS API.
-     * Optional filters: { category, sub_category, product, filter }
+     * Optional filters: { category, sub_category, product, filter, page, per_page }
      */
-    list(filters?: { category?: string; sub_category?: string; product?: string; filter?: string }): Observable<any> {
+    list(filters?: {
+        category?: string;
+        sub_category?: string;
+        product?: string;
+        filter?: string;
+        page?: number;
+        per_page?: number;
+    }): Observable<any> {
         const params: any = {};
         if (filters) {
             if (filters.category) params.category = filters.category;
             if (filters.sub_category) params.sub_category = filters.sub_category;
             if (filters.product) params.product = filters.product;
             if (filters.filter) params.filter = filters.filter;
+            if (filters.page) params.page = filters.page.toString();
+            if (filters.per_page) params.per_page = filters.per_page.toString();
         }
         return this.http.get(this.url, { params });
     }

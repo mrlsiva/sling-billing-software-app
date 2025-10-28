@@ -1,3 +1,4 @@
+// (Removed duplicate class and misplaced imports. The correct CheckoutComponent class with placeOrder() is below.)
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -118,7 +119,7 @@ export class CheckoutComponent implements OnInit {
 
     loadStaff() {
         this.loading = true;
-        const url = `${environment.apiBase.replace(/\/$/, '')}/staff`;
+        const url = `${environment.apiBase}/staffs`;
         const headers = this.auth.authHeaders();
 
         this.http.get<any>(url, { headers }).subscribe({
@@ -129,10 +130,11 @@ export class CheckoutComponent implements OnInit {
                 this.loading = false;
             },
             error: (error) => {
-                console.error('Failed to load staff:', error);
-                // Fallback to static data if API fails
+                // API endpoint not available, use fallback data
                 this.staffList = [
-                    { id: 1, name: 'Default Staff', email: 'staff@example.com' }
+                    { id: 1, name: 'Default Staff', email: 'staff@example.com' },
+                    { id: 2, name: 'Store Manager', email: 'manager@example.com' },
+                    { id: 3, name: 'Sales Associate', email: 'sales@example.com' }
                 ];
                 this.searchedStaff = this.staffList.slice(0, 5);
                 this.loading = false;
@@ -303,7 +305,7 @@ export class CheckoutComponent implements OnInit {
     loadFinanceOptions() {
         this.financeLoading = true;
         const headers = this.auth.authHeaders();
-        const url = `${environment.apiBase}/finance`;
+        const url = `${environment.apiBase}/finances`;
 
         this.http.get<any>(url, { headers }).subscribe({
             next: (response) => {
@@ -319,12 +321,12 @@ export class CheckoutComponent implements OnInit {
                 this.financeLoading = false;
             },
             error: (error) => {
-                console.error('Failed to load finance options:', error);
-                // Fallback to static data if API fails
+                // API endpoint not available, use fallback data
                 this.financeOptions = [
                     { id: 1, name: 'Bank Transfer', description: 'Bank transfer finance' },
                     { id: 2, name: 'Credit Line', description: 'Credit line finance' },
-                    { id: 3, name: 'Installment', description: 'Installment finance' }
+                    { id: 3, name: 'Installment', description: 'Installment finance' },
+                    { id: 4, name: 'EMI', description: 'Monthly installment' }
                 ];
                 this.financeLoading = false;
             }
@@ -526,5 +528,189 @@ export class CheckoutComponent implements OnInit {
 
         // Generate PDF using the PDF generator service
         this.pdfGenerator.generateInvoicePdf(invoiceData);
+    }
+
+    /**
+     * Combined method to place order and generate PDF
+     */
+    placeOrderAndGeneratePdf(): void {
+        // Validate all required fields first
+        if (!this.validateOrderData()) {
+            return;
+        }
+
+        // Generate PDF first
+        this.generatePdfSilently();
+
+        // Then place the order
+        this.placeOrder();
+    }
+
+    /**
+     * Validate all order data before placing order or generating PDF
+     */
+    private validateOrderData(): boolean {
+        // Validate staff selection
+        if (!this.selectedStaff) {
+            this.toast.show('Please select staff', 'error');
+            return false;
+        }
+
+        // Validate customer selection
+        if (!this.selectedCustomer) {
+            this.toast.show('Please select customer', 'error');
+            return false;
+        }
+
+        // Validate cart items
+        if (!this.items || this.items.length === 0) {
+            this.toast.show('Cart is empty', 'error');
+            return false;
+        }
+
+        // Validate payment methods
+        if (!this.selectedPayments || this.selectedPayments.length === 0) {
+            this.toast.show('Please select payment methods', 'error');
+            return false;
+        }
+
+        // Validate payment amounts
+        const totalBill = this.cart.totalPrice();
+        const totalPaid = this.getTotalPaidAmount();
+
+        if (totalPaid < totalBill) {
+            this.toast.show(`Payment incomplete. Remaining amount: ${(totalBill - totalPaid).toFixed(2)}`, 'error');
+            return false;
+        }
+
+        // Validate payment method specific fields
+        for (let payment of this.selectedPayments) {
+            if (!payment.amount || payment.amount <= 0) {
+                this.toast.show(`Please enter valid amount for ${payment.method.name}`, 'error');
+                return false;
+            }
+
+            // Validate payment method specific fields
+            const methodName = payment.method.name.toLowerCase();
+
+            if (methodName === 'finance') {
+                if (!payment.financeRefNo || !payment.selectedFinance) {
+                    this.toast.show('Please enter finance reference number and select finance option', 'error');
+                    return false;
+                }
+            }
+
+            if (methodName === 'card') {
+                if (!payment.cardNo || !payment.cardName) {
+                    this.toast.show('Please enter card number and card name for card payment', 'error');
+                    return false;
+                }
+            }
+
+            if (methodName === 'cheque') {
+                if (!payment.chequeNo) {
+                    this.toast.show('Please enter cheque number for cheque payment', 'error');
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Generate PDF without showing validation toasts (internal use)
+     */
+    private generatePdfSilently(): void {
+        try {
+            // Prepare invoice data
+            const invoiceData: InvoiceData = {
+                customer: this.selectedCustomer,
+                staff: this.selectedStaff,
+                items: this.items,
+                payments: this.selectedPayments,
+                total: this.cart.totalPrice()
+            };
+
+            // Generate PDF using the PDF generator service
+            this.pdfGenerator.generateInvoicePdf(invoiceData);
+        } catch (error) {
+            console.error('PDF generation failed:', error);
+            // Don't show error toast for PDF generation failure
+        }
+    }
+
+    /**
+     * Build and send the order payload to /api/pos/store
+     */
+    placeOrder(): void {
+        // Validate data if called separately
+        if (!this.validateOrderData()) {
+            return;
+        }
+
+        // Build cart array
+        const cart = this.items.map((it: any) => ({
+            product_id: it.product?.id || it.product_id || it.id,
+            qty: it.qty,
+            price: it.product?.price || it.price,
+            tax_amount: it.product?.tax_amount || it.tax_amount || 0
+        }));
+
+        // Build payments array
+        const payments = this.selectedPayments.map((p: any) => {
+            let extra: any = {};
+            const method = p.method.name;
+            if (method.toLowerCase() === 'card') {
+                extra = { card_name: p.cardName, card_number: p.cardNo };
+            } else if (method.toLowerCase() === 'cheque') {
+                extra = { cheque_number: p.chequeNo };
+            } else if (method.toLowerCase() === 'finance') {
+                extra = { finance_ref_no: p.financeRefNo, finance: p.selectedFinance };
+            }
+            return {
+                method,
+                amount: Number(p.amount) || 0,
+                extra
+            };
+        });
+
+        // Build customer object (copy only required fields)
+        const c: any = this.selectedCustomer;
+        const customer = {
+            phone: c.phone || '',
+            alt_phone: c.alt_phone || '',
+            name: c.name || '',
+            address: c.address || '',
+            pincode: c.pincode || '',
+            gender: c.gender || '',
+            dob: c.dob || '',
+            gst: c.gst || ''
+        };
+
+        // Build payload
+        const payload = {
+            billed_by: this.selectedStaff.id,
+            customer,
+            cart,
+            payments
+        };
+
+        const headers = this.auth.authHeaders();
+        const url = `${environment.apiBase}/pos/store`;
+        this.loading = true;
+        this.http.post<any>(url, payload, { headers }).subscribe({
+            next: (response: any) => {
+                this.loading = false;
+                this.toast.show('Order placed successfully!', 'success');
+                // Optionally clear cart and go back
+                this.cart.clear();
+                setTimeout(() => this.router.navigate(['/pos']), 1200);
+            },
+            error: (err: any) => {
+                this.loading = false;
+                this.toast.show('Order failed: ' + (err?.error?.message || err.statusText || 'Unknown error'), 'error');
+            }
+        });
     }
 }

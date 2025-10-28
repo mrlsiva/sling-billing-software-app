@@ -30,7 +30,8 @@
         </div>
         <div *ngIf="searchTerm || selectedCategory || selectedSubCategory" class="search-results-info">
             <div class="results-summary">
-                <span class="results-text">Showing {{filteredProducts.length}} of {{products.length}} products</span>
+                <span class="results-text">Showing {{filteredProducts.length}} of {{totalItems}} products (Page
+                    {{currentPage}} of {{totalPages}})</span>
             </div>
             <div *ngIf="selectedCategory || selectedSubCategory" class="active-filters">
                 <span class="filters-label">Active Filters:</span>
@@ -45,6 +46,10 @@
             </div>
         </div>
     </div>
+
+
+
+
 
     <!-- Professional Filter Modal -->
     <div *ngIf="showFilterModal" class="modal-overlay" (click)="closeFilterModal()">
@@ -240,8 +245,58 @@
 
         </li>
     </ul>
-    <div *ngIf="!filteredProducts?.length && !loading && !error && products?.length === 0"
-        class="no-products-container">
+    <!-- Pagination Component -->
+    <div *ngIf="totalPages > 1 && !loading && !error" class="pagination-container">
+        <div class="pagination-info">
+            <span class="pagination-text">
+                Showing {{((currentPage - 1) * safeItemsPerPage) + 1}} to {{Math.min(currentPage * safeItemsPerPage,
+                totalItems)}} of {{totalItems}} products
+            </span>
+        </div>
+        <div class="pagination-controls">
+            <!-- First Page Button -->
+            <button class="pagination-btn" [disabled]="currentPage === 1" (click)="goToFirstPage()" title="First Page">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="11,17 6,12 11,7"></polyline>
+                    <polyline points="18,17 13,12 18,7"></polyline>
+                </svg>
+            </button>
+
+            <!-- Previous Page Button -->
+            <button class="pagination-btn" [disabled]="currentPage === 1" (click)="goToPreviousPage()"
+                title="Previous Page">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="15,18 9,12 15,6"></polyline>
+                </svg>
+            </button>
+
+            <!-- Page Numbers -->
+            <div class="pagination-numbers">
+                <button *ngFor="let page of getPageNumbers()" class="pagination-number"
+                    [class.active]="page === currentPage" (click)="goToPage(page)">
+                    {{page}}
+                </button>
+            </div>
+
+            <!-- Next Page Button -->
+            <button class="pagination-btn" [disabled]="currentPage === totalPages" (click)="goToNextPage()"
+                title="Next Page">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="9,18 15,12 9,6"></polyline>
+                </svg>
+            </button>
+
+            <!-- Last Page Button -->
+            <button class="pagination-btn" [disabled]="currentPage === totalPages" (click)="goToLastPage()"
+                title="Last Page">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="13,17 18,12 13,7"></polyline>
+                    <polyline points="6,17 11,12 6,7"></polyline>
+                </svg>
+            </button>
+        </div>
+    </div>
+    <div *ngIf="filteredProducts?.length && !loading && !error && products?.length === 0" class="no-products-container">
         <div class="no-products-icon">📦</div>
         <div class="no-products-title">No POS Items Found</div>
         <div class="no-products-message">There are currently no products available in the system.</div>
