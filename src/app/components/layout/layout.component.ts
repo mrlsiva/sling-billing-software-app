@@ -5,6 +5,7 @@ import { HeaderComponent } from '../header/header.component';
 import { FooterComponent } from '../footer/footer.component';
 import { CartComponent } from '../cart/cart.component';
 import { ToastComponent } from '../toast/toast.component';
+import { AuthService } from '../../services/auth.service';
 import { Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
 
@@ -19,19 +20,23 @@ export class LayoutComponent implements OnInit, OnDestroy {
     showCart = true;
     private routerSubscription?: Subscription;
 
-    constructor(private router: Router) { }
+    constructor(private router: Router, private auth: AuthService) { }
 
     ngOnInit() {
         // Listen to route changes
         this.routerSubscription = this.router.events
             .pipe(filter(event => event instanceof NavigationEnd))
             .subscribe((event: NavigationEnd) => {
-                // Hide cart on checkout page
-                this.showCart = !event.url.includes('/checkout');
+                // Show cart only for owner users on POS page, hide on checkout
+                const isCheckout = event.url.includes('/checkout');
+                const isOwner = this.auth.isOwner();
+                this.showCart = isOwner && !isCheckout;
             });
 
         // Check initial route
-        this.showCart = !this.router.url.includes('/checkout');
+        const isCheckout = this.router.url.includes('/checkout');
+        const isOwner = this.auth.isOwner();
+        this.showCart = isOwner && !isCheckout;
     }
 
     ngOnDestroy() {

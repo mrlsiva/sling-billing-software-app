@@ -4,8 +4,10 @@ import { ProductListComponent } from './components/product-list/product-list.com
 import { ProfileComponent } from './components/profile/profile.component';
 import { SettingsComponent } from './components/settings/settings.component';
 import { OrderComponent } from './components/order/order.component';
+import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { LayoutComponent } from './components/layout/layout.component';
 import { AuthGuard } from './guards/auth.guard';
+import { OwnerGuard } from './guards/owner.guard';
 
 export const routes: Routes = [
     { path: 'login', component: LoginComponent },
@@ -14,7 +16,8 @@ export const routes: Routes = [
         component: LayoutComponent,
         canActivate: [AuthGuard],
         children: [
-            { path: 'pos', component: ProductListComponent },
+            { path: 'dashboard', component: DashboardComponent },
+            { path: 'pos', component: ProductListComponent, canActivate: [OwnerGuard] },
             { path: 'customers', loadComponent: () => import('./components/customers/customers.component').then(m => m.CustomersComponent) },
             { path: 'profile', component: ProfileComponent },
             { path: 'settings', component: SettingsComponent },
@@ -24,7 +27,7 @@ export const routes: Routes = [
             { path: 'settings/staff', loadComponent: () => import('./components/settings-pages/staff/staff.component').then(m => m.StaffComponent) },
             { path: 'order', component: OrderComponent },
             { path: 'checkout', loadComponent: () => import('./components/checkout/checkout.component').then(m => m.CheckoutComponent) },
-            { path: '', redirectTo: 'pos', pathMatch: 'full' }
+            { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
         ]
     },
     { path: '', redirectTo: '/login', pathMatch: 'full' },

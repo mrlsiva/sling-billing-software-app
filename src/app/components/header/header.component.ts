@@ -21,6 +21,10 @@ export class HeaderComponent implements OnInit, OnDestroy {
     private previousFocus: Element | null = null;
     @ViewChild('sideMenu', { read: ElementRef, static: false }) sideMenuRef?: ElementRef<HTMLElement>;
 
+    // Owner detection properties
+    isOwner = false;
+    hasOwner = false;
+
     private onKeydown = (e: KeyboardEvent) => {
         if (!this.open) return;
         if (e.key === 'Escape') { this.close(); e.preventDefault(); }
@@ -34,6 +38,9 @@ export class HeaderComponent implements OnInit, OnDestroy {
             if (logoVal) {
                 this.logoUrl = /^https?:\/\//i.test(logoVal) ? logoVal : `${environment.assetsBase.replace(/\/$/, '')}/${logoVal.replace(/^\//, '')}`;
             }
+            // Update owner status
+            this.isOwner = this.auth.isOwner();
+            this.hasOwner = this.auth.hasOwner();
         });
     }
 

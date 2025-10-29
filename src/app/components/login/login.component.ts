@@ -61,12 +61,25 @@ export class LoginComponent {
 
                 if (token) {
                     sessionStorage.setItem('auth_token', token);
-                    this.router.navigate(['/pos']);
+
+                    // Conditional routing based on owner_id
+                    // If owner_id is null/undefined (owner user) -> POS
+                    // If owner_id has value (branch/staff user) -> Dashboard
+                    if (this.auth.isOwner()) {
+                        this.router.navigate(['/pos']);
+                    } else {
+                        this.router.navigate(['/dashboard']);
+                    }
                     return;
                 }
 
                 if (res?.success) {
-                    this.router.navigate(['/pos']);
+                    // Conditional routing when no token but success flag
+                    if (this.auth.isOwner()) {
+                        this.router.navigate(['/pos']);
+                    } else {
+                        this.router.navigate(['/dashboard']);
+                    }
                     return;
                 }
 

@@ -1,0 +1,113 @@
+<div class="dashboard-page">
+    <div class="dashboard-header">
+        <h1>Dashboard</h1>
+        <p class="welcome-text" *ngIf="user">Welcome, {{ user.name }}</p>
+    </div>
+
+    <div *ngIf="loading" class="loading-container">
+        <div class="loading-spinner">Loading dashboard...</div>
+    </div>
+
+    <div *ngIf="!loading" class="dashboard-content">
+        <!-- Dashboard Stats Grid -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fa-solid fa-store"></i>
+                </div>
+                <div class="stat-info">
+                    <h3 class="stat-title">Total Branches</h3>
+                    <p class="stat-value">-</p>
+                    <span class="stat-label">Active branches</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fa-solid fa-users"></i>
+                </div>
+                <div class="stat-info">
+                    <h3 class="stat-title">Total Staff</h3>
+                    <p class="stat-value">-</p>
+                    <span class="stat-label">Active staff members</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fa-solid fa-receipt"></i>
+                </div>
+                <div class="stat-info">
+                    <h3 class="stat-title">Today's Orders</h3>
+                    <p class="stat-value">-</p>
+                    <span class="stat-label">Orders processed today</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fa-solid fa-indian-rupee-sign"></i>
+                </div>
+                <div class="stat-info">
+                    <h3 class="stat-title">Today's Revenue</h3>
+                    <p class="stat-value">₹ -</p>
+                    <span class="stat-label">Total revenue today</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- User Information -->
+        <div class="info-section" *ngIf="user">
+            <h2>Business Information</h2>
+            <div class="info-grid">
+                <div class="info-item">
+                    <span class="info-label">Business Name:</span>
+                    <span class="info-value">{{ user.name || '-' }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Email:</span>
+                    <span class="info-value">{{ user.email || '-' }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Phone:</span>
+                    <span class="info-value">{{ user.phone || '-' }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Unique ID:</span>
+                    <span class="info-value">{{ user.unique_id || '-' }}</span>
+                </div>
+                <div class="info-item" *ngIf="user.user_detail?.address">
+                    <span class="info-label">Address:</span>
+                    <span class="info-value">{{ user.user_detail.address }}</span>
+                </div>
+                <div class="info-item" *ngIf="user.user_detail?.plan_end">
+                    <span class="info-label">Plan Expires:</span>
+                    <span class="info-value">{{ user.user_detail.plan_end | date:'mediumDate' }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+            <h2>Quick Actions</h2>
+            <div class="action-buttons">
+                <button class="action-btn" routerLink="/customers">
+                    <i class="fa-solid fa-users"></i>
+                    <span>Manage Customers</span>
+                </button>
+                <button class="action-btn" routerLink="/order">
+                    <i class="fa-solid fa-receipt"></i>
+                    <span>View Orders</span>
+                </button>
+                <button class="action-btn" routerLink="/settings">
+                    <i class="fa-solid fa-cog"></i>
+                    <span>Settings</span>
+                </button>
+                <button class="action-btn" routerLink="/profile">
+                    <i class="fa-solid fa-user"></i>
+                    <span>Profile</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

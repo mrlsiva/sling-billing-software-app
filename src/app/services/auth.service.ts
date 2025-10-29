@@ -183,4 +183,16 @@ export class AuthService {
         if (!raw) return null;
         try { return JSON.parse(raw); } catch { return null; }
     }
+
+    /** Check if user has owner_id (is a branch/staff user) */
+    hasOwner(): boolean {
+        const user = this.getUser();
+        return user && user.owner_id !== null && user.owner_id !== undefined;
+    }
+
+    /** Check if user is owner (no owner_id) */
+    isOwner(): boolean {
+        const user = this.getUser();
+        return user && (user.owner_id === null || user.owner_id === undefined);
+    }
 }
