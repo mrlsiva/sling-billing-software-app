@@ -324,6 +324,7 @@ h3 {
     cursor: pointer;
     font-size: 14px;
     transition: all 0.3s ease;
+    min-width: 40px;
 
     &:hover:not(:disabled) {
         background: var(--color-primary-bg);
@@ -335,6 +336,16 @@ h3 {
         opacity: 0.5;
         cursor: not-allowed;
         background: var(--color-neutral-200);
+    }
+
+    &.page-number {
+        font-weight: 500;
+
+        &.active {
+            background: var(--color-primary-bg);
+            color: white;
+            border-color: var(--color-primary-bg);
+        }
     }
 
     i {

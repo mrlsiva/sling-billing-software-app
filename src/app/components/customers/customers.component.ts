@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
@@ -30,7 +30,25 @@ interface CustomerResponse {
     code: number;
     message: string;
     success: boolean;
-    data: Customer | Customer[];
+    data: {
+        current_page: number;
+        data: Customer[];
+        first_page_url: string;
+        from: number;
+        last_page: number;
+        last_page_url: string;
+        links: Array<{
+            url: string | null;
+            label: string;
+            active: boolean;
+        }>;
+        next_page_url: string | null;
+        path: string;
+        per_page: number;
+        prev_page_url: string | null;
+        to: number;
+        total: number;
+    };
 }
 
 @Component({
@@ -40,18 +58,24 @@ interface CustomerResponse {
     templateUrl: './customers.component.html',
     styleUrl: './customers.component.scss'
 })
-export class CustomersComponent implements OnInit {
+export class CustomersComponent implements OnInit, OnDestroy {
     customers: Customer[] = [];
     filteredCustomers: Customer[] = [];
-    paginatedCustomers: Customer[] = [];
     searchTerm: string = '';
     loading = true;
     error: string | null = null;
 
     // Pagination properties
     currentPage: number = 1;
+    totalPages: number = 1;
     itemsPerPage: number = 10;
-    totalPages: number = 0;
+    totalItems: number = 0;
+
+    // Search timeout for debouncing
+    searchTimeout: any;
+
+    // Expose Math to template
+    readonly Math = Math;
 
     constructor(private http: HttpClient, private auth: AuthService, private router: Router) { }
 
@@ -59,103 +83,143 @@ export class CustomersComponent implements OnInit {
         this.loadCustomers();
     }
 
-    loadCustomers() {
+    ngOnDestroy() {
+        if (this.searchTimeout) {
+            clearTimeout(this.searchTimeout);
+        }
+    }
+
+    loadCustomers(page: number = 1) {
         this.loading = true;
         this.error = null;
+        this.currentPage = page;
 
         const headers = this.auth.authHeaders();
 
-        this.http.get<CustomerResponse>(`${environment.apiBase}/pos/customer`, { headers })
+        // Build filters
+        const params: any = { page };
+
+        // Add search filter if exists
+        if (this.searchTerm.trim()) {
+            params.search = this.searchTerm.trim();
+        }
+
+        this.http.get<CustomerResponse>(`${environment.apiBase}/customers`, { headers, params })
             .subscribe({
                 next: (response) => {
-                    // Handle different response structures
-                    if (response.data) {
-                        // If data is an array, use it directly
-                        this.customers = Array.isArray(response.data) ? response.data : [response.data];
+                    console.log('Customers API Response:', response);
+
+                    if (response.success && response.data) {
+                        this.customers = response.data.data;
+                        this.currentPage = response.data.current_page;
+                        this.totalPages = response.data.last_page;
+                        this.itemsPerPage = response.data.per_page;
+                        this.totalItems = response.data.total;
                     } else {
-                        // Fallback for different API responses
-                        this.customers = Array.isArray(response) ? response : [];
+                        this.error = response.message || 'Failed to load customers';
+                        this.customers = [];
                     }
-                    this.filterCustomers();
+
                     this.loading = false;
                 },
                 error: (err) => {
-                    this.error = 'Failed to load customers';
-                    this.loading = false;
                     console.error('Error loading customers:', err);
+                    if (err.status === 401) {
+                        this.error = 'Unauthenticated. Please log in again.';
+                        this.auth.clearSession();
+                    } else if (err.status === 403) {
+                        this.error = 'Access denied. You do not have permission to view customers.';
+                    } else if (err.status === 404) {
+                        this.error = 'Customers endpoint not found. Please check your configuration.';
+                    } else {
+                        this.error = err?.error?.message || 'Failed to load customers. Please try again.';
+                    }
+                    this.loading = false;
                 }
             });
     }
 
+    onSearch() {
+        // Clear previous timeout
+        if (this.searchTimeout) {
+            clearTimeout(this.searchTimeout);
+        }
+
+        // Debounce search for 300ms
+        this.searchTimeout = setTimeout(() => {
+            this.loadCustomers(1); // Reset to first page when searching
+        }, 300);
+    }
+
+    clearSearch() {
+        this.searchTerm = '';
+        this.loadCustomers(1);
+    }
+
     refreshCustomers() {
-        this.loadCustomers();
+        this.loadCustomers(this.currentPage);
     }
 
     goBack() {
         this.router.navigate(['/pos']);
     }
 
-    filterCustomers() {
-        if (!this.searchTerm.trim()) {
-            this.filteredCustomers = [...this.customers];
-        } else {
-            const searchLower = this.searchTerm.toLowerCase().trim();
-            this.filteredCustomers = this.customers.filter(customer =>
-                customer.name?.toLowerCase().includes(searchLower) ||
-                customer.phone?.toLowerCase().includes(searchLower)
-            );
-        }
-        this.currentPage = 1; // Reset to first page when filtering
-        this.updatePagination();
-    }
-
-    onSearchChange() {
-        this.filterCustomers();
-    }
-
-    clearSearch() {
-        this.searchTerm = '';
-        this.filterCustomers();
-    }
-
     // Pagination methods
-    updatePagination() {
-        this.totalPages = Math.ceil(this.filteredCustomers.length / this.itemsPerPage);
-        const startIndex = (this.currentPage - 1) * this.itemsPerPage;
-        const endIndex = startIndex + this.itemsPerPage;
-        this.paginatedCustomers = this.filteredCustomers.slice(startIndex, endIndex);
+    goToPage(page: number) {
+        if (page >= 1 && page <= this.totalPages && page !== this.currentPage) {
+            this.loadCustomers(page);
+        }
+    }
+
+    goToFirstPage() {
+        this.goToPage(1);
+    }
+
+    goToLastPage() {
+        this.goToPage(this.totalPages);
     }
 
     nextPage() {
         if (this.currentPage < this.totalPages) {
-            this.currentPage++;
-            this.updatePagination();
+            this.goToPage(this.currentPage + 1);
         }
     }
 
     previousPage() {
         if (this.currentPage > 1) {
-            this.currentPage--;
-            this.updatePagination();
+            this.goToPage(this.currentPage - 1);
         }
     }
 
-    goToFirstPage() {
-        this.currentPage = 1;
-        this.updatePagination();
-    }
+    getPageNumbers(): number[] {
+        const pages: number[] = [];
+        const maxPagesToShow = 5;
+        const halfRange = Math.floor(maxPagesToShow / 2);
 
-    goToLastPage() {
-        this.currentPage = this.totalPages;
-        this.updatePagination();
+        let startPage = Math.max(1, this.currentPage - halfRange);
+        let endPage = Math.min(this.totalPages, this.currentPage + halfRange);
+
+        // Adjust range if we're near the beginning or end
+        if (endPage - startPage + 1 < maxPagesToShow) {
+            if (startPage === 1) {
+                endPage = Math.min(this.totalPages, startPage + maxPagesToShow - 1);
+            } else if (endPage === this.totalPages) {
+                startPage = Math.max(1, endPage - maxPagesToShow + 1);
+            }
+        }
+
+        for (let i = startPage; i <= endPage; i++) {
+            pages.push(i);
+        }
+
+        return pages;
     }
 
     getStartIndex(): number {
-        return (this.currentPage - 1) * this.itemsPerPage;
+        return (this.currentPage - 1) * this.itemsPerPage + 1;
     }
 
     getEndIndex(): number {
-        const endIndex = this.currentPage * this.itemsPerPage;
-        return Math.min(endIndex, this.filteredCustomers.length);
+        return Math.min(this.currentPage * this.itemsPerPage, this.totalItems);
     }
 }

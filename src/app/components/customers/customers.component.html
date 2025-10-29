@@ -18,7 +18,7 @@
             <div class="search-box">
                 <i class="fa-solid fa-search search-icon"></i>
                 <input type="text" placeholder="Search by name or phone number..." [(ngModel)]="searchTerm"
-                    (input)="onSearchChange()" class="search-input">
+                    (input)="onSearch()" class="search-input">
                 <button *ngIf="searchTerm" class="clear-search" (click)="clearSearch()">
                     <i class="fa-solid fa-times"></i>
                 </button>
@@ -35,9 +35,9 @@
             <button class="btn" (click)="refreshCustomers()">Try Again</button>
         </div>
 
-        <div *ngIf="paginatedCustomers?.length" class="scrollable-grid">
+        <div *ngIf="customers?.length" class="scrollable-grid">
             <div class="settings-grid">
-                <article *ngFor="let customer of paginatedCustomers; let i = index" class="settings-card">
+                <article *ngFor="let customer of customers; let i = index" class="settings-card">
                     <header class="sc-header">
                         <div class="sc-title">{{ customer.name || '-' }}</div>
                         <div class="sc-sno">
@@ -58,17 +58,18 @@
             </div>
         </div>
 
-        <div *ngIf="!filteredCustomers?.length && !loading && !error && customers?.length" class="no-results">
+        <div *ngIf="!customers?.length && !loading && !error && searchTerm" class="no-results">
             No customers found matching "{{ searchTerm }}"
         </div>
 
-        <div *ngIf="!customers?.length && !loading && !error" class="empty-state">No customers found</div>
+        <div *ngIf="!customers?.length && !loading && !error && !searchTerm" class="empty-state">No customers found
+        </div>
     </div>
 
     <!-- Fixed Pagination Controls -->
-    <div *ngIf="(filteredCustomers?.length || 0) > itemsPerPage" class="fixed-pagination">
+    <div *ngIf="totalPages > 1" class="fixed-pagination">
         <div class="pagination-info">
-            Showing {{ getStartIndex() + 1 }}-{{ getEndIndex() }} of {{ filteredCustomers.length }} customers
+            Showing {{ getStartIndex() }}-{{ getEndIndex() }} of {{ totalItems }} customers
         </div>
         <div class="pagination-controls">
             <button class="page-btn" (click)="goToFirstPage()" [disabled]="currentPage === 1">
@@ -77,9 +78,13 @@
             <button class="page-btn" (click)="previousPage()" [disabled]="currentPage === 1">
                 <i class="fa-solid fa-chevron-left"></i>
             </button>
-            <span class="page-info">
-                Page {{ currentPage }} of {{ totalPages }}
-            </span>
+
+            <!-- Page Numbers -->
+            <button *ngFor="let page of getPageNumbers()" class="page-btn page-number"
+                [class.active]="page === currentPage" (click)="goToPage(page)">
+                {{ page }}
+            </button>
+
             <button class="page-btn" (click)="nextPage()" [disabled]="currentPage === totalPages">
                 <i class="fa-solid fa-chevron-right"></i>
             </button>
