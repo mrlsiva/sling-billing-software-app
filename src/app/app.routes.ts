@@ -19,6 +19,7 @@ export const routes: Routes = [
         children: [
             { path: 'dashboard', component: DashboardComponent, canActivate: [HoGuard] },
             { path: 'pos', component: ProductListComponent, canActivate: [OwnerGuard] },
+            { path: 'categories', loadComponent: () => import('./components/settings-pages/categories/categories.component').then(m => m.CategoriesComponent) },
             { path: 'customers', loadComponent: () => import('./components/customers/customers.component').then(m => m.CustomersComponent) },
             { path: 'profile', component: ProfileComponent },
             { path: 'settings', component: SettingsComponent },
