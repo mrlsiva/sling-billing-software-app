@@ -8,6 +8,7 @@ import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { LayoutComponent } from './components/layout/layout.component';
 import { AuthGuard } from './guards/auth.guard';
 import { OwnerGuard } from './guards/owner.guard';
+import { HoGuard } from './guards/ho.guard';
 
 export const routes: Routes = [
     { path: 'login', component: LoginComponent },
@@ -16,7 +17,7 @@ export const routes: Routes = [
         component: LayoutComponent,
         canActivate: [AuthGuard],
         children: [
-            { path: 'dashboard', component: DashboardComponent },
+            { path: 'dashboard', component: DashboardComponent, canActivate: [HoGuard] },
             { path: 'pos', component: ProductListComponent, canActivate: [OwnerGuard] },
             { path: 'customers', loadComponent: () => import('./components/customers/customers.component').then(m => m.CustomersComponent) },
             { path: 'profile', component: ProfileComponent },
