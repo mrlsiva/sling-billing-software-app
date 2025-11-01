@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ProductService } from '../../services/product.service';
 import { AuthService } from '../../services/auth.service';
 import { CartService } from '../../services/cart.service';
+import { ToastService } from '../../services/toast.service';
 import { environment } from '../../../environments/environment';
 import { Subscription } from 'rxjs';
 import { RouterModule, Router } from '@angular/router';
@@ -67,7 +68,7 @@ export class ProductListComponent implements OnInit {
     private subs: Subscription | null = null;
     // previously used for inline expansion; removed when details page was deprecated
 
-    constructor(private productService: ProductService, private auth: AuthService, private cart: CartService, private router: Router) { }
+    constructor(private productService: ProductService, private auth: AuthService, private cart: CartService, private router: Router, private toastService: ToastService) { }
 
     ngOnInit() {
         // subscribe to reactive user updates
@@ -140,6 +141,9 @@ export class ProductListComponent implements OnInit {
 
                 this.paginationData = paginationInfo.data;
                 this.products = paginationInfo.products;
+
+                // Log first few products to understand structure
+                console.log('First 3 products structure:', this.products.slice(0, 3));
 
                 // Update pagination info
                 this.currentPage = paginationInfo.currentPage;
@@ -385,13 +389,29 @@ export class ProductListComponent implements OnInit {
     // Ensure each product has a safe numeric `quantity` (integer >= 0)
     private normalizeProductQuantities() {
         if (!Array.isArray(this.products)) return;
-        this.products = this.products.map((p: any) => {
+        console.log('Normalizing quantities for', this.products.length, 'products');
+
+        this.products = this.products.map((p: any, index: number) => {
             // try common locations for quantity
             const raw = p?.quantity ?? p?.product?.quantity ?? 0;
             const num = Number(raw);
             const safe = Number.isFinite(num) ? Math.max(0, Math.floor(num)) : 0;
+
+            // Log first 5 products' quantity normalization
+            if (index < 5) {
+                console.log(`Product ${index + 1} quantity normalization:`, {
+                    original: p,
+                    rawQuantity: raw,
+                    processedQuantity: safe,
+                    productHasQuantity: p?.quantity,
+                    nestedProductQuantity: p?.product?.quantity
+                });
+            }
+
             return { ...p, quantity: safe };
         });
+
+        console.log('Quantity normalization complete');
     }
 
     // Search functionality methods
@@ -624,7 +644,52 @@ export class ProductListComponent implements OnInit {
     }
 
     addToCart(item: any) {
-        this.cart.add(item.product ?? item);
+        console.log('🛒 AddToCart called with item:', item);
+
+        const product = item.product ?? item;
+        console.log('🛒 Extracted product:', product);
+
+        // Check quantity before adding to cart - comprehensive check for all possible structures
+        const quantities = [
+            product?.quantity,
+            item?.quantity,
+            product?.product?.quantity,
+            item?.product?.quantity,
+            product?.stock,
+            item?.stock,
+            product?.available_quantity,
+            item?.available_quantity,
+            product?.qty,
+            item?.qty
+        ];
+
+        console.log('🛒 All possible quantity values:', quantities);
+
+        // Get the first valid number from the quantities array, default to 0
+        const quantity = quantities.find(q => Number.isFinite(Number(q)) && Number(q) >= 0) || 0;
+        const finalQuantity = Number(quantity);
+
+        console.log('🛒 Final extracted quantity:', finalQuantity);
+
+        console.log('🛒 AddToCart validation:', {
+            item,
+            product,
+            extractedQuantity: finalQuantity,
+            allQuantities: quantities,
+            isValid: Number.isFinite(finalQuantity) && finalQuantity > 0
+        });
+
+        if (!Number.isFinite(finalQuantity) || finalQuantity <= 0) {
+            // Show error message when item is out of stock
+            console.log('🚫 BLOCKED: Item has quantity:', finalQuantity);
+            this.toastService.show('Item is out of stock and cannot be added to cart', 'error');
+            console.log('Prevented adding item with quantity:', finalQuantity);
+            return;
+        }
+
+        console.log('✅ ALLOWED: Adding item to cart with quantity:', finalQuantity);
+        this.cart.add(product);
+        this.toastService.show(`${product?.name || 'Item'} added to cart`, 'success');
     }
 
     goToLogin() {

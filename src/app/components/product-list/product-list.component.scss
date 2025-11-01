@@ -362,6 +362,13 @@ li.product-item.qty-danger {
     border: 1px solid var(--color-danger-border);
 }
 
+/* Enhanced styles for out-of-stock items */
+li.product-item.out-of-stock {
+    &:hover {
+        cursor: not-allowed !important;
+    }
+}
+
 .product-main {
     display: flex;
     align-items: center;

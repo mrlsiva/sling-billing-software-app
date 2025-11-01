@@ -225,12 +225,16 @@
         </button>
     </div>
     <ul *ngIf="filteredProducts?.length" class="product-list">
-        <li *ngFor="let p of filteredProducts" class="product-item" (click)="addToCart(p)"
-            [ngClass]="{ 'qty-warning': p.quantity > 0 && p.quantity < 5, 'qty-danger': p.quantity === 0 }">
+        <li *ngFor="let p of filteredProducts" class="product-item" [ngClass]="{ 
+                'qty-warning': p.quantity > 0 && p.quantity < 5, 
+                'qty-danger': p.quantity === 0,
+                'out-of-stock': p.quantity <= 0
+            }" [attr.data-quantity]="p.quantity" (click)="p.quantity > 0 ? addToCart(p) : null"
+            [style.cursor]="p.quantity > 0 ? 'pointer' : 'not-allowed'"
+            [title]="p.quantity <= 0 ? 'Out of stock - cannot add to cart' : 'Click to add to cart'">
             <div class="product-item-listing">
                 <div class="product-main">
                     <div class="product-title">{{ p.product.name }} ({{ p.product.code }})</div>
-
                 </div>
                 <div class="product-main">
 

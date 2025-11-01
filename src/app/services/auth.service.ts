@@ -205,13 +205,23 @@ export class AuthService {
     /** Check if HO user has billing enabled (role_id = 2 AND is_bill_enabled = 1) */
     isHOWithBilling(): boolean {
         const user = this.getUser();
-        return user && 
-               user.role_id === 2 && 
-               user.user_detail && 
-               user.user_detail.is_bill_enabled === 1;
-    }
+        const result = user &&
+            user.role_id === 2 &&
+            user.user_detail &&
+            user.user_detail.is_bill_enabled === 1;
 
-    /** Check if user should access POS (Branch users OR HO with billing enabled) */
+        // Debug logging
+        if (user && user.role_id === 2) {
+            console.log('HO User detected:', {
+                role_id: user.role_id,
+                has_user_detail: !!user.user_detail,
+                is_bill_enabled: user.user_detail?.is_bill_enabled,
+                isHOWithBilling: result
+            });
+        }
+
+        return result;
+    }    /** Check if user should access POS (Branch users OR HO with billing enabled) */
     shouldAccessPOS(): boolean {
         return this.isBranch() || this.isHOWithBilling();
     }

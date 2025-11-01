@@ -66,13 +66,23 @@ export class LoginComponent {
                     // role_id: 1 = Super Admin -> Super Admin Dashboard
                     // role_id: 2 = HO -> HO Dashboard (if is_bill_enabled = 0) or POS (if is_bill_enabled = 1)
                     // role_id: 3 = Branch -> POS
+                    console.log('Login routing logic:', {
+                        isSuperAdmin: this.auth.isSuperAdmin(),
+                        isHO: this.auth.isHO(),
+                        isHOWithBilling: this.auth.isHOWithBilling(),
+                        isBranch: this.auth.isBranch(),
+                        shouldAccessPOS: this.auth.shouldAccessPOS()
+                    });
+
                     if (this.auth.isSuperAdmin()) {
                         this.router.navigate(['/super-admin']);
                     } else if (this.auth.isHO()) {
                         // Check if HO has billing enabled
                         if (this.auth.isHOWithBilling()) {
+                            console.log('HO with billing enabled - redirecting to POS');
                             this.router.navigate(['/pos']); // HO with billing goes to POS
                         } else {
+                            console.log('HO without billing - redirecting to dashboard');
                             this.router.navigate(['/dashboard']); // HO without billing goes to dashboard
                         }
                     } else if (this.auth.isBranch()) {
@@ -86,13 +96,23 @@ export class LoginComponent {
 
                 if (res?.success) {
                     // Conditional routing when no token but success flag
+                    console.log('Login success routing logic:', {
+                        isSuperAdmin: this.auth.isSuperAdmin(),
+                        isHO: this.auth.isHO(),
+                        isHOWithBilling: this.auth.isHOWithBilling(),
+                        isBranch: this.auth.isBranch(),
+                        shouldAccessPOS: this.auth.shouldAccessPOS()
+                    });
+
                     if (this.auth.isSuperAdmin()) {
                         this.router.navigate(['/super-admin']);
                     } else if (this.auth.isHO()) {
                         // Check if HO has billing enabled
                         if (this.auth.isHOWithBilling()) {
+                            console.log('HO with billing enabled - redirecting to POS');
                             this.router.navigate(['/pos']); // HO with billing goes to POS
                         } else {
+                            console.log('HO without billing - redirecting to dashboard');
                             this.router.navigate(['/dashboard']); // HO without billing goes to dashboard
                         }
                     } else if (this.auth.isBranch()) {
