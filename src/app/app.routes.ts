@@ -5,10 +5,12 @@ import { ProfileComponent } from './components/profile/profile.component';
 import { SettingsComponent } from './components/settings/settings.component';
 import { OrderComponent } from './components/order/order.component';
 import { DashboardComponent } from './components/dashboard/dashboard.component';
+import { SuperAdminDashboardComponent } from './components/super-admin-dashboard/super-admin-dashboard.component';
 import { LayoutComponent } from './components/layout/layout.component';
 import { AuthGuard } from './guards/auth.guard';
-import { OwnerGuard } from './guards/owner.guard';
+import { BranchGuard } from './guards/owner.guard';
 import { HoGuard } from './guards/ho.guard';
+import { SuperAdminGuard } from './guards/super-admin.guard';
 
 export const routes: Routes = [
     { path: 'login', component: LoginComponent },
@@ -17,9 +19,10 @@ export const routes: Routes = [
         component: LayoutComponent,
         canActivate: [AuthGuard],
         children: [
+            { path: 'super-admin', component: SuperAdminDashboardComponent, canActivate: [SuperAdminGuard] },
             { path: 'dashboard', component: DashboardComponent, canActivate: [HoGuard] },
-            { path: 'pos', component: ProductListComponent, canActivate: [OwnerGuard] },
-            { path: 'categories', loadComponent: () => import('./components/settings-pages/categories/categories.component').then(m => m.CategoriesComponent) },
+            { path: 'pos', component: ProductListComponent, canActivate: [BranchGuard] },
+            { path: 'categories', loadComponent: () => import('./components/settings-pages/categories/categories.component').then(m => m.CategoriesComponent), canActivate: [HoGuard] },
             { path: 'customers', loadComponent: () => import('./components/customers/customers.component').then(m => m.CustomersComponent) },
             { path: 'profile', component: ProfileComponent },
             { path: 'settings', component: SettingsComponent },

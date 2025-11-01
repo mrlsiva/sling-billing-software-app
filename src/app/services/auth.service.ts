@@ -184,13 +184,45 @@ export class AuthService {
         try { return JSON.parse(raw); } catch { return null; }
     }
 
-    /** Check if user has owner_id (is a branch/staff user) */
+    /** Check if user is Super Admin (role_id = 1) */
+    isSuperAdmin(): boolean {
+        const user = this.getUser();
+        return user && user.role_id === 1;
+    }
+
+    /** Check if user is HO (role_id = 2) */
+    isHO(): boolean {
+        const user = this.getUser();
+        return user && user.role_id === 2;
+    }
+
+    /** Check if user is Branch (role_id = 3) */
+    isBranch(): boolean {
+        const user = this.getUser();
+        return user && user.role_id === 3;
+    }
+
+    /** Check if HO user has billing enabled (role_id = 2 AND is_bill_enabled = 1) */
+    isHOWithBilling(): boolean {
+        const user = this.getUser();
+        return user && 
+               user.role_id === 2 && 
+               user.user_detail && 
+               user.user_detail.is_bill_enabled === 1;
+    }
+
+    /** Check if user should access POS (Branch users OR HO with billing enabled) */
+    shouldAccessPOS(): boolean {
+        return this.isBranch() || this.isHOWithBilling();
+    }
+
+    /** @deprecated Use role-based methods instead */
     hasOwner(): boolean {
         const user = this.getUser();
         return user && user.owner_id !== null && user.owner_id !== undefined;
     }
 
-    /** Check if user is owner (no owner_id) */
+    /** @deprecated Use role-based methods instead */
     isOwner(): boolean {
         const user = this.getUser();
         return user && (user.owner_id === null || user.owner_id === undefined);

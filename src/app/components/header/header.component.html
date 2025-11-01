@@ -19,18 +19,25 @@
                 aria-hidden="true"></i></button>
     </div>
     <ul>
-        <!-- POS menu - only for owner users (owner_id is null) -->
-        <li *ngIf="isOwner">
-            <a routerLink="/pos" (click)="close()" aria-label="POS">
-                <i class="fa-solid fa-desktop" aria-hidden="true"></i>
-                <span>POS</span>
+        <!-- Super Admin menu -->
+        <li *ngIf="isSuperAdmin">
+            <a routerLink="/super-admin" (click)="close()" aria-label="Super Admin Dashboard">
+                <i class="fa-solid fa-crown" aria-hidden="true"></i>
+                <span>Super Admin</span>
             </a>
         </li>
-        <!-- Dashboard menu - only for branch/staff users (owner_id is not null) -->
-        <li *ngIf="hasOwner">
+        <!-- HO Dashboard menu -->
+        <li *ngIf="isHO">
             <a routerLink="/dashboard" (click)="close()" aria-label="Dashboard">
                 <i class="fa-solid fa-chart-line" aria-hidden="true"></i>
                 <span>Dashboard</span>
+            </a>
+        </li>
+        <!-- POS menu - for branch users AND HO users with billing enabled -->
+        <li *ngIf="shouldShowPOS">
+            <a routerLink="/pos" (click)="close()" aria-label="POS">
+                <i class="fa-solid fa-desktop" aria-hidden="true"></i>
+                <span>POS</span>
             </a>
         </li>
         <li>

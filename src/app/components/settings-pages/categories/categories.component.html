@@ -1,16 +1,32 @@
 <div class="categories-container">
     <div class="header-section">
-        <button class="back-btn" (click)="goBack()" aria-label="Go back">
-            <i class="fa-solid fa-arrow-left"></i> Back
-        </button>
-        <h1>Categories</h1>
+        <div class="d-flex align-items-center">
+            <button class="back-btn" (click)="goBack()" aria-label="Go back">
+                <i class="fa-solid fa-arrow-left"></i>
+            </button>
+            <h1>Categories</h1>
+        </div>
         <div class="header-actions">
             <button class="refresh-btn" (click)="refreshCategories()" aria-label="Refresh categories">
                 <i class="fa-solid fa-arrows-rotate"></i>
             </button>
             <button class="create-btn" (click)="openCreateModal()" aria-label="Create category">
-                <i class="fa-solid fa-plus"></i> Create Category
+                <i class="fa-solid fa-plus"></i> Create
             </button>
+        </div>
+    </div>
+
+    <!-- Search Section -->
+    <div class="search-section" *ngIf="!loading">
+        <div class="search-container">
+            <div class="search-input-wrapper">
+                <i class="fa-solid fa-search search-icon"></i>
+                <input type="text" class="search-input" placeholder="Search categories..." [(ngModel)]="searchTerm"
+                    (input)="onSearchChange()" />
+                <button *ngIf="searchTerm" class="clear-search-btn" (click)="clearSearch()" aria-label="Clear search">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
         </div>
     </div>
 
@@ -24,8 +40,9 @@
         <p>Loading categories...</p>
     </div>
 
-    <div class="categories-list" *ngIf="!loading && categories.length > 0">
-        <div class="category-item" *ngFor="let category of categories">
+    <div class="categories-list" *ngIf="!loading && filteredCategories.length > 0">
+        <div class="category-item" *ngFor="let category of filteredCategories"
+            (click)="openCategoryDetails(category.id)">
             <div class="category-image-small">
                 <img [src]="getImageUrl(category.image)" [alt]="category.name"
                     onerror="this.src='https://test.slingbillings.com/no-image-icon.jpg'" />
@@ -33,10 +50,17 @@
             <div class="category-details">
                 <h3 class="category-name">{{ category.name }}</h3>
                 <div class="category-meta">
-                    <span class="subcategory-count">
-                        <i class="fa-solid fa-list"></i>
-                        {{ category.sub_categories.length }} subcategories
-                    </span>
+                    <div class="status-row">
+                        <span class="subcategory-count">
+                            <i class="fa-solid fa-list"></i>
+                            {{ category.sub_categories.length }} subcategories
+                        </span>
+                        <span class="category-status" [ngClass]="getStatusClass(category.is_active)">
+                            <i class="fa-solid"
+                                [ngClass]="category.is_active === 1 ? 'fa-check-circle' : 'fa-times-circle'"></i>
+                            {{ getStatusText(category.is_active) }}
+                        </span>
+                    </div>
                     <div class="subcategories" *ngIf="category.sub_categories.length > 0">
                         <span *ngFor="let sub of category.sub_categories" class="subcategory-tag">
                             {{ sub.name }}
@@ -44,7 +68,11 @@
                     </div>
                 </div>
             </div>
-            <div class="category-actions">
+            <div class="category-actions" (click)="$event.stopPropagation()">
+                <button class="status-toggle-btn" (click)="toggleCategoryStatus(category.id, category.is_active)"
+                    [title]="category.is_active === 1 ? 'Deactivate' : 'Activate'" aria-label="Toggle status">
+                    <i class="fa-solid" [ngClass]="category.is_active === 1 ? 'fa-toggle-on' : 'fa-toggle-off'"></i>
+                </button>
                 <button class="edit-btn-icon" (click)="openEditModal(category)" aria-label="Edit category">
                     <i class="fa-solid fa-pen"></i>
                 </button>
@@ -52,7 +80,15 @@
         </div>
     </div>
 
-    <div class="no-data" *ngIf="!loading && categories.length === 0">
+    <div class="no-data" *ngIf="!loading && filteredCategories.length === 0 && searchTerm">
+        <i class="fa-solid fa-search"></i>
+        <p>No categories found for "{{ searchTerm }}"</p>
+        <button class="create-btn" (click)="clearSearch()">
+            <i class="fa-solid fa-times"></i> Clear Search
+        </button>
+    </div>
+
+    <div class="no-data" *ngIf="!loading && categories.length === 0 && !searchTerm">
         <i class="fa-solid fa-folder-open"></i>
         <p>No categories found</p>
         <button class="create-btn" (click)="openCreateModal()">
@@ -139,6 +175,81 @@
                     </button>
                 </div>
             </form>
+        </div>
+    </div>
+</div>
+
+<!-- Category Details Modal -->
+<div class="modal-overlay" *ngIf="showDetailsModal" (click)="closeDetailsModal()">
+    <div class="modal-content details-modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h2>Category Details</h2>
+            <button class="close-btn" (click)="closeDetailsModal()" aria-label="Close modal">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <div class="modal-body">
+            <div class="loading-spinner" *ngIf="detailsLoading">
+                <i class="fa-solid fa-spinner fa-spin"></i>
+                <p>Loading category details...</p>
+            </div>
+
+            <div *ngIf="!detailsLoading && selectedCategoryDetails" class="category-details-content">
+                <div class="details-header">
+                    <div class="category-image-large">
+                        <img [src]="getImageUrl(selectedCategoryDetails.image)" [alt]="selectedCategoryDetails.name"
+                            onerror="this.src='https://test.slingbillings.com/no-image-icon.jpg'" />
+                    </div>
+                    <div class="category-info">
+                        <h3 class="category-title">{{ selectedCategoryDetails.name }}</h3>
+                        <div class="status-badge" [ngClass]="getStatusClass(selectedCategoryDetails.is_active)">
+                            <i class="fa-solid"
+                                [ngClass]="selectedCategoryDetails.is_active === 1 ? 'fa-check-circle' : 'fa-times-circle'"></i>
+                            {{ getStatusText(selectedCategoryDetails.is_active) }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="details-grid">
+                    <div class="detail-item">
+                        <label>Category ID</label>
+                        <span>{{ selectedCategoryDetails.id }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <label>User ID</label>
+                        <span>{{ selectedCategoryDetails.user_id }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <label>Bulk Upload</label>
+                        <span>{{ selectedCategoryDetails.is_bulk_upload === 1 ? 'Yes' : 'No' }}</span>
+                    </div>
+                    <div class="detail-item" *ngIf="selectedCategoryDetails.run_id">
+                        <label>Run ID</label>
+                        <span>{{ selectedCategoryDetails.run_id }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <label>Created At</label>
+                        <span>{{ formatDate(selectedCategoryDetails.created_at) }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <label>Updated At</label>
+                        <span>{{ formatDate(selectedCategoryDetails.updated_at) }}</span>
+                    </div>
+                </div>
+
+                <div class="details-actions">
+                    <button class="status-toggle-btn-large"
+                        (click)="toggleCategoryStatus(selectedCategoryDetails.id, selectedCategoryDetails.is_active)">
+                        <i class="fa-solid"
+                            [ngClass]="selectedCategoryDetails.is_active === 1 ? 'fa-toggle-on' : 'fa-toggle-off'"></i>
+                        {{ selectedCategoryDetails.is_active === 1 ? 'Deactivate' : 'Activate' }}
+                    </button>
+                    <button class="edit-btn" (click)="openEditModal(selectedCategoryDetails); closeDetailsModal()">
+                        <i class="fa-solid fa-pen"></i> Edit Category
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 </div>

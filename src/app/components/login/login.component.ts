@@ -62,12 +62,23 @@ export class LoginComponent {
                 if (token) {
                     sessionStorage.setItem('auth_token', token);
 
-                    // Conditional routing based on owner_id
-                    // If owner_id is null/undefined (owner user) -> POS
-                    // If owner_id has value (branch/staff user) -> Dashboard
-                    if (this.auth.isOwner()) {
+                    // Conditional routing based on role_id and billing status
+                    // role_id: 1 = Super Admin -> Super Admin Dashboard
+                    // role_id: 2 = HO -> HO Dashboard (if is_bill_enabled = 0) or POS (if is_bill_enabled = 1)
+                    // role_id: 3 = Branch -> POS
+                    if (this.auth.isSuperAdmin()) {
+                        this.router.navigate(['/super-admin']);
+                    } else if (this.auth.isHO()) {
+                        // Check if HO has billing enabled
+                        if (this.auth.isHOWithBilling()) {
+                            this.router.navigate(['/pos']); // HO with billing goes to POS
+                        } else {
+                            this.router.navigate(['/dashboard']); // HO without billing goes to dashboard
+                        }
+                    } else if (this.auth.isBranch()) {
                         this.router.navigate(['/pos']);
                     } else {
+                        // Fallback for unknown role
                         this.router.navigate(['/dashboard']);
                     }
                     return;
@@ -75,9 +86,19 @@ export class LoginComponent {
 
                 if (res?.success) {
                     // Conditional routing when no token but success flag
-                    if (this.auth.isOwner()) {
+                    if (this.auth.isSuperAdmin()) {
+                        this.router.navigate(['/super-admin']);
+                    } else if (this.auth.isHO()) {
+                        // Check if HO has billing enabled
+                        if (this.auth.isHOWithBilling()) {
+                            this.router.navigate(['/pos']); // HO with billing goes to POS
+                        } else {
+                            this.router.navigate(['/dashboard']); // HO without billing goes to dashboard
+                        }
+                    } else if (this.auth.isBranch()) {
                         this.router.navigate(['/pos']);
                     } else {
+                        // Fallback for unknown role
                         this.router.navigate(['/dashboard']);
                     }
                     return;

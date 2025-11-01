@@ -3,16 +3,16 @@ import { CanActivate, Router, UrlTree } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 
 @Injectable({ providedIn: 'root' })
-export class HoGuard implements CanActivate {
+export class SuperAdminGuard implements CanActivate {
     constructor(private auth: AuthService, private router: Router) { }
 
     canActivate(): boolean | UrlTree {
-        // Allow access only if user is HO (role_id = 2)
-        if (this.auth.isHO()) {
+        // Allow access only if user is Super Admin (role_id = 1)
+        if (this.auth.isSuperAdmin()) {
             return true;
-        } else if (this.auth.isSuperAdmin()) {
-            // Redirect Super Admin to their dashboard
-            return this.router.createUrlTree(['/super-admin']);
+        } else if (this.auth.isHO()) {
+            // Redirect HO to their dashboard
+            return this.router.createUrlTree(['/dashboard']);
         } else if (this.auth.isBranch()) {
             // Redirect Branch to POS
             return this.router.createUrlTree(['/pos']);

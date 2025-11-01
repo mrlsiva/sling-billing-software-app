@@ -3,16 +3,22 @@ import { CanActivate, Router, UrlTree } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 
 @Injectable({ providedIn: 'root' })
-export class OwnerGuard implements CanActivate {
+export class BranchGuard implements CanActivate {
     constructor(private auth: AuthService, private router: Router) { }
 
     canActivate(): boolean | UrlTree {
-        // Allow access only if user is owner (owner_id is null)
-        if (this.auth.isOwner()) {
+        // Allow access if user should access POS (Branch OR HO with billing enabled)
+        if (this.auth.shouldAccessPOS()) {
             return true;
-        } else {
-            // Redirect to dashboard for branch/staff users
+        } else if (this.auth.isSuperAdmin()) {
+            // Redirect Super Admin to their dashboard
+            return this.router.createUrlTree(['/super-admin']);
+        } else if (this.auth.isHO()) {
+            // Redirect HO (without billing) to their dashboard
             return this.router.createUrlTree(['/dashboard']);
+        } else {
+            // Unknown role, redirect to login
+            return this.router.createUrlTree(['/login']);
         }
     }
 }

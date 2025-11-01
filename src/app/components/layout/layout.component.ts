@@ -27,16 +27,16 @@ export class LayoutComponent implements OnInit, OnDestroy {
         this.routerSubscription = this.router.events
             .pipe(filter(event => event instanceof NavigationEnd))
             .subscribe((event: NavigationEnd) => {
-                // Show cart only for owner users on POS page, hide on checkout
+                // Show cart for users who should access POS (branch OR HO with billing), hide on checkout
                 const isCheckout = event.url.includes('/checkout');
-                const isOwner = this.auth.isOwner();
-                this.showCart = isOwner && !isCheckout;
+                const shouldShowCart = this.auth.shouldAccessPOS();
+                this.showCart = shouldShowCart && !isCheckout;
             });
 
         // Check initial route
         const isCheckout = this.router.url.includes('/checkout');
-        const isOwner = this.auth.isOwner();
-        this.showCart = isOwner && !isCheckout;
+        const shouldShowCart = this.auth.shouldAccessPOS();
+        this.showCart = shouldShowCart && !isCheckout;
     }
 
     ngOnDestroy() {

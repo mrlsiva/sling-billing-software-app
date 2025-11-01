@@ -1,11 +1,15 @@
 <nav class="app-footer" role="navigation" aria-label="Footer navigation">
-    <!-- POS button - only visible for owner users (owner_id is null) -->
-    <a class="btn" *ngIf="isOwner" routerLink="/pos" routerLinkActive="active" aria-label="POS">
-        <i class="fa-solid fa-desktop fa-lg" aria-hidden="true"></i>
+    <!-- Super Admin button -->
+    <a class="btn" *ngIf="isSuperAdmin" routerLink="/super-admin" routerLinkActive="active" aria-label="Super Admin">
+        <i class="fa-solid fa-crown fa-lg" aria-hidden="true"></i>
     </a>
-    <!-- Dashboard button - only visible for branch/staff users (owner_id is not null) -->
-    <a class="btn" *ngIf="hasOwner" routerLink="/dashboard" routerLinkActive="active" aria-label="Dashboard">
+    <!-- HO Dashboard button -->
+    <a class="btn" *ngIf="isHO" routerLink="/dashboard" routerLinkActive="active" aria-label="Dashboard">
         <i class="fa-solid fa-chart-line fa-lg" aria-hidden="true"></i>
+    </a>
+    <!-- POS button - for branch users AND HO users with billing enabled -->
+    <a class="btn" *ngIf="shouldShowPOS" routerLink="/pos" routerLinkActive="active" aria-label="POS">
+        <i class="fa-solid fa-desktop fa-lg" aria-hidden="true"></i>
     </a>
     <a class="btn" routerLink="/profile" routerLinkActive="active" aria-label="Profile">
         <i class="fa-solid fa-user fa-lg" aria-hidden="true"></i>

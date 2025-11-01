@@ -11,15 +11,19 @@ import { AuthService } from '../../services/auth.service';
     styleUrls: ['./footer.component.scss']
 })
 export class FooterComponent implements OnInit {
-    isOwner = false;
-    hasOwner = false;
+    isSuperAdmin = false;
+    isHO = false;
+    isBranch = false;
+    shouldShowPOS = false;
 
     constructor(private router: Router, private auth: AuthService) { }
 
     ngOnInit() {
         this.auth.user$.subscribe(() => {
-            this.isOwner = this.auth.isOwner();
-            this.hasOwner = this.auth.hasOwner();
+            this.isSuperAdmin = this.auth.isSuperAdmin();
+            this.isHO = this.auth.isHO();
+            this.isBranch = this.auth.isBranch();
+            this.shouldShowPOS = this.auth.shouldAccessPOS(); // Branch OR HO with billing
         });
     }
 

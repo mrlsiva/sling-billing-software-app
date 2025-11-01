@@ -32,6 +32,30 @@ interface Category {
     sub_categories: SubCategory[];
 }
 
+interface CategoryDetailResponse {
+    code: number;
+    message: string;
+    success: boolean;
+    data: {
+        id: number;
+        user_id: number;
+        name: string;
+        image: string;
+        is_active: number;
+        is_bulk_upload: number;
+        run_id: string | null;
+        created_at: string;
+        updated_at: string;
+    };
+}
+
+interface StatusToggleResponse {
+    code: number;
+    message: string;
+    success: boolean;
+    data: string;
+}
+
 interface CategoryResponse {
     code: number;
     message: string;
@@ -66,8 +90,13 @@ interface CategoryResponse {
 })
 export class CategoriesComponent implements OnInit, OnDestroy {
     categories: Category[] = [];
+    filteredCategories: Category[] = [];
     loading = true;
     error: string | null = null;
+
+    // Search properties
+    searchTerm: string = '';
+    isSearching: boolean = false;
 
     // Pagination properties
     currentPage: number = 1;
@@ -77,6 +106,7 @@ export class CategoriesComponent implements OnInit, OnDestroy {
 
     // Modal properties
     showModal: boolean = false;
+    showDetailsModal: boolean = false;
     isEditMode: boolean = false;
     modalTitle: string = '';
 
@@ -85,6 +115,10 @@ export class CategoriesComponent implements OnInit, OnDestroy {
     categoryId: number | null = null;
     selectedImage: File | null = null;
     imagePreview: string | null = null;
+
+    // Category details for popup
+    selectedCategoryDetails: any = null;
+    detailsLoading: boolean = false;
 
     // Expose Math to template
     readonly Math = Math;
@@ -119,13 +153,20 @@ export class CategoriesComponent implements OnInit, OnDestroy {
 
                     if (response.success && response.data) {
                         this.categories = response.data.data;
+                        this.filteredCategories = this.categories;
                         this.currentPage = response.data.current_page;
                         this.totalPages = response.data.last_page;
                         this.itemsPerPage = response.data.per_page;
                         this.totalItems = response.data.total;
+
+                        // Apply search filter if search term exists
+                        if (this.searchTerm.trim()) {
+                            this.filterCategories();
+                        }
                     } else {
                         this.error = response.message || 'Failed to load categories';
                         this.categories = [];
+                        this.filteredCategories = [];
                     }
 
                     this.loading = false;
@@ -353,5 +394,106 @@ export class CategoriesComponent implements OnInit, OnDestroy {
         }
         // Otherwise, construct the full URL
         return `${environment.assetsBase.replace(/\/$/, '')}/${image.replace(/^\//, '')}`;
+    }
+
+    // Search functionality
+    onSearchChange() {
+        this.filterCategories();
+    }
+
+    filterCategories() {
+        if (!this.searchTerm.trim()) {
+            this.filteredCategories = this.categories;
+        } else {
+            const searchLower = this.searchTerm.toLowerCase();
+            this.filteredCategories = this.categories.filter(category =>
+                category.name.toLowerCase().includes(searchLower)
+            );
+        }
+    }
+
+    clearSearch() {
+        this.searchTerm = '';
+        this.filteredCategories = this.categories;
+    }
+
+    // Category details popup
+    async openCategoryDetails(categoryId: number) {
+        this.detailsLoading = true;
+        this.showDetailsModal = true;
+        this.selectedCategoryDetails = null;
+
+        try {
+            const headers = this.auth.authHeaders();
+            const response = await this.http.get<CategoryDetailResponse>(
+                `${environment.apiBase}/categories/${categoryId}/view`,
+                { headers }
+            ).toPromise();
+
+            if (response?.success && response.data) {
+                this.selectedCategoryDetails = response.data;
+            } else {
+                this.error = response?.message || 'Failed to load category details';
+                this.closeDetailsModal();
+            }
+        } catch (err: any) {
+            console.error('Error loading category details:', err);
+            this.error = err?.error?.message || 'Failed to load category details';
+            this.closeDetailsModal();
+        } finally {
+            this.detailsLoading = false;
+        }
+    }
+
+    closeDetailsModal() {
+        this.showDetailsModal = false;
+        this.selectedCategoryDetails = null;
+        this.detailsLoading = false;
+        this.error = null;
+    }
+
+    // Status toggle functionality
+    async toggleCategoryStatus(categoryId: number, currentStatus: number) {
+        try {
+            const headers = this.auth.authHeaders();
+            const response = await this.http.get<StatusToggleResponse>(
+                `${environment.apiBase}/categories/${categoryId}/status`,
+                { headers }
+            ).toPromise();
+
+            if (response?.success) {
+                // Update the category status in the local array
+                const categoryIndex = this.categories.findIndex(cat => cat.id === categoryId);
+                if (categoryIndex !== -1) {
+                    this.categories[categoryIndex].is_active = this.categories[categoryIndex].is_active === 1 ? 0 : 1;
+                    this.filterCategories(); // Refresh filtered categories
+                }
+
+                // Update details modal if open for this category
+                if (this.selectedCategoryDetails && this.selectedCategoryDetails.id === categoryId) {
+                    this.selectedCategoryDetails.is_active = this.selectedCategoryDetails.is_active === 1 ? 0 : 1;
+                }
+
+                console.log('Status updated:', response.message);
+            } else {
+                this.error = response?.message || 'Failed to update category status';
+            }
+        } catch (err: any) {
+            console.error('Error updating category status:', err);
+            this.error = err?.error?.message || 'Failed to update category status';
+        }
+    }
+
+    getStatusText(isActive: number): string {
+        return isActive === 1 ? 'Active' : 'Inactive';
+    }
+
+    getStatusClass(isActive: number): string {
+        return isActive === 1 ? 'status-active' : 'status-inactive';
+    }
+
+    formatDate(dateString: string): string {
+        const date = new Date(dateString);
+        return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
     }
 }

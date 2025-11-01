@@ -1,0 +1,121 @@
+<div class="super-admin-dashboard">
+    <div class="dashboard-header">
+        <h1>Super Admin Dashboard</h1>
+        <p class="welcome-text" *ngIf="user">Welcome, {{ user.name }}</p>
+    </div>
+
+    <div *ngIf="loading" class="loading-container">
+        <div class="loading-spinner">Loading dashboard...</div>
+    </div>
+
+    <div *ngIf="!loading" class="dashboard-content">
+        <!-- Super Admin Stats Grid -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fa-solid fa-building"></i>
+                </div>
+                <div class="stat-info">
+                    <h3 class="stat-title">Total Companies</h3>
+                    <p class="stat-value">-</p>
+                    <span class="stat-label">Active companies</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fa-solid fa-users-gear"></i>
+                </div>
+                <div class="stat-info">
+                    <h3 class="stat-title">Total HO Users</h3>
+                    <p class="stat-value">-</p>
+                    <span class="stat-label">Head office users</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fa-solid fa-store"></i>
+                </div>
+                <div class="stat-info">
+                    <h3 class="stat-title">Total Branches</h3>
+                    <p class="stat-value">-</p>
+                    <span class="stat-label">All branches</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fa-solid fa-indian-rupee-sign"></i>
+                </div>
+                <div class="stat-info">
+                    <h3 class="stat-title">Total Revenue</h3>
+                    <p class="stat-value">₹ -</p>
+                    <span class="stat-label">Platform revenue</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Super Admin Information -->
+        <div class="info-section" *ngIf="user">
+            <h2>System Information</h2>
+            <div class="info-grid">
+                <div class="info-item">
+                    <span class="info-label">Admin Name:</span>
+                    <span class="info-value">{{ user.name || '-' }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Email:</span>
+                    <span class="info-value">{{ user.email || '-' }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Phone:</span>
+                    <span class="info-value">{{ user.phone || '-' }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Role:</span>
+                    <span class="info-value badge-super-admin">Super Admin</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Unique ID:</span>
+                    <span class="info-value">{{ user.unique_id || '-' }}</span>
+                </div>
+                <div class="info-item" *ngIf="user.created_at">
+                    <span class="info-label">Account Created:</span>
+                    <span class="info-value">{{ user.created_at | date:'mediumDate' }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Super Admin Quick Actions -->
+        <div class="quick-actions">
+            <h2>System Management</h2>
+            <div class="action-buttons">
+                <button class="action-btn primary">
+                    <i class="fa-solid fa-building"></i>
+                    <span>Manage Companies</span>
+                </button>
+                <button class="action-btn secondary">
+                    <i class="fa-solid fa-users-gear"></i>
+                    <span>Manage HO Users</span>
+                </button>
+                <button class="action-btn info">
+                    <i class="fa-solid fa-store"></i>
+                    <span>Manage Branches</span>
+                </button>
+                <button class="action-btn success">
+                    <i class="fa-solid fa-chart-line"></i>
+                    <span>Analytics</span>
+                </button>
+                <button class="action-btn warning">
+                    <i class="fa-solid fa-cogs"></i>
+                    <span>System Settings</span>
+                </button>
+                <button class="action-btn danger" routerLink="/profile">
+                    <i class="fa-solid fa-user-shield"></i>
+                    <span>Admin Profile</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

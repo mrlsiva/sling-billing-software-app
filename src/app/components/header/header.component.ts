@@ -21,9 +21,11 @@ export class HeaderComponent implements OnInit, OnDestroy {
     private previousFocus: Element | null = null;
     @ViewChild('sideMenu', { read: ElementRef, static: false }) sideMenuRef?: ElementRef<HTMLElement>;
 
-    // Owner detection properties
-    isOwner = false;
-    hasOwner = false;
+    // Role detection properties
+    isSuperAdmin = false;
+    isHO = false;
+    isBranch = false;
+    shouldShowPOS = false;
 
     private onKeydown = (e: KeyboardEvent) => {
         if (!this.open) return;
@@ -38,9 +40,11 @@ export class HeaderComponent implements OnInit, OnDestroy {
             if (logoVal) {
                 this.logoUrl = /^https?:\/\//i.test(logoVal) ? logoVal : `${environment.assetsBase.replace(/\/$/, '')}/${logoVal.replace(/^\//, '')}`;
             }
-            // Update owner status
-            this.isOwner = this.auth.isOwner();
-            this.hasOwner = this.auth.hasOwner();
+            // Update role status
+            this.isSuperAdmin = this.auth.isSuperAdmin();
+            this.isHO = this.auth.isHO();
+            this.isBranch = this.auth.isBranch();
+            this.shouldShowPOS = this.auth.shouldAccessPOS(); // Branch OR HO with billing
         });
     }
 
