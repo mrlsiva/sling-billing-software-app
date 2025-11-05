@@ -423,6 +423,16 @@ export class CategoriesComponent implements OnInit, OnDestroy {
         this.showDetailsModal = true;
         this.selectedCategoryDetails = null;
 
+        // First, try to find the category in our existing list data (which includes subcategories)
+        const existingCategory = this.categories.find(cat => cat.id === categoryId);
+        if (existingCategory) {
+            // Use the existing data which already includes subcategories
+            this.selectedCategoryDetails = existingCategory;
+            this.detailsLoading = false;
+            return;
+        }
+
+        // If not found in existing data, fetch from API
         try {
             const headers = this.auth.authHeaders();
             const response = await this.http.get<CategoryDetailResponse>(
@@ -431,7 +441,11 @@ export class CategoriesComponent implements OnInit, OnDestroy {
             ).toPromise();
 
             if (response?.success && response.data) {
-                this.selectedCategoryDetails = response.data;
+                // The API response doesn't include subcategories, so we'll add an empty array
+                this.selectedCategoryDetails = {
+                    ...response.data,
+                    sub_categories: []
+                };
             } else {
                 this.error = response?.message || 'Failed to load category details';
                 this.closeDetailsModal();

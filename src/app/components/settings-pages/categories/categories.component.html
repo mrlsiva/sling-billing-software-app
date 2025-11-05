@@ -212,14 +212,14 @@
                 </div>
 
                 <div class="details-grid">
-                    <div class="detail-item">
+                    <!-- <div class="detail-item">
                         <label>Category ID</label>
                         <span>{{ selectedCategoryDetails.id }}</span>
                     </div>
                     <div class="detail-item">
                         <label>User ID</label>
                         <span>{{ selectedCategoryDetails.user_id }}</span>
-                    </div>
+                    </div>-->
                     <div class="detail-item">
                         <label>Bulk Upload</label>
                         <span>{{ selectedCategoryDetails.is_bulk_upload === 1 ? 'Yes' : 'No' }}</span>
@@ -235,6 +235,47 @@
                     <div class="detail-item">
                         <label>Updated At</label>
                         <span>{{ formatDate(selectedCategoryDetails.updated_at) }}</span>
+                    </div>
+                </div>
+
+                <!-- Subcategories List -->
+                <div class="subcategories-section"
+                    *ngIf="selectedCategoryDetails && selectedCategoryDetails.sub_categories && selectedCategoryDetails.sub_categories.length > 0">
+                    <h4 class="section-title">
+                        <i class="fa-solid fa-tags"></i>
+                        Subcategories ({{ selectedCategoryDetails.sub_categories.length }})
+                    </h4>
+                    <div class="subcategories-list-modal">
+                        <div class="subcategory-item-modal"
+                            *ngFor="let subcategory of selectedCategoryDetails.sub_categories">
+                            <div class="subcategory-info-modal">
+                                <div class="subcategory-image-tiny">
+                                    <img [src]="getImageUrl(subcategory.image)" [alt]="subcategory.name"
+                                        onerror="this.src='https://test.slingbillings.com/no-image-icon.svg'" />
+                                </div>
+                                <div class="subcategory-details-modal">
+                                    <span class="subcategory-name-modal">{{ subcategory.name }}</span>
+                                    <span class="subcategory-status-modal"
+                                        [ngClass]="getStatusClass(subcategory.is_active)">
+                                        <i class="fa-solid"
+                                            [ngClass]="subcategory.is_active === 1 ? 'fa-circle-check' : 'fa-circle-xmark'"></i>
+                                        {{ getStatusText(subcategory.is_active) }}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="subcategory-date-modal">
+                                <small>{{ formatDate(subcategory.created_at) }}</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="no-subcategories"
+                    *ngIf="selectedCategoryDetails && (!selectedCategoryDetails.sub_categories || selectedCategoryDetails.sub_categories.length === 0)">
+                    <div class="empty-state-mini">
+                        <i class="fa-solid fa-tags"></i>
+                        <span>No subcategories found</span>
+                        <small>Create subcategories to organize your products better</small>
                     </div>
                 </div>
 
