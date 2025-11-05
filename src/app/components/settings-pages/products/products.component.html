@@ -1,0 +1,391 @@
+<div class="products-container">
+    <div class="header-section">
+        <div class="d-flex align-items-center">
+            <button class="back-btn" (click)="goBack()" aria-label="Go back">
+                <i class="fa-solid fa-arrow-left"></i>
+            </button>
+            <h1>Products</h1>
+        </div>
+        <div class="header-actions">
+            <button class="refresh-btn" (click)="refreshProducts()" aria-label="Refresh products">
+                <i class="fa-solid fa-arrows-rotate"></i>
+            </button>
+            <button class="create-btn" (click)="openCreateModal()" aria-label="Create product">
+                <i class="fa-solid fa-plus"></i> Create
+            </button>
+        </div>
+    </div>
+
+    <!-- Search Section -->
+    <div class="search-section" *ngIf="!loading">
+        <div class="search-container">
+            <div class="search-input-wrapper">
+                <i class="fa-solid fa-search search-icon"></i>
+                <input type="text" class="search-input" placeholder="Search products, codes, categories..."
+                    [(ngModel)]="searchTerm" (input)="onSearchChange()" />
+                <button *ngIf="searchTerm" class="clear-search-btn" (click)="clearSearch()" aria-label="Clear search">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="error-message" *ngIf="error && !showDetailsModal">
+        <i class="fa-solid fa-circle-exclamation"></i>
+        <span>{{ error }}</span>
+    </div>
+
+    <div class="loading-spinner" *ngIf="loading && !showDetailsModal">
+        <i class="fa-solid fa-spinner fa-spin"></i>
+        <p>Loading products...</p>
+    </div>
+
+    <div class="products-list" *ngIf="!loading && filteredProducts.length > 0">
+        <div class="product-item" *ngFor="let product of filteredProducts" (click)="openProductDetails(product)">
+            <div class="product-image-small">
+                <img [src]="getImageUrl(product.image)" [alt]="product.name"
+                    onerror="this.src='https://test.slingbillings.com/no-image-icon.svg'" />
+            </div>
+            <div class="product-details">
+                <h3 class="product-name">{{ product.name }}</h3>
+                <div class="product-code">
+                    <i class="fa-solid fa-barcode"></i>
+                    {{ product.code }}
+                </div>
+                <div class="product-meta">
+                    <div class="category-info">
+                        <span class="category-tag">
+                            <i class="fa-solid fa-layer-group"></i>
+                            {{ product.category.name }}
+                        </span>
+                        <span class="subcategory-tag">
+                            <i class="fa-solid fa-tags"></i>
+                            {{ product.sub_category.name }}
+                        </span>
+                    </div>
+                    <div class="price-row">
+                        <span class="price">
+                            <i class="fa-solid fa-indian-rupee-sign"></i>
+                            {{ formatPrice(product.price) }}
+                        </span>
+                        <span class="tax-info">
+                            <i class="fa-solid fa-percent"></i>
+                            {{ product.tax.name }}% Tax
+                        </span>
+                    </div>
+                    <div class="status-row">
+                        <span class="quantity-status" [ngClass]="getQuantityStatusClass(product.quantity)">
+                            <i class="fa-solid fa-boxes-stacked"></i>
+                            {{ product.quantity }} {{ product.metric.name }}
+                            <small>({{ getQuantityStatusText(product.quantity) }})</small>
+                        </span>
+                        <span class="product-status" [ngClass]="getStatusClass(product.is_active)">
+                            <i class="fa-solid"
+                                [ngClass]="product.is_active === 1 ? 'fa-check-circle' : 'fa-times-circle'"></i>
+                            {{ getStatusText(product.is_active) }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="product-actions" (click)="$event.stopPropagation()">
+                <button class="status-toggle-btn" (click)="toggleProductStatus(product.id, product.is_active)"
+                    [title]="product.is_active === 1 ? 'Deactivate' : 'Activate'" aria-label="Toggle status">
+                    <i class="fa-solid" [ngClass]="product.is_active === 1 ? 'fa-toggle-on' : 'fa-toggle-off'"></i>
+                </button>
+                <button class="edit-btn-icon" (click)="openEditModal(product)" aria-label="Edit product">
+                    <i class="fa-solid fa-pen"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="no-data" *ngIf="!loading && filteredProducts.length === 0 && searchTerm">
+        <i class="fa-solid fa-search"></i>
+        <p>No products found for "{{ searchTerm }}"</p>
+        <button class="create-btn" (click)="clearSearch()">
+            <i class="fa-solid fa-times"></i> Clear Search
+        </button>
+    </div>
+
+    <div class="no-data" *ngIf="!loading && products.length === 0 && !searchTerm">
+        <i class="fa-solid fa-box-open"></i>
+        <p>No products found</p>
+        <p class="sub-message">Products will appear here once they are created</p>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination" *ngIf="!loading && totalPages > 1">
+        <div class="pagination-info">
+            Showing {{ getStartIndex() }} to {{ getEndIndex() }} of {{ totalItems }} products
+        </div>
+        <div class="pagination-controls">
+            <button (click)="goToFirstPage()" [disabled]="currentPage === 1" aria-label="First page">
+                <i class="fa-solid fa-angles-left"></i>
+            </button>
+            <button (click)="previousPage()" [disabled]="currentPage === 1" aria-label="Previous page">
+                <i class="fa-solid fa-angle-left"></i>
+            </button>
+
+            <button *ngFor="let page of getPageNumbers()" (click)="goToPage(page)" [class.active]="page === currentPage"
+                [attr.aria-label]="'Page ' + page">
+                {{ page }}
+            </button>
+
+            <button (click)="nextPage()" [disabled]="currentPage === totalPages" aria-label="Next page">
+                <i class="fa-solid fa-angle-right"></i>
+            </button>
+            <button (click)="goToLastPage()" [disabled]="currentPage === totalPages" aria-label="Last page">
+                <i class="fa-solid fa-angles-right"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Product Details Modal -->
+<div class="modal-overlay" *ngIf="showDetailsModal" (click)="closeDetailsModal()">
+    <div class="modal-content details-modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h2>{{ selectedProductDetails?.name }}</h2>
+            <button class="close-btn" (click)="closeDetailsModal()" aria-label="Close modal">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <div class="modal-body">
+            <div *ngIf="selectedProductDetails" class="product-details-content">
+                <div class="details-header">
+                    <div class="product-image-large">
+                        <img [src]="getImageUrl(selectedProductDetails.image)" [alt]="selectedProductDetails.name"
+                            onerror="this.src='https://test.slingbillings.com/no-image-icon.svg'" />
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">{{ selectedProductDetails.name }}</h3>
+                        <div class="product-code-large">
+                            <i class="fa-solid fa-barcode"></i>
+                            {{ selectedProductDetails.code }}
+                        </div>
+                        <div class="status-badge" [ngClass]="getStatusClass(selectedProductDetails.is_active)">
+                            <i class="fa-solid"
+                                [ngClass]="selectedProductDetails.is_active === 1 ? 'fa-check-circle' : 'fa-times-circle'"></i>
+                            {{ getStatusText(selectedProductDetails.is_active) }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="details-grid">
+                    <div class="detail-item">
+                        <label>Category</label>
+                        <span>{{ selectedProductDetails.category.name }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <label>Subcategory</label>
+                        <span>{{ selectedProductDetails.sub_category.name }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <label>Price</label>
+                        <span>{{ formatPrice(selectedProductDetails.price) }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <label>Tax</label>
+                        <span>{{ selectedProductDetails.tax.name }}% (₹{{ selectedProductDetails.tax_amount }})</span>
+                    </div>
+                    <div class="detail-item">
+                        <label>Quantity</label>
+                        <span [ngClass]="getQuantityStatusClass(selectedProductDetails.quantity)">
+                            {{ selectedProductDetails.quantity }} {{ selectedProductDetails.metric.name }}
+                            <small>({{ getQuantityStatusText(selectedProductDetails.quantity) }})</small>
+                        </span>
+                    </div>
+                    <div class="detail-item">
+                        <label>Unit</label>
+                        <span>{{ selectedProductDetails.metric.name }}</span>
+                    </div>
+                    <div class="detail-item" *ngIf="selectedProductDetails.hsn_code">
+                        <label>HSN Code</label>
+                        <span>{{ selectedProductDetails.hsn_code }}</span>
+                    </div>
+                    <div class="detail-item" *ngIf="selectedProductDetails.description">
+                        <label>Description</label>
+                        <span>{{ selectedProductDetails.description }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <label>Bulk Upload</label>
+                        <span>{{ selectedProductDetails.is_bulk_upload === 1 ? 'Yes' : 'No' }}</span>
+                    </div>
+                    <div class="detail-item" *ngIf="selectedProductDetails.run_id">
+                        <label>Run ID</label>
+                        <span>{{ selectedProductDetails.run_id }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <label>Created At</label>
+                        <span>{{ formatDate(selectedProductDetails.created_at) }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <label>Updated At</label>
+                        <span>{{ formatDate(selectedProductDetails.updated_at) }}</span>
+                    </div>
+                </div>
+
+                <div class="details-actions">
+                    <button class="status-toggle-btn-large"
+                        (click)="toggleProductStatus(selectedProductDetails.id, selectedProductDetails.is_active)">
+                        <i class="fa-solid"
+                            [ngClass]="selectedProductDetails.is_active === 1 ? 'fa-toggle-on' : 'fa-toggle-off'"></i>
+                        {{ selectedProductDetails.is_active === 1 ? 'Deactivate' : 'Activate' }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Create/Edit Product Modal -->
+<div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h2>{{ modalTitle }}</h2>
+            <button class="close-btn" (click)="closeModal()" aria-label="Close modal">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <div class="modal-body">
+            <div class="error-message" *ngIf="error">
+                <i class="fa-solid fa-circle-exclamation"></i>
+                <span>{{ error }}</span>
+            </div>
+
+            <form (ngSubmit)="submitForm()">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="productName">Product Name <span class="required">*</span></label>
+                        <input type="text" id="productName" [(ngModel)]="productName" name="productName"
+                            placeholder="Enter product name" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="productCode">Product Code <span class="required">*</span></label>
+                        <input type="text" id="productCode" [(ngModel)]="productCode" name="productCode"
+                            placeholder="Enter product code" required />
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="category">Category <span class="required">*</span></label>
+                        <select id="category" [(ngModel)]="selectedCategoryId" name="category"
+                            (change)="onCategoryChange()" required>
+                            <option value="">Select Category</option>
+                            <option *ngFor="let category of categories" [value]="category.id">
+                                {{ category.name }}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="subcategory">Subcategory <span class="required">*</span></label>
+                        <select id="subcategory" [(ngModel)]="selectedSubcategoryId" name="subcategory"
+                            [disabled]="!selectedCategoryId" required>
+                            <option value="">{{ !selectedCategoryId ? 'Select Category First' : (subcategories.length
+                                === 0 ? 'No subcategories available' : 'Select Subcategory') }}</option>
+                            <option *ngFor="let subcategory of subcategories" [value]="subcategory.id">
+                                {{ subcategory.name }}
+                            </option>
+                        </select>
+                        <small class="help-text" *ngIf="selectedCategoryId && subcategories.length === 0">
+                            <i class="fas fa-info-circle"></i>
+                            No subcategories found for this category
+                        </small>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="price">Price <span class="required">*</span></label>
+                        <input type="number" id="price" [(ngModel)]="price" name="price" placeholder="Enter price"
+                            step="0.01" min="0" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="tax">Tax <span class="required">*</span></label>
+                        <select id="tax" [(ngModel)]="selectedTaxId" name="tax" required>
+                            <option value="">Select Tax</option>
+                            <option *ngFor="let tax of taxes" [value]="tax.id">
+                                {{ tax.name }}%
+                            </option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="metric">Unit/Metric <span class="required">*</span></label>
+                        <select id="metric" [(ngModel)]="selectedMetricId" name="metric" required>
+                            <option value="">Select Unit</option>
+                            <option *ngFor="let metric of metrics" [value]="metric.id">
+                                {{ metric.name }}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="hsnCode">HSN Code</label>
+                        <input type="text" id="hsnCode" [(ngModel)]="hsnCode" name="hsnCode"
+                            placeholder="Enter HSN code" />
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="discountType">Discount Type</label>
+                        <select id="discountType" [(ngModel)]="discountType" name="discountType">
+                            <option value="">No Discount</option>
+                            <option value="percentage">Percentage</option>
+                            <option value="fixed">Fixed Amount</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="discount">Discount Value</label>
+                        <input type="number" id="discount" [(ngModel)]="discount" name="discount"
+                            placeholder="Enter discount value" step="0.01" min="0" [disabled]="!discountType" />
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="productDescription">Description</label>
+                    <textarea id="productDescription" [(ngModel)]="productDescription" name="productDescription"
+                        placeholder="Enter product description" rows="3"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="productImage">Product Image</label>
+                    <div class="image-upload-section">
+                        <div class="image-preview" *ngIf="imagePreview">
+                            <img [src]="imagePreview" alt="Product preview" />
+                            <button type="button" class="remove-image-btn" (click)="removeImage()">
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>
+                        </div>
+                        <input type="file" id="productImage" (change)="onImageSelect($event)" accept="image/*" />
+                        <label for="productImage" class="file-label">
+                            <i class="fa-solid fa-cloud-arrow-up"></i>
+                            {{ selectedImage ? 'Change Image' : 'Upload Image' }}
+                        </label>
+                    </div>
+                </div>
+
+                <div class="quantity-notice">
+                    <i class="fa-solid fa-info-circle"></i>
+                    <span>Quantity will be set to 0 by default. You can manage inventory separately.</span>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="cancel-btn" (click)="closeModal()">
+                        Cancel
+                    </button>
+                    <button type="submit" class="submit-btn" [disabled]="loading">
+                        <i class="fa-solid fa-spinner fa-spin" *ngIf="loading"></i>
+                        <i class="fa-solid fa-check" *ngIf="!loading"></i>
+                        {{ loading ? 'Saving...' : (isEditMode ? 'Update' : 'Create') }}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

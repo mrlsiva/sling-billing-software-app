@@ -1,0 +1,133 @@
+<div class="tax-container">
+    <div class="header-section">
+        <div class="d-flex align-items-center">
+            <button class="back-btn" (click)="goBack()" aria-label="Go back">
+                <i class="fa-solid fa-arrow-left"></i>
+            </button>
+            <h1>Tax Management</h1>
+        </div>
+        <div class="header-actions">
+            <button class="refresh-btn" (click)="refreshTaxes()" aria-label="Refresh taxes">
+                <i class="fa-solid fa-arrows-rotate"></i>
+            </button>
+            <button class="create-btn" (click)="openCreateModal()" aria-label="Create tax">
+                <i class="fa-solid fa-plus"></i> Create
+            </button>
+        </div>
+    </div>
+
+    <!-- Search Section -->
+    <div class="search-section" *ngIf="!loading">
+        <div class="search-container">
+            <div class="search-input-wrapper">
+                <i class="fa-solid fa-search search-icon"></i>
+                <input type="text" class="search-input" placeholder="Search tax percentages..." [(ngModel)]="searchTerm"
+                    (input)="onSearchChange()" />
+                <button *ngIf="searchTerm" class="clear-search-btn" (click)="clearSearch()" aria-label="Clear search">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="error-message" *ngIf="error && !showModal">
+        <i class="fa-solid fa-circle-exclamation"></i>
+        <span>{{ error }}</span>
+    </div>
+
+    <div class="loading-spinner" *ngIf="loading && !showModal">
+        <i class="fa-solid fa-spinner fa-spin"></i>
+        <p>Loading taxes...</p>
+    </div>
+
+    <div class="taxes-list" *ngIf="!loading && filteredTaxes.length > 0">
+        <div class="tax-item" *ngFor="let tax of filteredTaxes">
+            <div class="tax-icon">
+                <i class="fa-solid fa-percent"></i>
+            </div>
+            <div class="tax-details">
+                <h3 class="tax-name">{{ tax.name }}% Tax</h3>
+                <div class="tax-meta">
+                    <div class="status-row">
+                        <span class="tax-status" [ngClass]="getStatusClass(tax.is_active)">
+                            <i class="fa-solid"
+                                [ngClass]="tax.is_active === 1 ? 'fa-check-circle' : 'fa-times-circle'"></i>
+                            {{ getStatusText(tax.is_active) }}
+                        </span>
+                        <span class="tax-created">
+                            <i class="fa-solid fa-calendar"></i>
+                            {{ formatDate(tax.created_at) }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="tax-actions">
+                <button class="status-toggle-btn" (click)="toggleTaxStatus(tax.id, tax.is_active)"
+                    [title]="tax.is_active === 1 ? 'Deactivate' : 'Activate'" aria-label="Toggle status">
+                    <i class="fa-solid" [ngClass]="tax.is_active === 1 ? 'fa-toggle-on' : 'fa-toggle-off'"></i>
+                </button>
+                <button class="edit-btn-icon" (click)="openEditModal(tax)" aria-label="Edit tax">
+                    <i class="fa-solid fa-pen"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="no-data" *ngIf="!loading && filteredTaxes.length === 0 && searchTerm">
+        <i class="fa-solid fa-search"></i>
+        <p>No taxes found for "{{ searchTerm }}"</p>
+        <button class="create-btn" (click)="clearSearch()">
+            <i class="fa-solid fa-times"></i> Clear Search
+        </button>
+    </div>
+
+    <div class="no-data" *ngIf="!loading && taxes.length === 0 && !searchTerm">
+        <i class="fa-solid fa-percent"></i>
+        <p>No taxes found</p>
+        <button class="create-btn" (click)="openCreateModal()">
+            <i class="fa-solid fa-plus"></i> Create Your First Tax
+        </button>
+    </div>
+</div>
+
+<!-- Create/Edit Tax Modal -->
+<div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h2>{{ modalTitle }}</h2>
+            <button class="close-btn" (click)="closeModal()" aria-label="Close modal">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <div class="modal-body">
+            <div class="error-message" *ngIf="error">
+                <i class="fa-solid fa-circle-exclamation"></i>
+                <span>{{ error }}</span>
+            </div>
+
+            <form (ngSubmit)="submitForm()">
+                <div class="form-group">
+                    <label for="taxName">Tax Percentage <span class="required">*</span></label>
+                    <div class="input-with-suffix">
+                        <input type="number" id="taxName" [(ngModel)]="taxName" name="taxName"
+                            placeholder="Enter tax percentage" step="0.01" min="0" max="100" required />
+                        <span class="input-suffix">%</span>
+                    </div>
+                    <small class="help-text">Enter a value between 0 and 100</small>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="cancel-btn" (click)="closeModal()">
+                        Cancel
+                    </button>
+                    <button type="submit" class="submit-btn" [disabled]="loading">
+                        <i class="fa-solid fa-spinner fa-spin" *ngIf="loading"></i>
+                        <i class="fa-solid fa-check" *ngIf="!loading"></i>
+                        {{ loading ? 'Saving...' : (isEditMode ? 'Update' : 'Create') }}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

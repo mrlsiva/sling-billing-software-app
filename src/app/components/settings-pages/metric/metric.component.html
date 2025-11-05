@@ -1,0 +1,165 @@
+<div class="metric-container">
+    <!-- Header Section -->
+    <div class="header">
+        <div class="title-section">
+            <button class="back-btn" (click)="goBack()">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            <h1>Metrics Management</h1>
+        </div>
+        <div class="actions">
+            <button class="refresh-btn" (click)="refreshMetrics()" [disabled]="loading">
+                <i class="fas fa-sync-alt" [class.fa-spin]="loading"></i>
+                Refresh
+            </button>
+            <button class="primary-btn" (click)="openCreateModal()">
+                <i class="fas fa-plus"></i>
+                Add Metric
+            </button>
+        </div>
+    </div>
+
+    <!-- Search Section -->
+    <div class="search-section">
+        <div class="search-box">
+            <i class="fas fa-search search-icon"></i>
+            <input type="text" placeholder="Search metrics..." [(ngModel)]="searchTerm" (input)="onSearchChange()"
+                class="search-input" />
+            <button *ngIf="searchTerm" class="clear-search" (click)="clearSearch()" type="button">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="search-info" *ngIf="searchTerm">
+            Found {{ filteredMetrics.length }} of {{ totalItems }} metrics
+        </div>
+    </div>
+
+    <!-- Error Message -->
+    <div class="error-message" *ngIf="error && !showModal">
+        <i class="fas fa-exclamation-triangle"></i>
+        {{ error }}
+        <button class="retry-btn" (click)="loadMetrics(currentPage)">Retry</button>
+    </div>
+
+    <!-- Loading State -->
+    <div class="loading" *ngIf="loading && !showModal">
+        <i class="fas fa-spinner fa-spin"></i>
+        Loading metrics...
+    </div>
+
+    <!-- Content Section -->
+    <div class="content" *ngIf="!loading || showModal">
+        <!-- Metrics Table -->
+        <div class="table-container" *ngIf="filteredMetrics.length > 0">
+            <table class="metrics-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Status</th>
+                        <th>Created Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let metric of filteredMetrics">
+                        <td>{{ metric.id }}</td>
+                        <td class="metric-name">{{ metric.name }}</td>
+                        <td>
+                            <span [class]="getStatusClass(metric.is_active)">
+                                {{ getStatusText(metric.is_active) }}
+                            </span>
+                        </td>
+                        <td>{{ formatDate(metric.created_at) }}</td>
+                        <td class="actions-cell">
+                            <button class="action-btn edit-btn" (click)="openEditModal(metric)" title="Edit Metric">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="action-btn status-btn"
+                                (click)="toggleMetricStatus(metric.id, metric.is_active)"
+                                [title]="metric.is_active === 1 ? 'Deactivate' : 'Activate'">
+                                <i class="fas"
+                                    [ngClass]="metric.is_active === 1 ? 'fa-toggle-on' : 'fa-toggle-off'"></i>
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Empty State -->
+        <div class="empty-state" *ngIf="filteredMetrics.length === 0 && !loading">
+            <div class="empty-icon">
+                <i class="fas fa-ruler"></i>
+            </div>
+            <h3>{{ searchTerm ? 'No metrics found' : 'No metrics yet' }}</h3>
+            <p>{{ searchTerm ? 'Try adjusting your search terms' : 'Create your first metric to get started' }}</p>
+            <button class="primary-btn" (click)="searchTerm ? clearSearch() : openCreateModal()">
+                {{ searchTerm ? 'Clear Search' : 'Add Metric' }}
+            </button>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination" *ngIf="totalPages > 1 && !searchTerm">
+            <button class="page-btn" (click)="loadMetrics(currentPage - 1)" [disabled]="currentPage === 1 || loading">
+                <i class="fas fa-chevron-left"></i>
+                Previous
+            </button>
+
+            <span class="page-info">
+                Page {{ currentPage }} of {{ totalPages }}
+            </span>
+
+            <button class="page-btn" (click)="loadMetrics(currentPage + 1)"
+                [disabled]="currentPage === totalPages || loading">
+                Next
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Create/Edit Modal -->
+<div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
+    <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h2>{{ modalTitle }}</h2>
+            <button class="close-btn" (click)="closeModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <form (ngSubmit)="submitForm()" #metricForm="ngForm">
+            <div class="modal-body">
+                <!-- Error Message in Modal -->
+                <div class="error-message" *ngIf="error">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    {{ error }}
+                </div>
+
+                <!-- Metric Name Field -->
+                <div class="form-group">
+                    <label for="metricName">
+                        Metric Name <span class="required">*</span>
+                    </label>
+                    <input id="metricName" type="text" [(ngModel)]="metricName" name="metricName" class="form-control"
+                        placeholder="Enter metric name" required maxlength="255" #nameInput="ngModel" />
+                    <div class="validation-error" *ngIf="nameInput.invalid && nameInput.touched">
+                        <span *ngIf="nameInput.errors?.['required']">Metric name is required</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="secondary-btn" (click)="closeModal()">
+                    Cancel
+                </button>
+                <button type="submit" class="primary-btn" [disabled]="loading || metricForm.invalid">
+                    <i class="fas fa-spinner fa-spin" *ngIf="loading"></i>
+                    <i class="fas fa-save" *ngIf="!loading"></i>
+                    {{ isEditMode ? 'Update' : 'Create' }}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
