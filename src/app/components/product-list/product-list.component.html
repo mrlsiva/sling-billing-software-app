@@ -229,7 +229,7 @@
                 'qty-warning': p.quantity > 0 && p.quantity < 5, 
                 'qty-danger': p.quantity === 0,
                 'out-of-stock': p.quantity <= 0
-            }" [attr.data-quantity]="p.quantity" (click)="p.quantity > 0 ? addToCart(p) : null"
+            }" [attr.data-quantity]="p.quantity" (click)="addToCart(p)"
             [style.cursor]="p.quantity > 0 ? 'pointer' : 'not-allowed'"
             [title]="p.quantity <= 0 ? 'Out of stock - cannot add to cart' : 'Click to add to cart'">
             <div class="product-item-listing">
@@ -243,7 +243,9 @@
                 </div>
                 <div class="product-main">
                     <div class="product-title">Rs. <strong>{{ p.product.price }}</strong> </div>
-                    <div class="product-meta">{{ p.quantity }} <span>Qty</span></div>
+                    <div class="product-meta">{{ p.quantity }} <span>Qty</span>
+                        <span *ngIf="p.quantity <= 0" class="out-of-stock-label">• OUT OF STOCK</span>
+                    </div>
                 </div>
             </div>
 

@@ -644,55 +644,86 @@ export class ProductListComponent implements OnInit {
     }
 
     addToCart(item: any) {
-        console.log('🛒 AddToCart called with item:', item);
-
         const product = item.product ?? item;
-        console.log('🛒 Extracted product:', product);
 
-        // Check quantity before adding to cart - comprehensive check for all possible structures
-        const quantities = [
-            product?.quantity,
-            item?.quantity,
-            product?.product?.quantity,
-            item?.product?.quantity,
-            product?.stock,
-            item?.stock,
-            product?.available_quantity,
-            item?.available_quantity,
-            product?.qty,
-            item?.qty
-        ];
+        // Use the SAME quantity detection logic as CartService to ensure consistency
+        const availableQuantity = Number(item?.quantity ?? item?.product?.quantity ?? 0);
 
-        console.log('🛒 All possible quantity values:', quantities);
-
-        // Get the first valid number from the quantities array, default to 0
-        const quantity = quantities.find(q => Number.isFinite(Number(q)) && Number(q) >= 0) || 0;
-        const finalQuantity = Number(quantity);
-
-        console.log('🛒 Final extracted quantity:', finalQuantity);
-
-        console.log('🛒 AddToCart validation:', {
-            item,
-            product,
-            extractedQuantity: finalQuantity,
-            allQuantities: quantities,
-            isValid: Number.isFinite(finalQuantity) && finalQuantity > 0
+        // Debug: Log the raw data structure to understand the issue
+        console.log('🔍 POS Click Debug - Raw Item Structure:', {
+            item: item,
+            topLevelQuantity: item?.quantity,
+            nestedQuantity: item?.product?.quantity,
+            calculatedAvailable: availableQuantity,
+            productName: product?.name
         });
 
-        if (!Number.isFinite(finalQuantity) || finalQuantity <= 0) {
-            // Show error message when item is out of stock
-            console.log('🚫 BLOCKED: Item has quantity:', finalQuantity);
-            this.toastService.show('Item is out of stock and cannot be added to cart', 'error');
-            console.log('Prevented adding item with quantity:', finalQuantity);
+        // Strict validation - prevent any zero or negative quantity items
+        if (!Number.isFinite(availableQuantity) || availableQuantity <= 0) {
+            console.log('❌ POS Click Blocked:', {
+                itemName: product?.name || 'Unknown',
+                itemQuantity: item?.quantity,
+                productQuantity: item?.product?.quantity,
+                finalQuantity: availableQuantity,
+                reason: 'Zero or negative quantity'
+            });
+            this.toastService.show('❌ Item is out of stock and cannot be added to cart', 'error');
             return;
         }
 
-        console.log('✅ ALLOWED: Adding item to cart with quantity:', finalQuantity);
-        this.cart.add(product);
-        this.toastService.show(`${product?.name || 'Item'} added to cart`, 'success');
-    }
+        // Generate ID the same way CartService does
+        const itemId = String(item?.product?.id ?? item?.id ?? item?.product_id ?? item?.sku ?? '');
+        if (!itemId) {
+            console.log('❌ POS Click Blocked: No valid ID found');
+            this.toastService.show('❌ Unable to add item - invalid product ID', 'error');
+            return;
+        }
 
-    goToLogin() {
+        // Check if item is already in cart and would exceed available quantity
+        // Access cart items through the service's observable current value
+        let currentCartItems: any[] = [];
+        this.cart.cart$.subscribe(items => currentCartItems = items).unsubscribe();
+
+        const existingCartItem = currentCartItems.find((cartItem: any) => cartItem.id === itemId);
+
+        if (existingCartItem) {
+            const currentCartQuantity = existingCartItem.qty || 0;
+
+            // Debug: Log cart item structure
+            console.log('🔍 Cart Item Debug:', {
+                cartItemId: existingCartItem.id,
+                cartItemQty: currentCartQuantity,
+                cartItemProduct: existingCartItem.product,
+                cartProductQuantity: existingCartItem.product?.quantity,
+                cartNestedQuantity: existingCartItem.product?.product?.quantity
+            });
+
+            if (currentCartQuantity >= availableQuantity) {
+                console.log('❌ POS Click Blocked:', {
+                    itemName: product?.name || 'Unknown',
+                    availableQuantity: availableQuantity,
+                    currentCartQuantity,
+                    reason: 'Would exceed available quantity',
+                    cartItemProduct: existingCartItem.product
+                });
+                this.toastService.show(`❌ Maximum quantity available: ${availableQuantity}. Already ${currentCartQuantity} in cart.`, 'error');
+                return;
+            }
+        }
+
+        console.log('✅ POS Click Allowed:', {
+            itemName: product?.name || 'Unknown',
+            availableQuantity: availableQuantity,
+            currentCartQuantity: existingCartItem?.qty || 0,
+            itemStructure: {
+                topLevelQuantity: item?.quantity,
+                nestedQuantity: item?.product?.quantity
+            }
+        });
+
+        this.cart.add(item); // Pass full item to preserve POS structure
+        this.toastService.show(`✅ ${product?.name || 'Item'} added to cart`, 'success');
+    } goToLogin() {
         this.router.navigate(['/login']);
     }
 }

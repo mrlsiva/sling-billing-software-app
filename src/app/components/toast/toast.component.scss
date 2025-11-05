@@ -1,19 +1,22 @@
 .toast {
     position: fixed;
-    left: 50%;
-    transform: translateX(-50%);
+    left: 10%;
+    transform: translateX(-6%);
     bottom: 1.5rem;
-    z-index: 2000
+    z-index: 2000;
+    width: 90%;
+    max-width: 90%;
 }
 
 .toast-inner {
     padding: .6rem 1rem;
     border-radius: 6px;
-    color: #fff
+    color: #fff;
+    font-size: 12px;
 }
 
 .toast-inner.error {
-    background: #ff4d4f
+    background: #ff4d4f;
 }
 
 .toast-inner.success {

@@ -39,18 +39,16 @@ export class CartComponent {
 
     /**
      * Safely compute tax percentage for a cart item.
-     * If price is zero or invalid, returns null.
+     * Aligned with POS structure: item.product.price and item.product.tax_amount
      */
     taxPercent(item: any): number | null {
         try {
-            const product = item.product || {};
-            const priceRaw = product.price ?? product.selling_price ?? 0;
-            const taxRaw = product.tax_amount ?? product.taxAmount ?? item.tax_amount ?? 0;
-            const price = Number(priceRaw) || 0;
-            const tax = Number(taxRaw) || 0;
+            // Match POS structure: item.product.price and item.product.tax_amount
+            const price = Number(item.product?.price) || 0;
+            const tax = Number(item.product?.tax_amount) || 0;
+
             if (price <= 0 || tax <= 0) return null;
             const pct = (tax / price) * 100;
-            // round to 2 decimals
             return Math.round(pct * 100) / 100;
         } catch (e) {
             return null;
@@ -66,7 +64,32 @@ export class CartComponent {
     }
     close() { this.open = false; }
 
-    inc(id: string) { this.cart.increment(id); }
+    getAvailableQuantity(item: any): number {
+        // Use the SAME quantity detection logic as CartService and ProductListComponent
+        // item.product contains the full POS item structure
+        const quantity = item.product?.quantity ?? item.product?.product?.quantity ?? 0;
+        const finalQuantity = Number(quantity) || 0;
+
+        console.log('Cart getAvailableQuantity debug:', {
+            itemId: item.id,
+            productQuantity: item.product?.quantity,
+            nestedQuantity: item.product?.product?.quantity,
+            finalQuantity: finalQuantity,
+            fullProductStructure: item.product
+        });
+
+        return finalQuantity;
+    } inc(id: string) {
+        const item = this.items.find(i => i.id === id);
+        if (item) {
+            const availableQuantity = this.getAvailableQuantity(item);
+            if (item.qty >= availableQuantity) {
+                this.showToast(`Maximum quantity available: ${availableQuantity}`);
+                return;
+            }
+        }
+        this.cart.increment(id);
+    }
     dec(id: string) { this.cart.decrement(id); }
     del(id: string) { this.cart.remove(id); }
     clear() { this.cart.clear(); }

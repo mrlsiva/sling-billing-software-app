@@ -35,50 +35,21 @@ export class CartService {
     }
 
     add(product: any) {
-        console.log('🛒 CartService.add called with product:', product);
+        // Extract ID from either the product structure or the nested product
+        const id = String(product?.product?.id ?? product?.id ?? product?.product_id ?? product?.sku ?? '');
+        if (!id) return;
 
-        const id = String(product?.id ?? product?.product?.id ?? product?.product_id ?? product?.sku ?? '');
-        if (!id) {
-            console.log('🚫 No valid ID found for product');
-            return;
-        }
+        // Check product quantity before adding - use original POS structure
+        const quantity = Number(product?.quantity ?? product?.product?.quantity ?? 0);
 
-        // Check product quantity before adding - comprehensive check for all possible structures
-        const quantities = [
-            product?.quantity,
-            product?.product?.quantity,
-            product?.stock,
-            product?.available_quantity,
-            product?.qty,
-            product?.product?.stock,
-            product?.product?.qty
-        ];
-
-        console.log('🛒 All possible quantity values in CartService:', quantities);
-
-        // Get the first valid number from the quantities array, default to 0
-        const quantity = quantities.find(q => Number.isFinite(Number(q)) && Number(q) >= 0) || 0;
-        const finalQuantity = Number(quantity);
-
-        console.log('🛒 CartService.add validation:', {
-            product,
-            extractedQuantity: finalQuantity,
-            allQuantities: quantities,
-            isValid: Number.isFinite(finalQuantity) && finalQuantity > 0
-        });
-
-        if (!Number.isFinite(finalQuantity) || finalQuantity <= 0) {
-            console.log('🚫 BLOCKED in CartService: Product has quantity:', finalQuantity);
+        if (!Number.isFinite(quantity) || quantity <= 0) {
             console.log('Cannot add product to cart: quantity is 0 or negative');
             return;
         }
 
-        console.log('✅ ALLOWED in CartService: Adding product with quantity:', finalQuantity);
-
         const ex = this.items.find(i => i.id === id);
         if (ex) {
             ex.qty += 1;
-            // emit the existing item as added
             this.addedSub.next(ex);
         } else {
             this.items.push({ id, product, qty: 1 });
@@ -93,6 +64,7 @@ export class CartService {
 
         // Check if we can increment based on available quantity
         const availableQuantity = it.product?.quantity ?? it.product?.product?.quantity ?? 0;
+
         if (it.qty >= availableQuantity) {
             console.log('Cannot increment: would exceed available quantity');
             return;

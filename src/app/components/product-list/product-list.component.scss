@@ -369,6 +369,15 @@ li.product-item.out-of-stock {
     }
 }
 
+.out-of-stock-label {
+    color: #dc3545;
+    font-weight: bold;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-left: 8px;
+}
+
 .product-main {
     display: flex;
     align-items: center;
