@@ -183,7 +183,7 @@
 <div class="modal-overlay" *ngIf="showDetailsModal" (click)="closeDetailsModal()">
     <div class="modal-content details-modal" (click)="$event.stopPropagation()">
         <div class="modal-header">
-            <h2>Category Details</h2>
+            <h2>{{ selectedCategoryDetails.name }}</h2>
             <button class="close-btn" (click)="closeDetailsModal()" aria-label="Close modal">
                 <i class="fa-solid fa-xmark"></i>
             </button>
