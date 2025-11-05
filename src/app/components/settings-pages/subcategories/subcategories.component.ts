@@ -280,7 +280,7 @@ export class SubcategoriesComponent implements OnInit, OnDestroy {
     createSubcategory() {
         const headers = this.auth.authHeaders();
         const formData = new FormData();
-        formData.append('value', this.subcategoryName.trim());
+        formData.append('sub_category', this.subcategoryName.trim());
         formData.append('category', this.selectedCategoryId!.toString());
 
         if (this.selectedImage) {
@@ -318,7 +318,7 @@ export class SubcategoriesComponent implements OnInit, OnDestroy {
 
         const headers = this.auth.authHeaders();
         const formData = new FormData();
-        formData.append('value', this.subcategoryName.trim());
+        formData.append('sub_category', this.subcategoryName.trim());
         formData.append('category', this.selectedCategoryId!.toString());
         formData.append('subcategory_id', this.subcategoryId.toString());
 
