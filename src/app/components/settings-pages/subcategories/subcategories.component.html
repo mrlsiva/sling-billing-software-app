@@ -4,13 +4,13 @@
             <button class="back-btn" (click)="goBack()" aria-label="Go back">
                 <i class="fa-solid fa-arrow-left"></i>
             </button>
-            <h1>Categories</h1>
+            <h1>Subcategories</h1>
         </div>
         <div class="header-actions">
-            <button class="refresh-btn" (click)="refreshCategories()" aria-label="Refresh categories">
+            <button class="refresh-btn" (click)="refreshSubcategories()" aria-label="Refresh subcategories">
                 <i class="fa-solid fa-arrows-rotate"></i>
             </button>
-            <button class="create-btn" (click)="openCreateModal()" aria-label="Create category">
+            <button class="create-btn" (click)="openCreateModal()" aria-label="Create subcategory">
                 <i class="fa-solid fa-plus"></i> Create
             </button>
         </div>
@@ -21,7 +21,7 @@
         <div class="search-container">
             <div class="search-input-wrapper">
                 <i class="fa-solid fa-search search-icon"></i>
-                <input type="text" class="search-input" placeholder="Search categories..." [(ngModel)]="searchTerm"
+                <input type="text" class="search-input" placeholder="Search subcategories..." [(ngModel)]="searchTerm"
                     (input)="onSearchChange()" />
                 <button *ngIf="searchTerm" class="clear-search-btn" (click)="clearSearch()" aria-label="Clear search">
                     <i class="fa-solid fa-xmark"></i>
@@ -37,69 +37,66 @@
 
     <div class="loading-spinner" *ngIf="loading && !showModal">
         <i class="fa-solid fa-spinner fa-spin"></i>
-        <p>Loading categories...</p>
+        <p>Loading subcategories...</p>
     </div>
 
-    <div class="categories-list" *ngIf="!loading && filteredCategories.length > 0">
-        <div class="category-item" *ngFor="let category of filteredCategories"
-            (click)="openCategoryDetails(category.id)">
+    <div class="categories-list" *ngIf="!loading && filteredSubcategories.length > 0">
+        <div class="category-item" *ngFor="let subcategory of filteredSubcategories"
+            (click)="openSubcategoryDetails(subcategory.id)">
             <div class="category-image-small">
-                <img [src]="getImageUrl(category.image)" [alt]="category.name"
+                <img [src]="getImageUrl(subcategory.image)" [alt]="subcategory.name"
                     onerror="this.src='https://test.slingbillings.com/no-image-icon.svg'" />
             </div>
             <div class="category-details">
-                <h3 class="category-name">{{ category.name }}</h3>
+                <h3 class="category-name">{{ subcategory.name }}</h3>
                 <div class="category-meta">
                     <div class="status-row">
-                        <span class="subcategory-count">
-                            <i class="fa-solid fa-list"></i>
-                            {{ category.sub_categories.length }} subcategories
+                        <span class="parent-category">
+                            <i class="fa-solid fa-layer-group"></i>
+                            {{ getCategoryName(subcategory.category_id) }}
                         </span>
-                        <span class="category-status" [ngClass]="getStatusClass(category.is_active)">
+                        <span class="category-status" [ngClass]="getStatusClass(subcategory.is_active)">
                             <i class="fa-solid"
-                                [ngClass]="category.is_active === 1 ? 'fa-check-circle' : 'fa-times-circle'"></i>
-                            {{ getStatusText(category.is_active) }}
+                                [ngClass]="subcategory.is_active === 1 ? 'fa-check-circle' : 'fa-times-circle'"></i>
+                            {{ getStatusText(subcategory.is_active) }}
                         </span>
                     </div>
-                    <div class="subcategories" *ngIf="category.sub_categories.length > 0">
-                        <span *ngFor="let sub of category.sub_categories" class="subcategory-tag">
-                            {{ sub.name }}
-                        </span>
-                    </div>
+
                 </div>
             </div>
             <div class="category-actions" (click)="$event.stopPropagation()">
-                <button class="status-toggle-btn" (click)="toggleCategoryStatus(category.id, category.is_active)"
-                    [title]="category.is_active === 1 ? 'Deactivate' : 'Activate'" aria-label="Toggle status">
-                    <i class="fa-solid" [ngClass]="category.is_active === 1 ? 'fa-toggle-on' : 'fa-toggle-off'"></i>
+                <button class="status-toggle-btn"
+                    (click)="toggleSubcategoryStatus(subcategory.id, subcategory.is_active)"
+                    [title]="subcategory.is_active === 1 ? 'Deactivate' : 'Activate'" aria-label="Toggle status">
+                    <i class="fa-solid" [ngClass]="subcategory.is_active === 1 ? 'fa-toggle-on' : 'fa-toggle-off'"></i>
                 </button>
-                <button class="edit-btn-icon" (click)="openEditModal(category)" aria-label="Edit category">
+                <button class="edit-btn-icon" (click)="openEditModal(subcategory)" aria-label="Edit subcategory">
                     <i class="fa-solid fa-pen"></i>
                 </button>
             </div>
         </div>
     </div>
 
-    <div class="no-data" *ngIf="!loading && filteredCategories.length === 0 && searchTerm">
+    <div class="no-data" *ngIf="!loading && filteredSubcategories.length === 0 && searchTerm">
         <i class="fa-solid fa-search"></i>
-        <p>No categories found for "{{ searchTerm }}"</p>
+        <p>No subcategories found for "{{ searchTerm }}"</p>
         <button class="create-btn" (click)="clearSearch()">
             <i class="fa-solid fa-times"></i> Clear Search
         </button>
     </div>
 
-    <div class="no-data" *ngIf="!loading && categories.length === 0 && !searchTerm">
+    <div class="no-data" *ngIf="!loading && subcategories.length === 0 && !searchTerm">
         <i class="fa-solid fa-folder-open"></i>
-        <p>No categories found</p>
+        <p>No subcategories found</p>
         <button class="create-btn" (click)="openCreateModal()">
-            <i class="fa-solid fa-plus"></i> Create Your First Category
+            <i class="fa-solid fa-plus"></i> Create Your First Subcategory
         </button>
     </div>
 
     <!-- Pagination -->
     <div class="pagination" *ngIf="!loading && totalPages > 1">
         <div class="pagination-info">
-            Showing {{ getStartIndex() }} to {{ getEndIndex() }} of {{ totalItems }} categories
+            Showing {{ getStartIndex() }} to {{ getEndIndex() }} of {{ totalItems }} subcategories
         </div>
         <div class="pagination-controls">
             <button (click)="goToFirstPage()" [disabled]="currentPage === 1" aria-label="First page">
@@ -142,22 +139,32 @@
 
             <form (ngSubmit)="submitForm()">
                 <div class="form-group">
-                    <label for="categoryName">Category Name <span class="required">*</span></label>
-                    <input type="text" id="categoryName" [(ngModel)]="categoryName" name="categoryName"
-                        placeholder="Enter category name" required />
+                    <label for="subcategoryName">Subcategory Name <span class="required">*</span></label>
+                    <input type="text" id="subcategoryName" [(ngModel)]="subcategoryName" name="subcategoryName"
+                        placeholder="Enter subcategory name" required />
                 </div>
 
                 <div class="form-group">
-                    <label for="categoryImage">Category Image (Optional)</label>
+                    <label for="categorySelect">Category <span class="required">*</span></label>
+                    <select id="categorySelect" [(ngModel)]="selectedCategoryId" name="categorySelect" required>
+                        <option value="">Select a category</option>
+                        <option *ngFor="let category of categories" [value]="category.id">
+                            {{ category.name }}
+                        </option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="subcategoryImage">Subcategory Image (Optional)</label>
                     <div class="image-upload-section">
                         <div class="image-preview" *ngIf="imagePreview">
-                            <img [src]="imagePreview" alt="Category preview" />
+                            <img [src]="imagePreview" alt="Subcategory preview" />
                             <button type="button" class="remove-image-btn" (click)="removeImage()">
                                 <i class="fa-solid fa-xmark"></i>
                             </button>
                         </div>
-                        <input type="file" id="categoryImage" (change)="onImageSelect($event)" accept="image/*" />
-                        <label for="categoryImage" class="file-label">
+                        <input type="file" id="subcategoryImage" (change)="onImageSelect($event)" accept="image/*" />
+                        <label for="subcategoryImage" class="file-label">
                             <i class="fa-solid fa-cloud-arrow-up"></i>
                             {{ selectedImage ? 'Change Image' : 'Upload Image' }}
                         </label>
@@ -179,11 +186,11 @@
     </div>
 </div>
 
-<!-- Category Details Modal -->
+<!-- Subcategory Details Modal -->
 <div class="modal-overlay" *ngIf="showDetailsModal" (click)="closeDetailsModal()">
     <div class="modal-content details-modal" (click)="$event.stopPropagation()">
         <div class="modal-header">
-            <h2>Category Details</h2>
+            <h2>Subcategory Details</h2>
             <button class="close-btn" (click)="closeDetailsModal()" aria-label="Close modal">
                 <i class="fa-solid fa-xmark"></i>
             </button>
@@ -192,61 +199,66 @@
         <div class="modal-body">
             <div class="loading-spinner" *ngIf="detailsLoading">
                 <i class="fa-solid fa-spinner fa-spin"></i>
-                <p>Loading category details...</p>
+                <p>Loading subcategory details...</p>
             </div>
 
-            <div *ngIf="!detailsLoading && selectedCategoryDetails" class="category-details-content">
+            <div *ngIf="!detailsLoading && selectedSubcategoryDetails" class="category-details-content">
                 <div class="details-header">
                     <div class="category-image-large">
-                        <img [src]="getImageUrl(selectedCategoryDetails.image)" [alt]="selectedCategoryDetails.name"
+                        <img [src]="getImageUrl(selectedSubcategoryDetails.image)"
+                            [alt]="selectedSubcategoryDetails.name"
                             onerror="this.src='https://test.slingbillings.com/no-image-icon.svg'" />
                     </div>
                     <div class="category-info">
-                        <h3 class="category-title">{{ selectedCategoryDetails.name }}</h3>
-                        <div class="status-badge" [ngClass]="getStatusClass(selectedCategoryDetails.is_active)">
+                        <h3 class="category-title">{{ selectedSubcategoryDetails.name }}</h3>
+                        <div class="status-badge" [ngClass]="getStatusClass(selectedSubcategoryDetails.is_active)">
                             <i class="fa-solid"
-                                [ngClass]="selectedCategoryDetails.is_active === 1 ? 'fa-check-circle' : 'fa-times-circle'"></i>
-                            {{ getStatusText(selectedCategoryDetails.is_active) }}
+                                [ngClass]="selectedSubcategoryDetails.is_active === 1 ? 'fa-check-circle' : 'fa-times-circle'"></i>
+                            {{ getStatusText(selectedSubcategoryDetails.is_active) }}
                         </div>
                     </div>
                 </div>
 
                 <div class="details-grid">
                     <div class="detail-item">
-                        <label>Category ID</label>
-                        <span>{{ selectedCategoryDetails.id }}</span>
+                        <label>Subcategory ID</label>
+                        <span>{{ selectedSubcategoryDetails.id }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <label>Category</label>
+                        <span>{{ getCategoryName(selectedSubcategoryDetails.category_id) }}</span>
                     </div>
                     <div class="detail-item">
                         <label>User ID</label>
-                        <span>{{ selectedCategoryDetails.user_id }}</span>
+                        <span>{{ selectedSubcategoryDetails.user_id }}</span>
                     </div>
                     <div class="detail-item">
                         <label>Bulk Upload</label>
-                        <span>{{ selectedCategoryDetails.is_bulk_upload === 1 ? 'Yes' : 'No' }}</span>
+                        <span>{{ selectedSubcategoryDetails.is_bulk_upload === 1 ? 'Yes' : 'No' }}</span>
                     </div>
-                    <div class="detail-item" *ngIf="selectedCategoryDetails.run_id">
+                    <div class="detail-item" *ngIf="selectedSubcategoryDetails.run_id">
                         <label>Run ID</label>
-                        <span>{{ selectedCategoryDetails.run_id }}</span>
+                        <span>{{ selectedSubcategoryDetails.run_id }}</span>
                     </div>
                     <div class="detail-item">
                         <label>Created At</label>
-                        <span>{{ formatDate(selectedCategoryDetails.created_at) }}</span>
+                        <span>{{ formatDate(selectedSubcategoryDetails.created_at) }}</span>
                     </div>
                     <div class="detail-item">
                         <label>Updated At</label>
-                        <span>{{ formatDate(selectedCategoryDetails.updated_at) }}</span>
+                        <span>{{ formatDate(selectedSubcategoryDetails.updated_at) }}</span>
                     </div>
                 </div>
 
                 <div class="details-actions">
                     <button class="status-toggle-btn-large"
-                        (click)="toggleCategoryStatus(selectedCategoryDetails.id, selectedCategoryDetails.is_active)">
+                        (click)="toggleSubcategoryStatus(selectedSubcategoryDetails.id, selectedSubcategoryDetails.is_active)">
                         <i class="fa-solid"
-                            [ngClass]="selectedCategoryDetails.is_active === 1 ? 'fa-toggle-on' : 'fa-toggle-off'"></i>
-                        {{ selectedCategoryDetails.is_active === 1 ? 'Deactivate' : 'Activate' }}
+                            [ngClass]="selectedSubcategoryDetails.is_active === 1 ? 'fa-toggle-on' : 'fa-toggle-off'"></i>
+                        {{ selectedSubcategoryDetails.is_active === 1 ? 'Deactivate' : 'Activate' }}
                     </button>
-                    <button class="edit-btn" (click)="openEditModal(selectedCategoryDetails); closeDetailsModal()">
-                        <i class="fa-solid fa-pen"></i> Edit Category
+                    <button class="edit-btn" (click)="openEditModal(selectedSubcategoryDetails); closeDetailsModal()">
+                        <i class="fa-solid fa-pen"></i> Edit Subcategory
                     </button>
                 </div>
             </div>

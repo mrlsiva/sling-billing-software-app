@@ -23,6 +23,7 @@ export const routes: Routes = [
             { path: 'dashboard', component: DashboardComponent, canActivate: [HoGuard] },
             { path: 'pos', component: ProductListComponent, canActivate: [BranchGuard] },
             { path: 'categories', loadComponent: () => import('./components/settings-pages/categories/categories.component').then(m => m.CategoriesComponent), canActivate: [HoGuard] },
+            { path: 'subcategories', loadComponent: () => import('./components/settings-pages/subcategories/subcategories.component').then(m => m.SubcategoriesComponent), canActivate: [HoGuard] },
             { path: 'customers', loadComponent: () => import('./components/customers/customers.component').then(m => m.CustomersComponent) },
             { path: 'profile', component: ProfileComponent },
             { path: 'settings', component: SettingsComponent },

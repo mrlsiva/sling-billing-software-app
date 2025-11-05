@@ -63,7 +63,7 @@ export class ProductListComponent implements OnInit {
     categorySearchTerm: string = '';
     subCategorySearchTerm: string = '';
 
-    readonly placeholderUrl = `${environment.assetsBase.replace(/\/$/, '')}/no-image-icon.jpg`;
+    readonly placeholderUrl = `${environment.assetsBase.replace(/\/$/, '')}/no-image-icon.svg`;
     readonly Math = Math; // Expose Math to template
     private subs: Subscription | null = null;
     // previously used for inline expansion; removed when details page was deprecated
@@ -86,7 +86,7 @@ export class ProductListComponent implements OnInit {
                 }
             } else {
                 // default placeholder image from server
-                this.logoUrl = `${environment.assetsBase.replace(/\/$/, '')}/no-image-icon.jpg`;
+                this.logoUrl = `${environment.assetsBase.replace(/\/$/, '')}/no-image-icon.svg`;
             }
         });
         this.fetchProducts();

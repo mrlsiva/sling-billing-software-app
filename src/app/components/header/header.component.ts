@@ -16,7 +16,7 @@ import { environment } from '../../../environments/environment';
 export class HeaderComponent implements OnInit, OnDestroy {
     open = false;
     userName = '';
-    logoUrl = `${environment.assetsBase.replace(/\/$/, '')}/no-image-icon.jpg`;
+    logoUrl = `${environment.assetsBase.replace(/\/$/, '')}/no-image-icon.svg`;
     isFullscreen = false;
     private previousFocus: Element | null = null;
     @ViewChild('sideMenu', { read: ElementRef, static: false }) sideMenuRef?: ElementRef<HTMLElement>;

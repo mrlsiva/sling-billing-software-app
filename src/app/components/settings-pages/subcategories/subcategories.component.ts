@@ -6,6 +6,11 @@ import { Router } from '@angular/router';
 import { environment } from '../../../../environments/environment';
 import { AuthService } from '../../../services/auth.service';
 
+interface Category {
+    id: number;
+    name: string;
+}
+
 interface SubCategory {
     id: number;
     user_id: number;
@@ -19,26 +24,14 @@ interface SubCategory {
     updated_at: string;
 }
 
-interface Category {
-    id: number;
-    user_id: number;
-    name: string;
-    image: string;
-    is_active: number;
-    is_bulk_upload: number;
-    run_id: string | null;
-    created_at: string;
-    updated_at: string;
-    sub_categories: SubCategory[];
-}
-
-interface CategoryDetailResponse {
+interface SubCategoryDetailResponse {
     code: number;
     message: string;
     success: boolean;
     data: {
         id: number;
         user_id: number;
+        category_id: number;
         name: string;
         image: string;
         is_active: number;
@@ -56,13 +49,13 @@ interface StatusToggleResponse {
     data: string;
 }
 
-interface CategoryResponse {
+interface SubCategoryResponse {
     code: number;
     message: string;
     success: boolean;
     data: {
         current_page: number;
-        data: Category[];
+        data: SubCategory[];
         first_page_url: string;
         from: number;
         last_page: number;
@@ -81,16 +74,26 @@ interface CategoryResponse {
     };
 }
 
+interface CategoryListResponse {
+    code: number;
+    message: string;
+    success: boolean;
+    data: {
+        data: Category[];
+    };
+}
+
 @Component({
-    selector: 'app-categories',
+    selector: 'app-subcategories',
     standalone: true,
     imports: [CommonModule, FormsModule, HttpClientModule],
-    templateUrl: './categories.component.html',
-    styleUrl: './categories.component.scss'
+    templateUrl: './subcategories.component.html',
+    styleUrl: './subcategories.component.scss'
 })
-export class CategoriesComponent implements OnInit, OnDestroy {
+export class SubcategoriesComponent implements OnInit, OnDestroy {
+    subcategories: SubCategory[] = [];
+    filteredSubcategories: SubCategory[] = [];
     categories: Category[] = [];
-    filteredCategories: Category[] = [];
     loading = true;
     error: string | null = null;
 
@@ -111,13 +114,14 @@ export class CategoriesComponent implements OnInit, OnDestroy {
     modalTitle: string = '';
 
     // Form properties
-    categoryName: string = '';
-    categoryId: number | null = null;
+    subcategoryName: string = '';
+    subcategoryId: number | null = null;
+    selectedCategoryId: number | null = null;
     selectedImage: File | null = null;
     imagePreview: string | null = null;
 
-    // Category details for popup
-    selectedCategoryDetails: any = null;
+    // Subcategory details for popup
+    selectedSubcategoryDetails: any = null;
     detailsLoading: boolean = false;
 
     // Expose Math to template
@@ -132,13 +136,31 @@ export class CategoriesComponent implements OnInit, OnDestroy {
 
     ngOnInit() {
         this.loadCategories();
+        this.loadSubcategories();
     }
 
     ngOnDestroy() {
         // Cleanup if needed
     }
 
-    loadCategories(page: number = 1) {
+    loadCategories() {
+        const headers = this.auth.authHeaders();
+
+        this.http.get<CategoryListResponse>(`${environment.apiBase}/categories/list`, { headers })
+            .subscribe({
+                next: (response) => {
+                    console.log('Categories API Response:', response);
+                    if (response.success && response.data) {
+                        this.categories = response.data.data;
+                    }
+                },
+                error: (err) => {
+                    console.error('Error loading categories:', err);
+                }
+            });
+    }
+
+    loadSubcategories(page: number = 1) {
         this.loading = true;
         this.error = null;
         this.currentPage = page;
@@ -146,14 +168,14 @@ export class CategoriesComponent implements OnInit, OnDestroy {
         const headers = this.auth.authHeaders();
         const params: any = { page };
 
-        this.http.get<CategoryResponse>(`${environment.apiBase}/categories/list`, { headers, params })
+        this.http.get<SubCategoryResponse>(`${environment.apiBase}/sub_categories/list`, { headers, params })
             .subscribe({
                 next: (response) => {
-                    console.log('Categories API Response:', response);
+                    console.log('Subcategories API Response:', response);
 
                     if (response.success && response.data) {
-                        this.categories = response.data.data;
-                        this.filteredCategories = this.categories;
+                        this.subcategories = response.data.data;
+                        this.filteredSubcategories = this.subcategories;
                         this.currentPage = response.data.current_page;
                         this.totalPages = response.data.last_page;
                         this.itemsPerPage = response.data.per_page;
@@ -161,25 +183,25 @@ export class CategoriesComponent implements OnInit, OnDestroy {
 
                         // Apply search filter if search term exists
                         if (this.searchTerm.trim()) {
-                            this.filterCategories();
+                            this.filterSubcategories();
                         }
                     } else {
-                        this.error = response.message || 'Failed to load categories';
-                        this.categories = [];
-                        this.filteredCategories = [];
+                        this.error = response.message || 'Failed to load subcategories';
+                        this.subcategories = [];
+                        this.filteredSubcategories = [];
                     }
 
                     this.loading = false;
                 },
                 error: (err) => {
-                    console.error('Error loading categories:', err);
+                    console.error('Error loading subcategories:', err);
                     if (err.status === 401) {
                         this.error = 'Unauthenticated. Please log in again.';
                         this.auth.clearSession();
                     } else if (err.status === 403) {
-                        this.error = 'Access denied. You do not have permission to view categories.';
+                        this.error = 'Access denied. You do not have permission to view subcategories.';
                     } else {
-                        this.error = err?.error?.message || 'Failed to load categories. Please try again.';
+                        this.error = err?.error?.message || 'Failed to load subcategories. Please try again.';
                     }
                     this.loading = false;
                 }
@@ -188,28 +210,31 @@ export class CategoriesComponent implements OnInit, OnDestroy {
 
     openCreateModal() {
         this.isEditMode = false;
-        this.modalTitle = 'Create Category';
-        this.categoryName = '';
-        this.categoryId = null;
+        this.modalTitle = 'Create Subcategory';
+        this.subcategoryName = '';
+        this.subcategoryId = null;
+        this.selectedCategoryId = null;
         this.selectedImage = null;
         this.imagePreview = null;
         this.showModal = true;
     }
 
-    openEditModal(category: Category) {
+    openEditModal(subcategory: SubCategory) {
         this.isEditMode = true;
-        this.modalTitle = 'Edit Category';
-        this.categoryName = category.name;
-        this.categoryId = category.id;
+        this.modalTitle = 'Edit Subcategory';
+        this.subcategoryName = subcategory.name;
+        this.subcategoryId = subcategory.id;
+        this.selectedCategoryId = subcategory.category_id;
         this.selectedImage = null;
-        this.imagePreview = category.image || null;
+        this.imagePreview = subcategory.image || null;
         this.showModal = true;
     }
 
     closeModal() {
         this.showModal = false;
-        this.categoryName = '';
-        this.categoryId = null;
+        this.subcategoryName = '';
+        this.subcategoryId = null;
+        this.selectedCategoryId = null;
         this.selectedImage = null;
         this.imagePreview = null;
         this.error = null;
@@ -235,22 +260,28 @@ export class CategoriesComponent implements OnInit, OnDestroy {
     }
 
     submitForm() {
-        if (!this.categoryName.trim()) {
-            this.error = 'Category name is required';
+        if (!this.subcategoryName.trim()) {
+            this.error = 'Subcategory name is required';
+            return;
+        }
+
+        if (!this.selectedCategoryId) {
+            this.error = 'Category is required';
             return;
         }
 
         if (this.isEditMode) {
-            this.updateCategory();
+            this.updateSubcategory();
         } else {
-            this.createCategory();
+            this.createSubcategory();
         }
     }
 
-    createCategory() {
+    createSubcategory() {
         const headers = this.auth.authHeaders();
         const formData = new FormData();
-        formData.append('category', this.categoryName.trim());
+        formData.append('value', this.subcategoryName.trim());
+        formData.append('category', this.selectedCategoryId!.toString());
 
         if (this.selectedImage) {
             formData.append('image', this.selectedImage);
@@ -259,36 +290,37 @@ export class CategoriesComponent implements OnInit, OnDestroy {
         this.loading = true;
         this.error = null;
 
-        this.http.post<any>(`${environment.apiBase}/categories/store`, formData, { headers })
+        this.http.post<any>(`${environment.apiBase}/sub_categories/store`, formData, { headers })
             .subscribe({
                 next: (response) => {
-                    console.log('Create Category Response:', response);
+                    console.log('Create Subcategory Response:', response);
                     if (response.success) {
                         this.closeModal();
-                        this.loadCategories(this.currentPage);
+                        this.loadSubcategories(this.currentPage);
                     } else {
-                        this.error = response.message || 'Failed to create category';
+                        this.error = response.message || 'Failed to create subcategory';
                     }
                     this.loading = false;
                 },
                 error: (err) => {
-                    console.error('Error creating category:', err);
-                    this.error = err?.error?.message || 'Failed to create category. Please try again.';
+                    console.error('Error creating subcategory:', err);
+                    this.error = err?.error?.message || 'Failed to create subcategory. Please try again.';
                     this.loading = false;
                 }
             });
     }
 
-    updateCategory() {
-        if (!this.categoryId) {
-            this.error = 'Category ID is missing';
+    updateSubcategory() {
+        if (!this.subcategoryId) {
+            this.error = 'Subcategory ID is missing';
             return;
         }
 
         const headers = this.auth.authHeaders();
         const formData = new FormData();
-        formData.append('category_name', this.categoryName.trim());
-        formData.append('category_id', this.categoryId.toString());
+        formData.append('value', this.subcategoryName.trim());
+        formData.append('category', this.selectedCategoryId!.toString());
+        formData.append('subcategory_id', this.subcategoryId.toString());
 
         if (this.selectedImage) {
             formData.append('image', this.selectedImage);
@@ -297,28 +329,28 @@ export class CategoriesComponent implements OnInit, OnDestroy {
         this.loading = true;
         this.error = null;
 
-        this.http.post<any>(`${environment.apiBase}/categories/update`, formData, { headers })
+        this.http.post<any>(`${environment.apiBase}/sub_categories/update`, formData, { headers })
             .subscribe({
                 next: (response) => {
-                    console.log('Update Category Response:', response);
+                    console.log('Update Subcategory Response:', response);
                     if (response.success) {
                         this.closeModal();
-                        this.loadCategories(this.currentPage);
+                        this.loadSubcategories(this.currentPage);
                     } else {
-                        this.error = response.message || 'Failed to update category';
+                        this.error = response.message || 'Failed to update subcategory';
                     }
                     this.loading = false;
                 },
                 error: (err) => {
-                    console.error('Error updating category:', err);
-                    this.error = err?.error?.message || 'Failed to update category. Please try again.';
+                    console.error('Error updating subcategory:', err);
+                    this.error = err?.error?.message || 'Failed to update subcategory. Please try again.';
                     this.loading = false;
                 }
             });
     }
 
-    refreshCategories() {
-        this.loadCategories(this.currentPage);
+    refreshSubcategories() {
+        this.loadSubcategories(this.currentPage);
     }
 
     goBack() {
@@ -328,7 +360,7 @@ export class CategoriesComponent implements OnInit, OnDestroy {
     // Pagination methods
     goToPage(page: number) {
         if (page >= 1 && page <= this.totalPages && page !== this.currentPage) {
-            this.loadCategories(page);
+            this.loadSubcategories(page);
         }
     }
 
@@ -385,7 +417,7 @@ export class CategoriesComponent implements OnInit, OnDestroy {
 
     getImageUrl(image: string | null): string {
         // Return placeholder if no image or if it's the default no-image icon
-        if (!image || image === 'https://test.slingbillings.com/no-image-icon.svg') {
+        if (!image || image === 'https://test.slingbillings.com/no-image-icon.svg' || image.includes('no-image-icon')) {
             return this.placeholderUrl;
         }
         // If it's already a full URL, return as is
@@ -398,47 +430,47 @@ export class CategoriesComponent implements OnInit, OnDestroy {
 
     // Search functionality
     onSearchChange() {
-        this.filterCategories();
+        this.filterSubcategories();
     }
 
-    filterCategories() {
+    filterSubcategories() {
         if (!this.searchTerm.trim()) {
-            this.filteredCategories = this.categories;
+            this.filteredSubcategories = this.subcategories;
         } else {
             const searchLower = this.searchTerm.toLowerCase();
-            this.filteredCategories = this.categories.filter(category =>
-                category.name.toLowerCase().includes(searchLower)
+            this.filteredSubcategories = this.subcategories.filter(subcategory =>
+                subcategory.name.toLowerCase().includes(searchLower)
             );
         }
     }
 
     clearSearch() {
         this.searchTerm = '';
-        this.filteredCategories = this.categories;
+        this.filteredSubcategories = this.subcategories;
     }
 
-    // Category details popup
-    async openCategoryDetails(categoryId: number) {
+    // Subcategory details popup
+    async openSubcategoryDetails(subcategoryId: number) {
         this.detailsLoading = true;
         this.showDetailsModal = true;
-        this.selectedCategoryDetails = null;
+        this.selectedSubcategoryDetails = null;
 
         try {
             const headers = this.auth.authHeaders();
-            const response = await this.http.get<CategoryDetailResponse>(
-                `${environment.apiBase}/categories/${categoryId}/view`,
+            const response = await this.http.get<SubCategoryDetailResponse>(
+                `${environment.apiBase}/sub_categories/${subcategoryId}/view`,
                 { headers }
             ).toPromise();
 
             if (response?.success && response.data) {
-                this.selectedCategoryDetails = response.data;
+                this.selectedSubcategoryDetails = response.data;
             } else {
-                this.error = response?.message || 'Failed to load category details';
+                this.error = response?.message || 'Failed to load subcategory details';
                 this.closeDetailsModal();
             }
         } catch (err: any) {
-            console.error('Error loading category details:', err);
-            this.error = err?.error?.message || 'Failed to load category details';
+            console.error('Error loading subcategory details:', err);
+            this.error = err?.error?.message || 'Failed to load subcategory details';
             this.closeDetailsModal();
         } finally {
             this.detailsLoading = false;
@@ -447,41 +479,46 @@ export class CategoriesComponent implements OnInit, OnDestroy {
 
     closeDetailsModal() {
         this.showDetailsModal = false;
-        this.selectedCategoryDetails = null;
+        this.selectedSubcategoryDetails = null;
         this.detailsLoading = false;
         this.error = null;
     }
 
     // Status toggle functionality
-    async toggleCategoryStatus(categoryId: number, currentStatus: number) {
+    async toggleSubcategoryStatus(subcategoryId: number, currentStatus: number) {
         try {
             const headers = this.auth.authHeaders();
             const response = await this.http.get<StatusToggleResponse>(
-                `${environment.apiBase}/categories/${categoryId}/status`,
+                `${environment.apiBase}/sub_categories/${subcategoryId}/status`,
                 { headers }
             ).toPromise();
 
             if (response?.success) {
-                // Update the category status in the local array
-                const categoryIndex = this.categories.findIndex(cat => cat.id === categoryId);
-                if (categoryIndex !== -1) {
-                    this.categories[categoryIndex].is_active = this.categories[categoryIndex].is_active === 1 ? 0 : 1;
-                    this.filterCategories(); // Refresh filtered categories
+                // Update the subcategory status in the local array
+                const subcategoryIndex = this.subcategories.findIndex(sub => sub.id === subcategoryId);
+                if (subcategoryIndex !== -1) {
+                    this.subcategories[subcategoryIndex].is_active = this.subcategories[subcategoryIndex].is_active === 1 ? 0 : 1;
+                    this.filterSubcategories(); // Refresh filtered subcategories
                 }
 
-                // Update details modal if open for this category
-                if (this.selectedCategoryDetails && this.selectedCategoryDetails.id === categoryId) {
-                    this.selectedCategoryDetails.is_active = this.selectedCategoryDetails.is_active === 1 ? 0 : 1;
+                // Update details modal if open for this subcategory
+                if (this.selectedSubcategoryDetails && this.selectedSubcategoryDetails.id === subcategoryId) {
+                    this.selectedSubcategoryDetails.is_active = this.selectedSubcategoryDetails.is_active === 1 ? 0 : 1;
                 }
 
                 console.log('Status updated:', response.message);
             } else {
-                this.error = response?.message || 'Failed to update category status';
+                this.error = response?.message || 'Failed to update subcategory status';
             }
         } catch (err: any) {
-            console.error('Error updating category status:', err);
-            this.error = err?.error?.message || 'Failed to update category status';
+            console.error('Error updating subcategory status:', err);
+            this.error = err?.error?.message || 'Failed to update subcategory status';
         }
+    }
+
+    getCategoryName(categoryId: number): string {
+        const category = this.categories.find(cat => cat.id === categoryId);
+        return category ? category.name : 'Unknown Category';
     }
 
     getStatusText(isActive: number): string {

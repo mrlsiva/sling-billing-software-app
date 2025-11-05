@@ -15,7 +15,7 @@ import { environment } from '../../../environments/environment';
     styleUrls: ['./pdf-generator.component.scss']
 })
 export class PdfGeneratorComponent {
-    private logoUrl = `${environment.assetsBase.replace(/\/$/, '')}/no-image-icon.jpg`;
+    private logoUrl = `${environment.assetsBase.replace(/\/$/, '')}/no-image-icon.svg`;
     private user: any = null;
     private templateCache: string | null = null;
 
