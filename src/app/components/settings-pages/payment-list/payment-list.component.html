@@ -1,28 +1,105 @@
-<div class="settings-page">
-    <div class="d-flex space-between">
-        <h3>Payment List</h3>
-        <button class="settings-back" (click)="goBack()"><i class="fa-solid fa-arrow-left"></i> Back</button>
+<div class="page-container">
+    <!-- Header -->
+    <div class="page-header">
+        <div class="header-left">
+            <h2 class="page-title">Payment Methods</h2>
+            <p class="page-subtitle">Manage your payment methods</p>
+        </div>
+        <div class="header-actions">
+            <button class="btn btn-secondary" (click)="goBack()">
+                <i class="fa-solid fa-arrow-left"></i>
+                Back
+            </button>
+        </div>
     </div>
-    <div *ngIf="loading">Loading...</div>
-    <div *ngIf="items?.length" class="settings-grid">
-        <article *ngFor="let it of items; let i = index" class="settings-card">
-            <header class="sc-header">
-                <div class="sc-title">{{ it.name || it.title || it }}</div>
-                <div class="sc-sno">
-                    <span class="status-badge" [class.active]="it.is_active === 1"
-                        [class.inactive]="it.is_active !== 1">
-                        {{ it.is_active === 1 ? 'Active' : 'Inactive' }}
-                    </span>
-                    <button class="card-toggle" (click)="$event.stopPropagation(); toggleItemActive(it)"
-                        [attr.aria-pressed]="it.is_active === 1" aria-label="Toggle active">
-                        <i class="fa-solid" [ngClass]="it.is_active === 1 ? 'fa-toggle-on' : 'fa-toggle-off'"></i>
-                    </button>
-                </div>
-            </header>
-            <div class="sc-body">
-                <div class="sc-row" *ngIf="it.description">{{ it.description }}</div>
+
+    <!-- Search and Controls -->
+    <div class="page-controls">
+        <div class="search-container">
+            <div class="search-input-wrapper">
+                <i class="fa-solid fa-search search-icon"></i>
+                <input type="text" class="search-input" placeholder="Search payment methods..." [(ngModel)]="searchTerm"
+                    (input)="onSearchChange()">
+                <button *ngIf="searchTerm" class="clear-search" (click)="clearSearch()" aria-label="Clear search">
+                    <i class="fa-solid fa-times"></i>
+                </button>
             </div>
-        </article>
+        </div>
+        <div class="controls-right">
+            <button class="btn btn-outline refresh-btn" (click)="refreshPayments()" [disabled]="loading">
+                <i class="fa-solid fa-refresh" [class.spinning]="loading"></i>
+                Refresh
+            </button>
+        </div>
     </div>
-    <div *ngIf="!items?.length && !loading">No items</div>
+
+    <!-- Error Message -->
+    <div *ngIf="error" class="error-message">
+        <i class="fa-solid fa-exclamation-triangle"></i>
+        {{ error }}
+        <button class="btn btn-sm btn-outline" (click)="error = null; refreshPayments()">
+            Try Again
+        </button>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="loading && !payments.length" class="loading-container">
+        <div class="loading-spinner">
+            <i class="fa-solid fa-spinner spinning"></i>
+        </div>
+        <p>Loading payment methods...</p>
+    </div>
+
+    <!-- Payments Table -->
+    <div *ngIf="!loading || payments.length" class="table-container">
+        <div *ngIf="filteredPayments.length === 0 && !loading" class="empty-state">
+            <div class="empty-icon">
+                <i class="fa-solid fa-credit-card"></i>
+            </div>
+            <h3>No payment methods found</h3>
+            <p *ngIf="searchTerm">No payment methods match your search criteria. Try adjusting your search.</p>
+            <p *ngIf="!searchTerm">No payment methods available.</p>
+        </div>
+
+        <table *ngIf="filteredPayments.length > 0" class="data-table">
+            <thead>
+                <tr>
+                    <th>Payment Method</th>
+                    <th>Payment ID</th>
+                    <th>Status</th>
+                    <th>Created Date</th>
+                    <th>Last Updated</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let payment of filteredPayments; trackBy: trackByPaymentId">
+                    <td>
+                        <div class="payment-name">
+                            <strong>{{ getPaymentMethodName(payment.payment_id) }}</strong>
+                        </div>
+                    </td>
+                    <td>{{ payment.payment_id }}</td>
+                    <td>
+                        <span class="status-badge" [ngClass]="getStatusClass(payment.is_active)">
+                            {{ getStatusText(payment.is_active) }}
+                        </span>
+                    </td>
+                    <td>{{ formatDate(payment.created_at) }}</td>
+                    <td>{{ formatDate(payment.updated_at) }}</td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="btn btn-sm"
+                                [ngClass]="payment.is_active === 1 ? 'btn-warning' : 'btn-success'"
+                                (click)="togglePaymentStatus(payment.id, payment.is_active)"
+                                [title]="payment.is_active === 1 ? 'Deactivate payment method' : 'Activate payment method'">
+                                <i class="fa-solid"
+                                    [ngClass]="payment.is_active === 1 ? 'fa-toggle-on' : 'fa-toggle-off'"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 </div>

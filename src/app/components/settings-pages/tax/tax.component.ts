@@ -68,7 +68,7 @@ export class TaxComponent implements OnInit, OnDestroy {
     modalTitle: string = '';
 
     // Form properties
-    taxName: string = '';
+    taxName: string | number = '';
     taxId: number | null = null;
 
     constructor(
@@ -135,35 +135,44 @@ export class TaxComponent implements OnInit, OnDestroy {
 
     // Modal methods
     openCreateModal() {
+        console.log('Opening create modal');
         this.isEditMode = false;
         this.modalTitle = 'Create Tax';
         this.taxName = '';
         this.taxId = null;
+        this.error = null;
         this.showModal = true;
+        console.log('Create modal opened, showModal:', this.showModal);
     }
 
     openEditModal(tax: Tax) {
+        console.log('Opening edit modal for tax:', tax);
         this.isEditMode = true;
         this.modalTitle = 'Edit Tax';
         this.taxName = tax.name;
         this.taxId = tax.id;
+        this.error = null;
         this.showModal = true;
+        console.log('Edit modal opened, showModal:', this.showModal);
     }
 
     closeModal() {
+        console.log('Closing modal');
         this.showModal = false;
         this.taxName = '';
         this.taxId = null;
         this.error = null;
+        console.log('Modal closed');
     }
 
     submitForm() {
-        if (!this.taxName.trim()) {
+        const taxNameStr = String(this.taxName || '').trim();
+        if (!taxNameStr) {
             this.error = 'Tax percentage is required';
             return;
         }
 
-        const taxValue = parseFloat(this.taxName);
+        const taxValue = parseFloat(taxNameStr);
         if (isNaN(taxValue) || taxValue < 0 || taxValue > 100) {
             this.error = 'Tax percentage must be between 0 and 100';
             return;
@@ -179,7 +188,7 @@ export class TaxComponent implements OnInit, OnDestroy {
     createTax() {
         const headers = this.auth.authHeaders();
         const formData = new FormData();
-        formData.append('name', this.taxName.trim());
+        formData.append('name', String(this.taxName || '').trim());
 
         this.loading = true;
         this.error = null;
@@ -213,7 +222,7 @@ export class TaxComponent implements OnInit, OnDestroy {
         const headers = this.auth.authHeaders();
         const formData = new FormData();
         formData.append('tax_id', this.taxId.toString());
-        formData.append('name', this.taxName.trim());
+        formData.append('name', String(this.taxName || '').trim());
 
         this.loading = true;
         this.error = null;
