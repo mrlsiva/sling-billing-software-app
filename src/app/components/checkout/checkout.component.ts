@@ -649,16 +649,30 @@ export class CheckoutComponent implements OnInit {
             return;
         }
 
-        // Build cart array
-        const cart = this.items.map((it: any) => ({
-            product_id: it.product?.product_id
-                || it.product_product_id
-                || it.product_id
-            ,
-            qty: it.qty,
-            price: it.product?.price || it.price,
-            tax_amount: it.product?.tax_amount || it.tax_amount || 0
-        }));
+        // Build cart array (robust extraction to match API expectations)
+        const cart = this.items.map((it: any) => {
+            // product may exist in multiple shapes: it.product, it.product.product, or top-level fields
+            const prod = it.product || {};
+            const nested = prod.product || {};
+
+            const productId = prod.product_id || nested.product_id || nested.id || prod.id || it.product_id || it.id || '';
+            const qty = Number(it.qty) || Number(it.quantity) || 0;
+
+            // Price may be at several places; ensure a numeric value is sent
+            const priceVal = prod.price ?? nested.price ?? prod.selling_price ?? nested.selling_price ?? it.price ?? 0;
+            const price = Number(priceVal) || 0;
+
+            // Tax amount may be present on product or item
+            const taxVal = prod.tax_amount ?? nested.tax_amount ?? prod.tax_amount ?? it.tax_amount ?? 0;
+            const tax_amount = Number(taxVal) || 0;
+
+            return {
+                product_id: Number(productId) || productId,
+                qty,
+                price,
+                tax_amount
+            };
+        });
 
         // Build payments array
         const payments = this.selectedPayments.map((p: any) => {
@@ -699,21 +713,199 @@ export class CheckoutComponent implements OnInit {
             payments
         };
 
+        // Debug: log the payload so we can compare with the working Postman request
+        console.log('Order payload prepared for POST /pos/store:', payload);
+
         const headers = this.auth.authHeaders();
         const url = `${environment.apiBase}/pos/store`;
         this.loading = true;
         this.http.post<any>(url, payload, { headers }).subscribe({
             next: (response: any) => {
+                console.log('Order placement response:', response);
                 this.loading = false;
                 this.toast.show('Order placed successfully!', 'success');
-                // Optionally clear cart and go back
+
+                // Extract order ID from response
+                if (response?.success && response?.data) {
+                    const orderId = response.data;
+                    console.log('Order ID received:', orderId);
+
+                    // Fetch order details and generate PDF
+                    this.fetchOrderDetailsAndGeneratePDF(orderId);
+                } else {
+                    console.warn('Order ID not found in response:', response);
+                }
+
+                // Clear cart and navigate back
                 this.cart.clear();
-                setTimeout(() => this.router.navigate(['/pos']), 1200);
+                setTimeout(() => this.router.navigate(['/pos']), 3000); // Increased delay to allow PDF generation
             },
             error: (err: any) => {
                 this.loading = false;
                 this.toast.show('Order failed: ' + (err?.error?.message || err.statusText || 'Unknown error'), 'error');
             }
         });
+    }
+
+    /**
+     * Fetch order details and generate PDF based on actual order data
+     */
+    private fetchOrderDetailsAndGeneratePDF(orderId: number): void {
+        console.log('Fetching order details for ID:', orderId);
+
+        const headers = this.auth.authHeaders();
+        const url = `${environment.apiBase}/orders/${orderId}/view`;
+
+        this.http.get<any>(url, { headers }).subscribe({
+            next: (response: any) => {
+                console.log('Order details response:', response);
+
+                if (response?.success && response?.data) {
+                    this.generatePDFFromOrderData(response.data);
+                } else {
+                    console.warn('Invalid order details response:', response);
+                    this.toast.show('Order placed but PDF generation failed', 'error');
+                }
+            },
+            error: (err: any) => {
+                console.error('Failed to fetch order details:', err);
+                this.toast.show('Order placed but failed to fetch details for PDF', 'error');
+            }
+        });
+    }
+
+    /**
+     * Generate PDF from actual order data received from API
+     */
+    private generatePDFFromOrderData(orderData: any): void {
+        console.log('Generating PDF from order data:', orderData);
+
+        try {
+            // Extract order information
+            const order = orderData.order;
+            const orderDetails = orderData.order_details || [];
+            const paymentDetails = orderData.order_payment_details || [];
+
+            // Prepare invoice data using actual order data
+            const invoiceData: InvoiceData = {
+                // Order information
+                orderId: order.id,
+                billId: order.bill_id,
+                billedOn: order.billed_on,
+                billAmount: parseFloat(order.bill_amount),
+
+                // Customer information
+                customer: {
+                    id: order.customer?.id,
+                    name: order.customer?.name,
+                    phone: order.customer?.phone,
+                    alt_phone: order.customer?.alt_phone,
+                    address: order.customer?.address,
+                    pincode: order.customer?.pincode,
+                    gst: order.customer?.gst
+                },
+
+                // Staff information (billed by)
+                staff: {
+                    id: order.billed_by?.id,
+                    name: order.billed_by?.name,
+                    phone: order.billed_by?.phone
+                },
+
+                // Shop/Branch information
+                shop: {
+                    name: order.shop?.name,
+                    email: order.shop?.email,
+                    phone: order.shop?.phone,
+                    alt_phone: order.shop?.alt_phone,
+                    logo: order.shop?.logo,
+                    address: order.shop?.address || ''
+                },
+
+                branch: order.branch ? {
+                    name: order.branch?.name,
+                    email: order.branch?.email,
+                    phone: order.branch?.phone,
+                    alt_phone: order.branch?.alt_phone,
+                    logo: order.branch?.logo,
+                    address: order.branch?.address || ''
+                } : null,
+
+                // Items from order details
+                items: orderDetails.map((item: any) => ({
+                    id: item.product_id,
+                    name: item.name,
+                    quantity: parseFloat(item.quantity),
+                    price: parseFloat(item.price),
+                    selling_price: parseFloat(item.selling_price),
+                    tax_amount: parseFloat(item.tax_amount),
+                    tax_percent: parseFloat(item.tax_percent),
+                    discount: item.discount ? parseFloat(item.discount) : 0,
+                    discount_type: item.discount_type,
+                    total: parseFloat(item.selling_price) * parseFloat(item.quantity)
+                })),
+
+                // Payments from order payment details
+                payments: paymentDetails.map((payment: any) => ({
+                    method: {
+                        id: payment.payment?.id,
+                        name: payment.payment?.name
+                    },
+                    amount: parseFloat(payment.amount),
+                    cardNo: payment.card || '',
+                    chequeNo: payment.number || '',
+                    financeRefNo: payment.finance_id || '',
+                    selectedFinance: payment.finance
+                })),
+
+                // Total amount
+                total: parseFloat(order.bill_amount),
+
+                // Additional order information
+                totalProductDiscount: parseFloat(order.total_product_discount || '0'),
+                isRefunded: order.is_refunded === 1
+            };
+
+            console.log('Prepared invoice data:', invoiceData);
+
+            // Generate PDF using the PDF generator service
+            this.pdfGenerator.generateInvoicePdf(invoiceData);
+
+            this.toast.show('PDF generated successfully!', 'success');
+
+        } catch (error) {
+            console.error('PDF generation from order data failed:', error);
+            this.toast.show('Failed to generate PDF from order data', 'error');
+        }
+    }
+
+    /**
+     * Helper method to get product name from cart item
+     */
+    getProductName(item: any): string {
+        // Handle nested product structures similar to addToCart logic
+        const product = item.product ?? item;
+        const nested = product.product || {};
+        
+        // Try multiple possible locations for product name
+        const productName = product?.name || nested?.name || product?.title || nested?.title || 
+                           product?.product_name || nested?.product_name || product?.code || 
+                           nested?.code || item.id || 'Unknown Product';
+        
+        return productName;
+    }
+
+    /**
+     * Helper method to get product price from cart item
+     */
+    getProductPrice(item: any): number {
+        // Handle nested product structures similar to cart service
+        const product = item.product ?? item;
+        const nested = product.product || {};
+
+        // Try multiple possible locations for product price
+        const priceVal = product.price ?? nested.price ?? product.selling_price ?? nested.selling_price ?? 
+                        product.amount ?? nested.amount ?? item.price ?? 0;
+        return Number(priceVal) || 0;
     }
 }

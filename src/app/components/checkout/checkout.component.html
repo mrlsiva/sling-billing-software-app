@@ -280,10 +280,10 @@
             </thead>
             <tbody>
                 <tr *ngFor="let it of items">
-                    <td>{{ it.product?.name || it.product?.title || it.id }}</td>
+                    <td>{{ getProductName(it) }}</td>
                     <td>{{ it.qty }}</td>
-                    <td>{{ (it.product?.price || 0) | number:'1.2-2' }}</td>
-                    <td>{{ ((it.product?.price || 0) * it.qty) | number:'1.2-2' }}</td>
+                    <td>{{ getProductPrice(it) | number:'1.2-2' }}</td>
+                    <td>{{ (getProductPrice(it) * it.qty) | number:'1.2-2' }}</td>
                 </tr>
             </tbody>
             <tfoot>

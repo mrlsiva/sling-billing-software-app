@@ -233,7 +233,7 @@ export class PdfGeneratorComponent {
         <div class="logo-container">{{logoHtml}}</div>
         <div class="shop-info">
           <h1 class="shop-name">{{shopName}}</h1>
-          {{shopPhoneHtml}}{{shopAddressHtml}}{{shopGstHtml}}
+          {{shopPhoneHtml}}{{shopEmailHtml}}{{shopAddressHtml}}{{shopGstHtml}}
         </div>
       </div>
       <div class="invoice-meta">
@@ -284,36 +284,45 @@ export class PdfGeneratorComponent {
         let template = await this.loadTemplate();
 
         // Prepare data for template replacement
-        const itemsHtml = invoiceData.items.map(i => `
-            <tr>
-                <td>${i.product?.name || i.product?.title || i.id}</td>
-                <td style="text-align: center">${i.qty}</td>
-                <td style="text-align: right">₹${Number(i.product?.price || 0).toFixed(2)}</td>
-                <td style="text-align: right">₹${(Number(i.product?.price || 0) * i.qty).toFixed(2)}</td>
-            </tr>
-        `).join('');
+        const itemsHtml = invoiceData.items.map(i => {
+            // Support both cart items and order detail items
+            const name = i.name || i.product?.name || i.product?.title || i.id || 'Unknown Item';
+            const quantity = i.quantity || i.qty || 0;
+            const price = i.price || i.selling_price || i.product?.price || 0;
+            const total = i.total || (Number(price) * Number(quantity));
+
+            return `
+                <tr>
+                    <td>${name}</td>
+                    <td style="text-align: center">${quantity}</td>
+                    <td style="text-align: right">₹${Number(price).toFixed(2)}</td>
+                    <td style="text-align: right">₹${Number(total).toFixed(2)}</td>
+                </tr>
+            `;
+        }).join('');
 
         const staffName = invoiceData.staff?.name || invoiceData.staff?.full_name || '-';
         const customerName = invoiceData.customer?.name || 'Walk-in Customer';
         const customerPhone = invoiceData.customer?.phone || '';
 
-        // Shop information from user data
-        const shopName = this.user?.business_name || this.user?.name || 'Shop Name';
-        const shopPhone = this.user?.phone || this.user?.mobile || '';
-        const shopAddress = this.user?.user_detail?.address || this.user?.address || '';
+        // Shop information - prefer order data, fallback to user data
+        const shopName = invoiceData.shop?.name || invoiceData.branch?.name || this.user?.business_name || this.user?.name || 'Shop Name';
+        const shopPhone = invoiceData.shop?.phone || invoiceData.branch?.phone || this.user?.phone || this.user?.mobile || '';
+        const shopEmail = invoiceData.shop?.email || invoiceData.branch?.email || this.user?.email || '';
+        const shopAddress = invoiceData.shop?.address || invoiceData.branch?.address || this.user?.user_detail?.address || this.user?.address || '';
         const shopGst = this.user?.user_detail?.gst_number || this.user?.gst_number || '';
 
         // Payment methods details
         const paymentsHtml = invoiceData.payments.map(payment => {
-            const methodName = payment.method.name;
+            const methodName = payment.method?.name || payment.method || 'Unknown';
             const amount = `₹${Number(payment.amount || 0).toFixed(2)}`;
             let details = '';
 
-            if (payment.method.name.toLowerCase() === 'finance') {
+            if (methodName.toLowerCase() === 'finance') {
                 details = `Ref: ${payment.financeRefNo || 'N/A'}, Finance: ${payment.selectedFinance?.name || 'N/A'}`;
-            } else if (payment.method.name.toLowerCase() === 'card') {
+            } else if (methodName.toLowerCase() === 'card') {
                 details = `Card: ${payment.cardNo || 'N/A'}, Name: ${payment.cardName || 'N/A'}`;
-            } else if (payment.method.name.toLowerCase() === 'cheque') {
+            } else if (methodName.toLowerCase() === 'cheque') {
                 details = `Cheque No: ${payment.chequeNo || 'N/A'}`;
             }
 
@@ -326,8 +335,13 @@ export class PdfGeneratorComponent {
             `;
         }).join('');
 
-        const currentDate = new Date().toLocaleDateString();
-        const currentTime = new Date().toLocaleTimeString();
+        // Use actual order date if available, otherwise current date
+        const orderDate = invoiceData.billedOn ? new Date(invoiceData.billedOn) : new Date();
+        const currentDate = orderDate.toLocaleDateString();
+        const currentTime = orderDate.toLocaleTimeString();
+
+        // Use actual bill ID if available, otherwise generate one
+        const invoiceNumber = invoiceData.billId || `#INV-${Date.now().toString().slice(-6)}`;
 
         // Prepare conditional HTML snippets
         const logoHtml = logoBase64 ?
@@ -335,6 +349,7 @@ export class PdfGeneratorComponent {
             `<div class="logo-fallback">${shopName.charAt(0)}</div>`;
 
         const shopPhoneHtml = shopPhone ? `<div class="shop-details"><strong>Phone:</strong> ${shopPhone}</div>` : '';
+        const shopEmailHtml = shopEmail ? `<div class="shop-details"><strong>Email:</strong> ${shopEmail}</div>` : '';
         const shopAddressHtml = shopAddress ? `<div class="shop-details"><strong>Address:</strong> ${shopAddress}</div>` : '';
         const shopGstHtml = shopGst ? `<div class="shop-details"><strong>GST No:</strong> ${shopGst}</div>` : '';
         const customerPhoneHtml = customerPhone ? `
@@ -344,6 +359,9 @@ export class PdfGeneratorComponent {
             </div>
         ` : '';
 
+        // Calculate total amount (prefer order data)
+        const totalAmount = invoiceData.billAmount || invoiceData.total || 0;
+
         // Replace template placeholders with actual data
         const replacements = {
             '{{customerName}}': customerName,
@@ -351,15 +369,16 @@ export class PdfGeneratorComponent {
             '{{shopName}}': shopName,
             '{{logoHtml}}': logoHtml,
             '{{shopPhoneHtml}}': shopPhoneHtml,
+            '{{shopEmailHtml}}': shopEmailHtml,
             '{{shopAddressHtml}}': shopAddressHtml,
             '{{shopGstHtml}}': shopGstHtml,
             '{{customerPhoneHtml}}': customerPhoneHtml,
-            '{{invoiceNumber}}': `#INV-${Date.now().toString().slice(-6)}`,
+            '{{invoiceNumber}}': invoiceNumber,
             '{{currentDate}}': currentDate,
             '{{currentTime}}': currentTime,
             '{{itemsHtml}}': itemsHtml,
             '{{paymentsHtml}}': paymentsHtml,
-            '{{totalAmount}}': invoiceData.total.toFixed(2)
+            '{{totalAmount}}': Number(totalAmount).toFixed(2)
         };
 
         // Apply all replacements
@@ -373,9 +392,37 @@ export class PdfGeneratorComponent {
 
 // Interface for invoice data
 export interface InvoiceData {
+    // Basic required fields (backward compatibility)
     customer: any;
     staff: any;
     items: any[];
     payments: any[];
     total: number;
+
+    // Extended fields from order API response
+    orderId?: number;
+    billId?: string;
+    billedOn?: string;
+    billAmount?: number;
+    totalProductDiscount?: number;
+    isRefunded?: boolean;
+
+    // Shop/Branch information
+    shop?: {
+        name?: string;
+        email?: string;
+        phone?: string;
+        alt_phone?: string;
+        logo?: string;
+        address?: string;
+    };
+
+    branch?: {
+        name?: string;
+        email?: string;
+        phone?: string;
+        alt_phone?: string;
+        logo?: string;
+        address?: string;
+    } | null;
 }
