@@ -20,7 +20,7 @@ interface FinanceResponse {
     code: number;
     message: string;
     success: boolean;
-    data: {
+    data: Finance[] | {
         current_page: number;
         data: Finance[];
         first_page_url: string;
@@ -74,7 +74,7 @@ export class FinanceComponent implements OnInit, OnDestroy {
 
     constructor(
         private http: HttpClient,
-        private auth: AuthService,
+        public auth: AuthService,
         private router: Router,
         private toast: ToastService
     ) { }
@@ -96,27 +96,66 @@ export class FinanceComponent implements OnInit, OnDestroy {
         this.currentPage = page;
 
         const headers = this.auth.authHeaders();
-        const params: any = { page };
+        let params: any = {};
+        let apiEndpoint: string;
 
-        this.http.get<FinanceResponse>(`${environment.apiBase}/finances/list`, { headers, params })
+        // Role-based API endpoint selection
+        if (this.auth.isHO()) {
+            // HO (role_id: 2) uses /finances/list with pagination
+            apiEndpoint = `${environment.apiBase}/finances/list`;
+            params = { page };
+            console.log('Loading finances for HO user (role_id: 2) from:', apiEndpoint, 'with page:', page);
+        } else if (this.auth.isBranch()) {
+            // Branch (role_id: 3) uses /finances without pagination
+            apiEndpoint = `${environment.apiBase}/finances`;
+            params = {};
+            console.log('Loading finances for Branch user (role_id: 3) from:', apiEndpoint, '(no pagination)');
+        } else {
+            // Fallback for other roles
+            apiEndpoint = `${environment.apiBase}/finances/list`;
+            params = { page };
+            console.log('Loading finances with fallback endpoint for unknown role from:', apiEndpoint);
+        }
+
+        this.http.get<FinanceResponse>(apiEndpoint, { headers, params })
             .subscribe({
                 next: (response) => {
-                    // console.log('Finances API Response:', response);
+                    console.log('Finances API Response:', response);
 
-                    if (response.success && response.data) {
-                        this.finances = response.data.data;
+                    if (response && response.success && response.data) {
+                        // Handle different response structures based on role
+                        if (Array.isArray(response.data)) {
+                            // Branch response: direct array
+                            this.finances = response.data;
+                            this.currentPage = 1;
+                            this.totalPages = 1;
+                            this.itemsPerPage = response.data.length;
+                            this.totalItems = response.data.length;
+                        } else {
+                            // HO response: paginated structure
+                            const paginatedData = response.data as any;
+                            this.finances = paginatedData.data;
+                            this.currentPage = paginatedData.current_page;
+                            this.totalPages = paginatedData.last_page;
+                            this.itemsPerPage = paginatedData.per_page;
+                            this.totalItems = paginatedData.total;
+                        }
+
                         this.filteredFinances = this.finances;
-                        this.currentPage = response.data.current_page;
-                        this.totalPages = response.data.last_page;
-                        this.itemsPerPage = response.data.per_page;
-                        this.totalItems = response.data.total;
 
                         // Apply search filter if search term exists
                         if (this.searchTerm.trim()) {
                             this.filterFinances();
                         }
+
+                        console.log(`Loaded ${this.finances.length} finances for ${this.auth.isHO() ? 'HO' : this.auth.isBranch() ? 'Branch' : 'Unknown'} user`);
+                    } else if (response === null || response === undefined) {
+                        this.error = 'No data received from server. Please try again.';
+                        this.finances = [];
+                        this.filteredFinances = [];
+                        console.error('API returned null or undefined response');
                     } else {
-                        this.error = response.message || 'Failed to load finances';
+                        this.error = response?.message || 'Failed to load finances';
                         this.finances = [];
                         this.filteredFinances = [];
                     }
@@ -124,15 +163,25 @@ export class FinanceComponent implements OnInit, OnDestroy {
                     this.loading = false;
                 },
                 error: (err) => {
-                    // console.error('Error loading finances:', err);
-                    if (err.status === 401) {
+                    console.error('Error loading finances:', err);
+
+                    if (err.status === 0) {
+                        this.error = 'Unable to connect to server. Please check your connection and try again.';
+                    } else if (err.status === 401) {
                         this.error = 'Unauthenticated. Please log in again.';
                         this.auth.clearSession();
                     } else if (err.status === 403) {
                         this.error = 'Access denied. You do not have permission to view finances.';
+                    } else if (err.status === 404) {
+                        this.error = 'Finance service not found. Please contact support.';
+                    } else if (err.status >= 500) {
+                        this.error = 'Server error. Please try again later.';
                     } else {
-                        this.error = err?.error?.message || 'Failed to load finances. Please try again.';
+                        this.error = err?.error?.message || `Failed to load finances. Error ${err.status}: ${err.statusText}`;
                     }
+
+                    this.finances = [];
+                    this.filteredFinances = [];
                     this.loading = false;
                 }
             });
@@ -198,7 +247,12 @@ export class FinanceComponent implements OnInit, OnDestroy {
                     // console.log('Create Finance Response:', response);
                     if (response.success) {
                         this.closeModal();
-                        this.loadFinances(this.currentPage);
+                        // Refresh without pagination for branch users
+                        if (this.auth.isBranch()) {
+                            this.loadFinances(1);
+                        } else {
+                            this.loadFinances(this.currentPage);
+                        }
                     } else {
                         this.error = response.message || 'Failed to create finance';
                     }
@@ -232,7 +286,12 @@ export class FinanceComponent implements OnInit, OnDestroy {
                     // console.log('Update Finance Response:', response);
                     if (response.success) {
                         this.closeModal();
-                        this.loadFinances(this.currentPage);
+                        // Refresh without pagination for branch users
+                        if (this.auth.isBranch()) {
+                            this.loadFinances(1);
+                        } else {
+                            this.loadFinances(this.currentPage);
+                        }
                     } else {
                         this.error = response.message || 'Failed to update finance';
                     }
@@ -297,7 +356,12 @@ export class FinanceComponent implements OnInit, OnDestroy {
     }
 
     refreshFinances() {
-        this.loadFinances(this.currentPage);
+        // For branch users, always load without pagination
+        if (this.auth.isBranch()) {
+            this.loadFinances(1); // Just use 1 as default, params will be empty anyway
+        } else {
+            this.loadFinances(this.currentPage);
+        }
     }
 
     goBack() {

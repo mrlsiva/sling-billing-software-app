@@ -667,7 +667,7 @@ export class ProductListComponent implements OnInit {
                 finalQuantity: availableQuantity,
                 reason: 'Zero or negative quantity'
             });
-            this.toastService.show('❌ Item is out of stock and cannot be added to cart', 'error');
+            // this.toastService.show('❌ Item is out of stock and cannot be added to cart', 'error');
             return;
         }
 
@@ -722,7 +722,7 @@ export class ProductListComponent implements OnInit {
         });
 
         this.cart.add(item); // Pass full item to preserve POS structure
-        this.toastService.show(`✅ ${product?.name || 'Item'} added to cart`, 'success');
+        this.toastService.show(` ${product?.name || 'Item'} added to cart`, 'success');
     } goToLogin() {
         this.router.navigate(['/login']);
     }

@@ -651,7 +651,10 @@ export class CheckoutComponent implements OnInit {
 
         // Build cart array
         const cart = this.items.map((it: any) => ({
-            product_id: it.product?.id || it.product_id || it.id,
+            product_id: it.product?.product_id
+                || it.product_product_id
+                || it.product_id
+            ,
             qty: it.qty,
             price: it.product?.price || it.price,
             tax_amount: it.product?.tax_amount || it.tax_amount || 0

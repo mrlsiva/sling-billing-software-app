@@ -15,14 +15,58 @@
     font-size: 12px;
 }
 
+.toast-content {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.toast-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    font-weight: bold;
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+.icon-success {
+    background: #ffffff;
+    color: #28a745;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+}
+
+.icon-error {
+    background: rgba(255, 255, 255, 0.2);
+    color: #fff;
+}
+
+.icon-info {
+    background: rgba(255, 255, 255, 0.2);
+    color: #fff;
+}
+
+.toast-message {
+    flex: 1;
+}
+
 .toast-inner.error {
     background: #ff4d4f;
 }
 
 .toast-inner.success {
-    background: #28a745
+    background: #28a745;
 }
 
 .toast-inner.info {
-    background: #333
+    background: #333;
 }

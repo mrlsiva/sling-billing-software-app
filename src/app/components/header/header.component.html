@@ -14,7 +14,16 @@
 
 <nav #sideMenu class="side-menu" [class.open]="open">
     <div class="side-head">
-        <strong class="side-title">{{ userName }}</strong>
+        <div class="user-info">
+            <strong class="side-title">{{ userName }}</strong>
+            <span class="user-role" [ngClass]="{
+                'role-superadmin': isSuperAdmin,
+                'role-ho': isHO && !isSuperAdmin,
+                'role-branch': isBranch && !isHO && !isSuperAdmin
+            }">
+                {{ isSuperAdmin ? 'Super Admin' : (isHO ? 'Head Office' : (isBranch ? 'Branch' : 'User')) }}
+            </span>
+        </div>
         <button class="side-close" (click)="close()" aria-label="Close menu"><i class="fa-solid fa-xmark"
                 aria-hidden="true"></i></button>
     </div>
