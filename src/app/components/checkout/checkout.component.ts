@@ -886,12 +886,12 @@ export class CheckoutComponent implements OnInit {
         // Handle nested product structures similar to addToCart logic
         const product = item.product ?? item;
         const nested = product.product || {};
-        
+
         // Try multiple possible locations for product name
-        const productName = product?.name || nested?.name || product?.title || nested?.title || 
-                           product?.product_name || nested?.product_name || product?.code || 
-                           nested?.code || item.id || 'Unknown Product';
-        
+        const productName = product?.name || nested?.name || product?.title || nested?.title ||
+            product?.product_name || nested?.product_name || product?.code ||
+            nested?.code || item.id || 'Unknown Product';
+
         return productName;
     }
 
@@ -904,8 +904,8 @@ export class CheckoutComponent implements OnInit {
         const nested = product.product || {};
 
         // Try multiple possible locations for product price
-        const priceVal = product.price ?? nested.price ?? product.selling_price ?? nested.selling_price ?? 
-                        product.amount ?? nested.amount ?? item.price ?? 0;
+        const priceVal = product.price ?? nested.price ?? product.selling_price ?? nested.selling_price ??
+            product.amount ?? nested.amount ?? item.price ?? 0;
         return Number(priceVal) || 0;
     }
 }
