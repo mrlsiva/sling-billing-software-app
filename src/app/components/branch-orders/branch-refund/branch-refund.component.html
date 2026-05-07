@@ -1,0 +1,88 @@
+<div class="page">
+    <div class="page-header">
+        <h2 class="page-title"><i class="fa fa-undo"></i> Process Refund</h2>
+        <button class="btn-secondary" routerLink="/branch/orders"><i class="fa fa-arrow-left"></i> Back</button>
+    </div>
+
+    <app-skeleton-loader *ngIf="loading" type="line" [count]="5"></app-skeleton-loader>
+
+    <ng-container *ngIf="!loading && orderData">
+        <!-- Order Info -->
+        <div class="section-card">
+            <h3 class="section-title">Order Info</h3>
+            <div class="info-grid">
+                <div class="info-row"><span>Bill ID</span><strong>{{ orderData.order?.bill_id }}</strong></div>
+                <div class="info-row"><span>Customer</span><strong>{{ orderData.order?.customer?.name ?? orderData.order?.customer_name ?? '-' }}</strong></div>
+                <div class="info-row"><span>Date</span><strong>{{ orderData.order?.billed_on | dateFormat }}</strong></div>
+                <div class="info-row"><span>Total Amount</span><strong>{{ (orderData.order?.bill_amount ?? 0) | amount }}</strong></div>
+            </div>
+        </div>
+
+        <!-- Refund Form -->
+        <div class="section-card">
+            <h3 class="section-title">Refund Details</h3>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Refunded By *</label>
+                    <select [(ngModel)]="form.refunded_by" [class.error]="errors.refunded_by">
+                        <option value="">Select staff</option>
+                        <option *ngFor="let s of staffs" [value]="s.id">{{ s.name }}</option>
+                    </select>
+                    <span class="error-msg" *ngIf="errors.refunded_by">{{ errors.refunded_by }}</span>
+                </div>
+                <div class="form-group">
+                    <label>Refund Amount *</label>
+                    <input type="number" [(ngModel)]="form.refund_amount" placeholder="Amount" [class.error]="errors.refund_amount" />
+                    <span class="error-msg" *ngIf="errors.refund_amount">{{ errors.refund_amount }}</span>
+                </div>
+                <div class="form-group">
+                    <label>Payment Method</label>
+                    <select [(ngModel)]="form.payment_id">
+                        <option value="">Select method</option>
+                        <option *ngFor="let p of payments" [value]="p.id">{{ p.name }}</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Payment Detail</label>
+                    <input type="text" [(ngModel)]="form.payment_detail" placeholder="UPI ID / Account No" />
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Reason *</label>
+                <textarea [(ngModel)]="form.reason" rows="3" placeholder="Reason for refund" [class.error]="errors.reason"></textarea>
+                <span class="error-msg" *ngIf="errors.reason">{{ errors.reason }}</span>
+            </div>
+        </div>
+
+        <!-- Product Rows -->
+        <div class="section-card">
+            <h3 class="section-title">Products</h3>
+            <div class="product-refund-row" *ngFor="let row of productRows">
+                <div class="product-info">
+                    <strong>{{ row.name }}</strong>
+                    <span class="text-muted">Ordered: {{ row.ordered_qty }} &bull; ₹ {{ row.price }}</span>
+                </div>
+                <div class="qty-input-wrap">
+                    <label>Refund Qty</label>
+                    <input type="number" [(ngModel)]="row.refund_qty" [min]="0" [max]="row.ordered_qty" class="qty-input" />
+                </div>
+                <div class="imei-select" *ngIf="row.imeis.length > 0">
+                    <label>Select IMEIs</label>
+                    <div class="imei-check-list">
+                        <label *ngFor="let imei of row.imeis" class="imei-check">
+                            <input type="checkbox" (change)="toggleImei(row, imei)" /> {{ imei }}
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-bar">
+            <button class="btn-secondary" routerLink="/branch/orders">Cancel</button>
+            <button class="btn-primary" (click)="submit()" [disabled]="saving">
+                <i class="fa fa-spinner fa-spin" *ngIf="saving"></i>
+                {{ saving ? 'Processing...' : 'Process Refund' }}
+            </button>
+        </div>
+    </ng-container>
+</div>

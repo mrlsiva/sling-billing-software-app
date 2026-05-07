@@ -1,0 +1,203 @@
+<div class="ledger-page">
+    <!-- Top Bar -->
+    <div class="page-header">
+        <h2 class="page-title"><i class="fa fa-book"></i> Vendor Ledger</h2>
+        <button class="btn-primary" (click)="showPaymentPanel = true">
+            <i class="fa fa-plus"></i> Make Payment
+        </button>
+    </div>
+
+    <app-skeleton-loader *ngIf="loading" type="line" [count]="4"></app-skeleton-loader>
+
+    <ng-container *ngIf="!loading && data">
+        <!-- Vendor Card + Stats -->
+        <div class="vendor-summary">
+            <div class="vendor-info">
+                <div class="vendor-avatar"><i class="fa fa-store"></i></div>
+                <div>
+                    <h3>{{ vendor.name }}</h3>
+                    <p>{{ vendor.phone }} &bull; {{ vendor.email }}</p>
+                    <p *ngIf="vendor.gst">GST: {{ vendor.gst }}</p>
+                    <p *ngIf="vendor.address">{{ vendor.address }}</p>
+                </div>
+            </div>
+            <div class="stat-chips">
+                <div class="chip chip-primary"><span>Total Gross</span><strong>{{ (stats.total_gross ?? stats.total_amount ?? 0) | amount }}</strong></div>
+                <div class="chip chip-success"><span>Total Paid</span><strong>{{ (stats.total_paid ?? 0) | amount }}</strong></div>
+                <div class="chip chip-danger"><span>Balance Due</span><strong>{{ (stats.balance_due ?? stats.balance ?? 0) | amount }}</strong></div>
+                <div class="chip chip-warning"><span>Opening Balance</span><strong>{{ (stats.opening_balance ?? 0) | amount }}</strong></div>
+            </div>
+        </div>
+
+        <!-- Date Filter -->
+        <div class="filter-row">
+            <input type="date" [(ngModel)]="filters.from_date" />
+            <input type="date" [(ngModel)]="filters.to_date" />
+            <input type="text" [(ngModel)]="filters.search" placeholder="Search invoice..." />
+            <button class="btn-apply" (click)="load()"><i class="fa fa-search"></i> Apply</button>
+        </div>
+
+        <!-- Purchase Orders Table -->
+        <div class="section-card">
+            <h3 class="section-title">Purchase Orders</h3>
+            <div class="table-responsive" *ngIf="orders.length > 0">
+                <table class="dt">
+                    <thead>
+                        <tr>
+                            <th>Invoice No</th>
+                            <th>Invoice Date</th>
+                            <th>Due Date</th>
+                            <th>Product</th>
+                            <th class="tr">Gross</th>
+                            <th class="tr">Paid</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <ng-container *ngFor="let o of orders">
+                            <tr>
+                                <td><strong>{{ o.invoice_no ?? o.invoice_number ?? '-' }}</strong></td>
+                                <td>{{ o.invoice_date | dateFormat }}</td>
+                                <td>{{ o.due_date | dateFormat }}</td>
+                                <td>{{ o.product ?? o.product_name ?? '-' }}</td>
+                                <td class="tr">{{ (o.gross ?? o.bill_amount ?? 0) | amount }}</td>
+                                <td class="tr">{{ (o.paid ?? o.paid_amount ?? 0) | amount }}</td>
+                                <td><app-status-badge [status]="o.status ?? o.payment_status"></app-status-badge></td>
+                                <td>
+                                    <div class="action-btns">
+                                        <button class="btn-icon" title="View details" (click)="toggleRow(o.id)"><i class="fa fa-eye"></i></button>
+                                        <button class="btn-icon" title="Edit amount" (click)="openUpdate(o)"><i class="fa fa-pencil-alt"></i></button>
+                                        <button class="btn-icon btn-icon-danger" title="Refund" (click)="openRefund(o)" *ngIf="o.status !== 'refunded'"><i class="fa fa-undo"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr *ngIf="expandedRow === o.id" class="expanded-row">
+                                <td colspan="8">
+                                    <div class="details-list" *ngIf="o.details?.length">
+                                        <strong>Amount History:</strong>
+                                        <div class="detail-item" *ngFor="let d of o.details">
+                                            <span>{{ d.amount | amount }}</span>
+                                            <span class="detail-reason">{{ d.reason }}</span>
+                                            <span class="detail-date">{{ d.created_at | dateFormat }}</span>
+                                        </div>
+                                    </div>
+                                    <p *ngIf="!o.details?.length" class="text-muted">No detail history.</p>
+                                </td>
+                            </tr>
+                        </ng-container>
+                    </tbody>
+                </table>
+            </div>
+            <app-empty-state *ngIf="orders.length === 0" title="No purchase orders found"></app-empty-state>
+        </div>
+
+        <!-- Payment History -->
+        <div class="section-card">
+            <div class="section-title-row">
+                <h3 class="section-title">Payment History</h3>
+                <button class="btn-secondary" (click)="loadPayments()">
+                    <i class="fa" [class.fa-eye]="!showPayments" [class.fa-eye-slash]="showPayments"></i>
+                    {{ showPayments ? 'Hide' : 'View' }} Payments
+                </button>
+            </div>
+            <ng-container *ngIf="showPayments">
+                <div class="payment-timeline" *ngIf="payments.length > 0">
+                    <div class="timeline-item" *ngFor="let p of payments">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <span class="tl-date">{{ p.created_at | dateFormat }}</span>
+                            <span class="tl-method">{{ p.payment_method ?? p.method }}</span>
+                            <span class="tl-amount">{{ (p.amount ?? 0) | amount }}</span>
+                            <span class="tl-comment" *ngIf="p.comment">{{ p.comment }}</span>
+                        </div>
+                    </div>
+                </div>
+                <app-empty-state *ngIf="payments.length === 0" title="No payments yet"></app-empty-state>
+            </ng-container>
+        </div>
+    </ng-container>
+</div>
+
+<!-- Make Payment Slide Panel -->
+<div class="slide-overlay" *ngIf="showPaymentPanel" (click)="$event.target === $event.currentTarget && (showPaymentPanel = false)">
+    <div class="slide-panel">
+        <div class="panel-header">
+            <h3>Make Payment</h3>
+            <button (click)="showPaymentPanel = false"><i class="fa fa-times"></i></button>
+        </div>
+        <div class="panel-body">
+            <div class="form-group">
+                <label>Payment Method *</label>
+                <select [(ngModel)]="paymentForm.payment_id">
+                    <option value="">Select method</option>
+                    <option *ngFor="let m of paymentMethods" [value]="m.id">{{ m.name }}</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Amount *</label>
+                <input type="number" [(ngModel)]="paymentForm.amount" placeholder="Enter amount" min="1" />
+            </div>
+            <div class="form-group">
+                <label>Comment</label>
+                <textarea [(ngModel)]="paymentForm.comment" rows="3" placeholder="Optional comment"></textarea>
+            </div>
+        </div>
+        <div class="panel-footer">
+            <button class="btn-cancel" (click)="showPaymentPanel = false">Cancel</button>
+            <button class="btn-primary" (click)="savePayment()" [disabled]="savingPayment">
+                {{ savingPayment ? 'Saving...' : 'Record Payment' }}
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Update Amount Modal -->
+<div class="modal-overlay" *ngIf="showUpdateModal" (click)="$event.target === $event.currentTarget && (showUpdateModal = false)">
+    <div class="modal-box">
+        <div class="modal-header"><h3>Update Amount</h3><button (click)="showUpdateModal = false"><i class="fa fa-times"></i></button></div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label>Old Amount</label>
+                <input type="text" [value]="updateForm.old_amount" readonly class="readonly-input" />
+            </div>
+            <div class="form-group">
+                <label>New Amount *</label>
+                <input type="number" [(ngModel)]="updateForm.new_amount" placeholder="Enter new amount" />
+            </div>
+            <div class="form-group">
+                <label>Reason *</label>
+                <textarea [(ngModel)]="updateForm.reason" rows="3" placeholder="Reason for change"></textarea>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-cancel" (click)="showUpdateModal = false">Cancel</button>
+            <button class="btn-primary" (click)="saveUpdate()" [disabled]="savingUpdate">{{ savingUpdate ? 'Saving...' : 'Update' }}</button>
+        </div>
+    </div>
+</div>
+
+<!-- Refund Modal -->
+<div class="modal-overlay" *ngIf="showRefundModal" (click)="$event.target === $event.currentTarget && (showRefundModal = false)">
+    <div class="modal-box">
+        <div class="modal-header"><h3>Refund</h3><button (click)="showRefundModal = false"><i class="fa fa-times"></i></button></div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label>Refund Quantity *</label>
+                <input type="number" [(ngModel)]="refundForm.refund_qty" placeholder="Quantity" min="1" />
+            </div>
+            <div class="form-group">
+                <label>Refund Amount *</label>
+                <input type="number" [(ngModel)]="refundForm.refund_amount" placeholder="Amount" min="0" />
+            </div>
+            <div class="form-group">
+                <label>Comment</label>
+                <textarea [(ngModel)]="refundForm.comment" rows="3" placeholder="Reason for refund"></textarea>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-cancel" (click)="showRefundModal = false">Cancel</button>
+            <button class="btn-primary" (click)="saveRefund()" [disabled]="savingRefund">{{ savingRefund ? 'Processing...' : 'Process Refund' }}</button>
+        </div>
+    </div>
+</div>

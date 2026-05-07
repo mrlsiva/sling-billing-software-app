@@ -1,9 +1,9 @@
 /* Product list minimal styles */
 :host {
     display: block;
-    padding: 0.75rem;
+    padding: 0.5625rem;
     background-color: color-mix(in srgb, var(--color-primary-bg) 5%, white 95%);
-    font-size: 13px;
+    font-size: 9.75px;
     /* slightly smaller base font */
     line-height: 1.35;
 }
@@ -12,7 +12,7 @@
 .search-container {
     background: white;
     border-radius: 8px;
-    padding: 1rem 0;
+    padding: 0.75rem 0;
 
     .search-input-wrapper {
         display: flex;
@@ -44,10 +44,10 @@
 
             .search-input {
                 width: 100%;
-                padding: 0.75rem 2.5rem 0.75rem 2.25rem;
+                padding: 0.5625rem 1.875rem 0.5625rem 1.6875rem;
                 border: none;
                 border-radius: 6px;
-                font-size: 14px;
+                font-size: 10.5px;
                 background: transparent;
                 color: var(--color-neutral-800);
 
@@ -67,7 +67,7 @@
                 border: none;
                 color: var(--color-neutral-600);
                 cursor: pointer;
-                padding: 0.25rem;
+                padding: 0.1875rem;
                 border-radius: 4px;
                 width: 24px;
                 height: 24px;
@@ -81,7 +81,7 @@
                 }
 
                 .clear-icon {
-                    font-size: 12px;
+                    font-size: 9px;
                 }
             }
         }
@@ -90,7 +90,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 0.75rem;
+            padding: 0.5625rem;
             background: var(--color-primary-bg);
             color: white;
             border: none;
@@ -130,7 +130,7 @@
                     border-radius: 50%;
                     width: 16px;
                     height: 16px;
-                    font-size: 10px;
+                    font-size: 7.5px;
                     font-weight: 600;
                     display: flex;
                     align-items: center;
@@ -146,20 +146,20 @@
     }
 
     .search-results-info {
-        margin-top: 1rem;
-        padding-top: 1rem;
+        margin-top: 0.75rem;
+        padding-top: 0.75rem;
         border-top: 1px solid var(--color-neutral-200);
 
         .results-summary {
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            font-size: 14px;
+            font-size: 10.5px;
             color: var(--color-neutral-700);
-            margin-bottom: 0.75rem;
+            margin-bottom: 0.5625rem;
 
             .results-icon {
-                font-size: 16px;
+                font-size: 12px;
                 opacity: 0.8;
             }
 
@@ -175,19 +175,19 @@
             gap: 0.5rem;
 
             .filters-label {
-                font-size: 12px;
+                font-size: 9px;
                 color: var(--color-neutral-600);
                 font-weight: 500;
-                margin-right: 0.25rem;
+                margin-right: 0.1875rem;
             }
 
             .filter-chip {
                 display: inline-flex;
                 align-items: center;
                 gap: 0.25rem;
-                padding: 0.25rem 0.75rem;
+                padding: 0.1875rem 0.5625rem;
                 border-radius: 16px;
-                font-size: 12px;
+                font-size: 9px;
                 font-weight: 500;
                 border: 1px solid;
 
@@ -208,15 +208,15 @@
                     border: none;
                     color: currentColor;
                     cursor: pointer;
-                    padding: 0.125rem;
+                    padding: 0.0938rem;
                     border-radius: 2px;
                     width: 14px;
                     height: 14px;
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    font-size: 10px;
-                    margin-left: 0.25rem;
+                    font-size: 7.5px;
+                    margin-left: 0.1875rem;
 
                     &:hover {
                         background: rgba(0, 0, 0, 0.1);
@@ -235,10 +235,10 @@
 
 .search-input {
     width: 100%;
-    padding: 0.75rem 1rem;
+    padding: 0.5625rem 0.75rem;
     border: 2px solid var(--color-neutral-400);
     border-radius: 6px;
-    font-size: 14px;
+    font-size: 10.5px;
     background-color: white;
     transition: border-color 0.2s ease;
 
@@ -257,10 +257,10 @@
     right: 0.75rem;
     background: none;
     border: none;
-    font-size: 16px;
+    font-size: 12px;
     color: var(--color-neutral-600);
     cursor: pointer;
-    padding: 0.25rem;
+    padding: 0.1875rem;
     border-radius: 50%;
     width: 24px;
     height: 24px;
@@ -281,24 +281,24 @@
 }
 
 .search-results-info {
-    margin-top: 0.5rem;
-    font-size: 12px;
+    margin-top: 0.375rem;
+    font-size: 9px;
     color: var(--color-neutral-600);
     text-align: center;
 }
 
 .no-results {
     text-align: center;
-    padding: 2rem;
+    padding: 1.5rem;
     color: var(--color-neutral-600);
     font-style: italic;
     background: var(--color-neutral-100);
     border-radius: 6px;
-    margin: 1rem 0;
+    margin: 0.75rem 0;
 }
 
 h2 {
-    margin-bottom: 1rem;
+    margin-bottom: 0.75rem;
 }
 
 /* Product list component - single canonical stylesheet */
@@ -308,7 +308,7 @@ h2 {
     background-color: color-mix(in srgb, var(--color-primary-bg) 5%, white 95%);
     min-height: calc(100vh - 150px);
     /* prevent horizontal scroll */
-    font-size: 13px;
+    font-size: 9.75px;
     /* ensure consistent smaller font across component */
     line-height: 1.35;
 }
@@ -321,15 +321,15 @@ h2 {
 }
 
 h2 {
-    margin-bottom: 0.6rem;
-    font-size: 1.05rem;
+    margin-bottom: 0.45rem;
+    font-size: 0.7875rem;
     /* smaller heading */
     margin-top: 0;
 }
 
 ul {
     list-style: none;
-    padding: 0.5rem;
+    padding: 0.375rem;
     margin: 0;
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -345,7 +345,7 @@ li {
     }
 
     & .product-item-listing {
-        padding: 0.75rem 1rem;
+        padding: 0.5625rem 0.75rem;
     }
 }
 
@@ -400,32 +400,32 @@ li.product-item.out-of-stock {
 
 .product-meta {
     color: var(--color-neutral-600);
-    font-size: 0.75rem;
+    font-size: 0.5625rem;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    padding: 4px 0px;
+    padding: 3px 0px;
 
     &.mb-3 {
-        margin-bottom: 0.25rem;
+        margin-bottom: 0.1875rem;
     }
 
     & span {
         background-color: var(--color-primary-bg-light);
         border: 1px solid var(--color-primary-bg);
         color: var(--color-primary-bg);
-        padding: 0 4px;
+        padding: 0 3px;
         border-radius: 4px;
     }
 }
 
 .product-footer {
-    margin-top: 0.5rem;
+    margin-top: 0.375rem;
     color: var(--color-neutral-800);
 }
 
 .expanded {
-    margin-top: 0.75rem;
+    margin-top: 0.5625rem;
 }
 
 .expanded-cards {
@@ -438,7 +438,7 @@ li.product-item.out-of-stock {
     display: flex;
     gap: 0.75rem;
     align-items: flex-start;
-    padding: 0.5rem;
+    padding: 0.375rem;
     border: 1px solid var(--color-neutral-400);
     border-radius: 6px;
     background: var(--color-neutral-200);
@@ -464,7 +464,7 @@ img {
 }
 
 .expanded-loading {
-    padding: 0.5rem;
+    padding: 0.375rem;
     color: var(--color-neutral-600);
 }
 
@@ -472,7 +472,7 @@ img {
 .error,
 .no-products {
     text-align: center;
-    margin: 1rem 0;
+    margin: 0.75rem 0;
     font-weight: bold;
     color: var(--color-neutral-700);
 }
@@ -483,7 +483,7 @@ img {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 3rem 1rem;
+    padding: 2.25rem 0.75rem;
     text-align: center;
 
     .loading-spinner {
@@ -493,11 +493,11 @@ img {
         border-top: 4px solid var(--color-primary-bg);
         border-radius: 50%;
         animation: spin 1s linear infinite;
-        margin-bottom: 1rem;
+        margin-bottom: 0.75rem;
     }
 
     .loading-text {
-        font-size: 16px;
+        font-size: 12px;
         color: var(--color-neutral-600);
         font-weight: 500;
     }
@@ -519,23 +519,23 @@ img {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 3rem 1rem;
+    padding: 2.25rem 0.75rem;
     text-align: center;
     background: var(--color-danger-bg);
     border: 1px solid var(--color-danger-border);
     border-radius: 8px;
-    margin: 1rem;
+    margin: 0.75rem;
 
     .error-icon {
-        font-size: 48px;
-        margin-bottom: 1rem;
+        font-size: 36px;
+        margin-bottom: 0.75rem;
     }
 
     .error-message {
-        font-size: 16px;
+        font-size: 12px;
         color: var(--color-danger-text);
         font-weight: 500;
-        margin-bottom: 1.5rem;
+        margin-bottom: 1.125rem;
         max-width: 500px;
     }
 
@@ -543,9 +543,9 @@ img {
         background: var(--color-primary-bg);
         color: white;
         border: none;
-        padding: 0.75rem 1.5rem;
+        padding: 0.5625rem 1.125rem;
         border-radius: 6px;
-        font-size: 14px;
+        font-size: 10.5px;
         font-weight: 500;
         cursor: pointer;
         transition: background-color 0.2s ease;
@@ -562,30 +562,30 @@ img {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 3rem 1rem;
+    padding: 2.25rem 0.75rem;
     text-align: center;
     background: var(--color-neutral-50);
     border: 1px solid var(--color-neutral-200);
     border-radius: 8px;
-    margin: 1rem;
+    margin: 0.75rem;
 
     .no-products-icon {
-        font-size: 64px;
-        margin-bottom: 1rem;
+        font-size: 48px;
+        margin-bottom: 0.75rem;
         opacity: 0.6;
     }
 
     .no-products-title {
-        font-size: 20px;
+        font-size: 15px;
         font-weight: 600;
         color: var(--color-neutral-800);
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.375rem;
     }
 
     .no-products-message {
-        font-size: 14px;
+        font-size: 10.5px;
         color: var(--color-neutral-600);
-        margin-bottom: 1.5rem;
+        margin-bottom: 1.125rem;
         max-width: 400px;
     }
 
@@ -593,9 +593,9 @@ img {
         background: var(--color-primary-bg);
         color: white;
         border: none;
-        padding: 0.75rem 1.5rem;
+        padding: 0.5625rem 1.125rem;
         border-radius: 6px;
-        font-size: 14px;
+        font-size: 10.5px;
         font-weight: 500;
         cursor: pointer;
         transition: background-color 0.2s ease;
@@ -612,39 +612,39 @@ img {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 3rem 1rem;
+    padding: 2.25rem 0.75rem;
     text-align: center;
     background: var(--color-warning-bg);
     border: 1px solid var(--color-warning-border);
     border-radius: 8px;
-    margin: 1rem;
+    margin: 0.75rem;
 
     .no-results-icon {
-        font-size: 48px;
-        margin-bottom: 1rem;
+        font-size: 36px;
+        margin-bottom: 0.75rem;
         opacity: 0.7;
     }
 
     .no-results-title {
-        font-size: 18px;
+        font-size: 13.5px;
         font-weight: 600;
         color: var(--color-warning-text);
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.375rem;
     }
 
     .no-results-message {
-        font-size: 14px;
+        font-size: 10.5px;
         color: var(--color-warning-text);
-        margin-bottom: 1.5rem;
+        margin-bottom: 1.125rem;
     }
 
     .clear-btn {
         background: var(--color-neutral-600);
         color: white;
         border: none;
-        padding: 0.75rem 1.5rem;
+        padding: 0.5625rem 1.125rem;
         border-radius: 6px;
-        font-size: 14px;
+        font-size: 10.5px;
         font-weight: 500;
         cursor: pointer;
         transition: background-color 0.2s ease;
@@ -656,8 +656,8 @@ img {
 }
 
 button.logout {
-    margin-top: 1rem;
-    padding: 0.5rem 1rem;
+    margin-top: 0.75rem;
+    padding: 0.375rem 0.75rem;
     background-color: var(--color-primary-bg);
     color: var(--color-primary-text);
     border: none;
@@ -725,14 +725,14 @@ button.logout {
         border: 1px solid var(--color-neutral-300);
 
         .modal-header {
-            padding: 1rem;
+            padding: 0.75rem;
             border-bottom: 1px solid var(--color-neutral-200);
             display: flex;
             align-items: center;
             justify-content: space-between;
 
             .modal-title {
-                font-size: 18px;
+                font-size: 13.5px;
                 font-weight: 600;
                 color: var(--color-neutral-900);
                 margin: 0;
@@ -763,11 +763,11 @@ button.logout {
         }
 
         .modal-body {
-            padding: 1.5rem;
+            padding: 1.125rem;
             overflow: visible;
 
             .filter-group {
-                margin-bottom: 1.5rem;
+                margin-bottom: 1.125rem;
 
                 &:last-child {
                     margin-bottom: 0;
@@ -775,10 +775,10 @@ button.logout {
 
                 .form-select {
                     width: 100%;
-                    padding: 0.75rem;
+                    padding: 0.5625rem;
                     border: 1px solid var(--color-neutral-400);
                     border-radius: 6px;
-                    font-size: 14px;
+                    font-size: 10.5px;
                     background: white;
                     color: var(--color-neutral-800);
                     cursor: pointer;
@@ -796,14 +796,14 @@ button.logout {
                     }
 
                     option {
-                        padding: 0.5rem;
+                        padding: 0.375rem;
                     }
                 }
             }
         }
 
         .modal-footer {
-            padding: 1rem 1.5rem 1.5rem;
+            padding: 0.75rem 1.125rem 1.125rem;
             background: var(--color-neutral-50);
             display: flex;
             gap: 0.75rem;
@@ -812,10 +812,10 @@ button.logout {
 
             .btn-secondary,
             .btn-primary {
-                padding: 0.75rem 1.5rem;
+                padding: 0.5625rem 1.125rem;
                 border: none;
                 border-radius: 6px;
-                font-size: 14px;
+                font-size: 10.5px;
                 font-weight: 500;
                 cursor: pointer;
                 transition: background-color 0.2s ease;
@@ -846,8 +846,8 @@ button.logout {
 .filter-group {
     .filter-label {
         display: block;
-        margin-bottom: 0.5rem;
-        font-size: 14px;
+        margin-bottom: 0.375rem;
+        font-size: 10.5px;
         font-weight: 500;
         color: var(--color-neutral-700);
     }
@@ -872,12 +872,12 @@ button.logout {
 
     .custom-select-display {
         width: 100%;
-        padding: 0.75rem 3rem 0.75rem 0.75rem;
+        padding: 0.5625rem 2.25rem 0.5625rem 0.5625rem;
         border: 1px solid var(--color-neutral-400);
         border-radius: 6px;
         background: white;
         color: var(--color-neutral-800);
-        font-size: 14px;
+        font-size: 10.5px;
         cursor: pointer;
         transition: border-color 0.2s ease;
         position: relative;
@@ -931,7 +931,7 @@ button.logout {
         display: block;
 
         .dropdown-search {
-            padding: 0.75rem;
+            padding: 0.5625rem;
             border-bottom: 1px solid var(--color-neutral-200);
             background: var(--color-neutral-50);
             position: sticky;
@@ -954,10 +954,10 @@ button.logout {
 
                 .dropdown-search-input {
                     width: 100%;
-                    padding: 0.5rem 2.25rem 0.5rem 2rem;
+                    padding: 0.375rem 1.6875rem 0.375rem 1.5rem;
                     border: 1px solid var(--color-neutral-300);
                     border-radius: 4px;
-                    font-size: 13px;
+                    font-size: 9.75px;
                     background: white;
                     color: var(--color-neutral-800);
 
@@ -968,7 +968,7 @@ button.logout {
 
                     &::placeholder {
                         color: var(--color-neutral-400);
-                        font-size: 12px;
+                        font-size: 9px;
                     }
                 }
 
@@ -979,7 +979,7 @@ button.logout {
                     border: none;
                     color: var(--color-neutral-500);
                     cursor: pointer;
-                    padding: 0.25rem;
+                    padding: 0.1875rem;
                     border-radius: 2px;
                     width: 20px;
                     height: 20px;
@@ -1002,14 +1002,14 @@ button.logout {
         }
 
         .dropdown-option {
-            padding: 0.75rem;
+            padding: 0.5625rem;
             cursor: pointer;
             transition: background-color 0.2s ease;
             display: flex;
             align-items: center;
             justify-content: space-between;
             border-bottom: 1px solid var(--color-neutral-100);
-            font-size: 14px;
+            font-size: 10.5px;
             color: var(--color-neutral-800);
 
             &:last-child {
@@ -1043,10 +1043,10 @@ button.logout {
         }
 
         .no-options-message {
-            padding: 1rem 0.75rem;
+            padding: 0.75rem 0.5625rem;
             text-align: center;
             color: var(--color-neutral-500);
-            font-size: 13px;
+            font-size: 9.75px;
             font-style: italic;
             border-bottom: none;
         }
@@ -1057,16 +1057,16 @@ button.logout {
 .pagination-container {
     background: white;
     border-radius: 8px;
-    padding: 1rem;
-    margin: 1rem 0;
+    padding: 0.75rem;
+    margin: 0.75rem 0;
     border: 1px solid var(--color-neutral-200);
 
     .pagination-info {
-        margin-bottom: 1rem;
+        margin-bottom: 0.75rem;
         text-align: center;
 
         .pagination-text {
-            font-size: 14px;
+            font-size: 10.5px;
             color: var(--color-neutral-600);
             font-weight: 500;
         }
@@ -1119,7 +1119,7 @@ button.logout {
         .pagination-numbers {
             display: flex;
             gap: 0.25rem;
-            margin: 0 0.5rem;
+            margin: 0 0.375rem;
             flex-wrap: wrap;
             justify-content: center;
 
@@ -1129,14 +1129,14 @@ button.logout {
                 justify-content: center;
                 min-width: 36px;
                 height: 36px;
-                padding: 0 0.5rem;
+                padding: 0 0.375rem;
                 background: white;
                 border: 1px solid var(--color-neutral-300);
                 border-radius: 6px;
                 cursor: pointer;
                 transition: all 0.2s ease;
                 color: var(--color-neutral-700);
-                font-size: 14px;
+                font-size: 10.5px;
                 font-weight: 500;
 
                 &:hover {
@@ -1164,7 +1164,7 @@ button.logout {
 /* Mobile responsive pagination */
 @media (max-width: 480px) {
     .pagination-container {
-        padding: 0.75rem;
+        padding: 0.5625rem;
 
         .pagination-controls {
             gap: 0.25rem;
@@ -1180,19 +1180,19 @@ button.logout {
             }
 
             .pagination-numbers {
-                margin: 0 0.25rem;
+                margin: 0 0.1875rem;
 
                 .pagination-number {
                     min-width: 32px;
                     height: 32px;
-                    font-size: 13px;
+                    font-size: 9.75px;
                 }
             }
         }
 
         .pagination-info {
             .pagination-text {
-                font-size: 13px;
+                font-size: 9.75px;
             }
         }
     }

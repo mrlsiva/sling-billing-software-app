@@ -1,0 +1,161 @@
+<div class="page">
+    <div class="page-header">
+        <h2 class="page-title"><i class="fa fa-chart-bar"></i> Reports</h2>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+        <button *ngFor="let t of ['daily','orders','sales','purchase','transfer']" [class.active]="activeTab === t" (click)="setTab(t)">
+            {{ t | titlecase }}
+        </button>
+    </div>
+
+    <!-- Daily Tab -->
+    <ng-container *ngIf="activeTab === 'daily'">
+        <div class="filter-row">
+            <select [(ngModel)]="dailyFilters.branch">
+                <option value="0">All Branches</option>
+                <option *ngFor="let b of branches" [value]="b.id">{{ b.name }}</option>
+            </select>
+            <input type="date" [(ngModel)]="dailyFilters.date" />
+            <button class="btn-apply" (click)="loadTab()"><i class="fa fa-search"></i> Apply</button>
+        </div>
+        <app-skeleton-loader *ngIf="loading" type="cards" [count]="4"></app-skeleton-loader>
+        <ng-container *ngIf="!loading && data">
+            <div class="stat-cards" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px;margin-bottom:16px">
+                <app-stat-card label="Total Sales"    [value]="(data.total_sales    ?? 0) | amount" icon="fa fa-rupee-sign" color="success"></app-stat-card>
+                <app-stat-card label="Total Purchase" [value]="(data.total_purchase ?? 0) | amount" icon="fa fa-boxes"     color="primary"></app-stat-card>
+                <app-stat-card label="Vendor Paid"    [value]="(data.vendor_paid    ?? 0) | amount" icon="fa fa-handshake" color="secondary"></app-stat-card>
+                <app-stat-card label="Profit"         [value]="(data.profit         ?? 0) | amount" icon="fa fa-chart-line" color="warning"></app-stat-card>
+            </div>
+            <!-- Orders Section -->
+            <div class="section-card">
+                <h3 class="section-title">Orders</h3>
+                <div class="table-responsive" *ngIf="orders().length > 0">
+                    <table class="dt"><thead><tr><th>Bill ID</th><th>Customer</th><th class="tr">Amount</th><th>Payment Mode</th><th>Refund</th><th>Date</th></tr></thead>
+                        <tbody><tr *ngFor="let o of orders()"><td>{{ o.bill_id }}</td><td>{{ o.customer_name }}</td><td class="tr">{{ (o.bill_amount ?? 0) | amount }}</td><td>{{ o.payment_mode }}</td><td>{{ o.is_refunded ? 'Yes' : 'No' }}</td><td>{{ o.billed_on | dateFormat }}</td></tr></tbody>
+                    </table>
+                </div>
+                <app-empty-state *ngIf="orders().length === 0" title="No orders"></app-empty-state>
+            </div>
+            <!-- Payment Summary -->
+            <div class="section-card">
+                <h3 class="section-title">Payment Summary</h3>
+                <div class="table-responsive" *ngIf="payments().length > 0">
+                    <table class="dt"><thead><tr><th>Payment Mode</th><th class="tr">Total Amount</th></tr></thead>
+                        <tbody><tr *ngFor="let p of payments()"><td>{{ p.payment_mode ?? p.method }}</td><td class="tr">{{ (p.total_amount ?? p.amount ?? 0) | amount }}</td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+            <!-- Credit -->
+            <div class="section-card" *ngIf="data.credit_amount != null">
+                <h3 class="section-title">Credit Amount</h3>
+                <app-stat-card label="Credit given today" [value]="(data.credit_amount ?? 0) | amount" icon="fa fa-credit-card" color="danger"></app-stat-card>
+            </div>
+        </ng-container>
+    </ng-container>
+
+    <!-- Orders Tab -->
+    <ng-container *ngIf="activeTab === 'orders'">
+        <div class="filter-row">
+            <select [(ngModel)]="ordersFilters.branch"><option value="0">All Branches</option><option *ngFor="let b of branches" [value]="b.id">{{ b.name }}</option></select>
+            <input type="date" [(ngModel)]="ordersFilters.from_date" />
+            <input type="date" [(ngModel)]="ordersFilters.to_date" />
+            <input type="text" [(ngModel)]="ordersFilters.search" placeholder="Search..." />
+            <button class="btn-apply" (click)="loadTab()"><i class="fa fa-search"></i> Apply</button>
+        </div>
+        <app-skeleton-loader *ngIf="loading" type="table" [count]="6"></app-skeleton-loader>
+        <div class="section-card" *ngIf="!loading">
+            <div class="table-responsive" *ngIf="(data?.orders ?? []).length > 0">
+                <table class="dt"><thead><tr><th>Bill ID</th><th>Customer</th><th>Phone</th><th class="tr">Amount</th><th class="tr">Discount</th><th>Refund</th><th>Date</th><th>Staff</th></tr></thead>
+                    <tbody>
+                        <tr *ngFor="let o of (data?.orders ?? [])">
+                            <td>{{ o.bill_id }}</td><td>{{ o.customer_name }}</td><td>{{ o.phone }}</td>
+                            <td class="tr">{{ (o.bill_amount ?? 0) | amount }}</td><td class="tr">{{ (o.discount ?? 0) | amount }}</td>
+                            <td>{{ o.is_refunded ? 'Yes' : 'No' }}</td><td>{{ o.billed_on | dateFormat }}</td><td>{{ o.staff }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <app-empty-state *ngIf="(data?.orders ?? []).length === 0" title="No orders"></app-empty-state>
+        </div>
+    </ng-container>
+
+    <!-- Sales Tab -->
+    <ng-container *ngIf="activeTab === 'sales'">
+        <div class="filter-row">
+            <select [(ngModel)]="salesFilters.branch"><option value="0">All Branches</option><option *ngFor="let b of branches" [value]="b.id">{{ b.name }}</option></select>
+            <input type="date" [(ngModel)]="salesFilters.from_date" />
+            <input type="date" [(ngModel)]="salesFilters.to_date" />
+            <button class="btn-apply" (click)="loadTab()"><i class="fa fa-search"></i> Apply</button>
+        </div>
+        <app-skeleton-loader *ngIf="loading" type="cards" [count]="1"></app-skeleton-loader>
+        <ng-container *ngIf="!loading && data">
+            <app-stat-card label="Total Sales" [value]="(data.total_sales ?? 0) | amount" icon="fa fa-rupee-sign" color="success" style="display:block;margin-bottom:14px;max-width:220px"></app-stat-card>
+            <div class="section-card">
+                <div class="table-responsive" *ngIf="(data?.sales ?? []).length > 0">
+                    <table class="dt"><thead><tr><th>Bill ID</th><th>Customer</th><th class="tr">Amount</th><th>Payment Mode</th><th>Date</th></tr></thead>
+                        <tbody><tr *ngFor="let s of (data?.sales ?? [])"><td>{{ s.bill_id }}</td><td>{{ s.customer_name }}</td><td class="tr">{{ (s.bill_amount ?? 0) | amount }}</td><td>{{ s.payment_mode }}</td><td>{{ s.billed_on | dateFormat }}</td></tr></tbody>
+                    </table>
+                </div>
+                <app-empty-state *ngIf="(data?.sales ?? []).length === 0" title="No sales data"></app-empty-state>
+            </div>
+        </ng-container>
+    </ng-container>
+
+    <!-- Purchase Tab -->
+    <ng-container *ngIf="activeTab === 'purchase'">
+        <div class="filter-row">
+            <input type="date" [(ngModel)]="purchaseFilters.from_date" />
+            <input type="date" [(ngModel)]="purchaseFilters.to_date" />
+            <input type="text" [(ngModel)]="purchaseFilters.vendor" placeholder="Vendor name..." />
+            <button class="btn-apply" (click)="loadTab()"><i class="fa fa-search"></i> Apply</button>
+        </div>
+        <app-skeleton-loader *ngIf="loading" type="table" [count]="5"></app-skeleton-loader>
+        <ng-container *ngIf="!loading && data">
+            <app-stat-card label="Total Purchase" [value]="(data.total_purchase ?? 0) | amount" icon="fa fa-boxes" color="primary" style="display:block;margin-bottom:14px;max-width:220px"></app-stat-card>
+            <div class="section-card">
+                <div class="table-responsive" *ngIf="(data?.purchases ?? []).length > 0">
+                    <table class="dt"><thead><tr><th>Invoice No</th><th>Vendor</th><th>Product</th><th class="tr">Qty</th><th class="tr">Unit Price</th><th class="tr">Tax</th><th class="tr">Gross</th><th>Date</th><th>Status</th></tr></thead>
+                        <tbody><tr *ngFor="let p of (data?.purchases ?? [])"><td>{{ p.invoice_no }}</td><td>{{ p.vendor_name ?? p.vendor }}</td><td>{{ p.product }}</td><td class="tr">{{ p.quantity ?? p.qty }}</td><td class="tr">{{ (p.price ?? 0) | amount }}</td><td class="tr">{{ p.tax ?? 0 }}%</td><td class="tr">{{ (p.gross ?? 0) | amount }}</td><td>{{ p.date | dateFormat }}</td><td>{{ p.status }}</td></tr></tbody>
+                    </table>
+                </div>
+                <app-empty-state *ngIf="(data?.purchases ?? []).length === 0" title="No purchase data"></app-empty-state>
+            </div>
+        </ng-container>
+    </ng-container>
+
+    <!-- Transfer Tab -->
+    <ng-container *ngIf="activeTab === 'transfer'">
+        <div class="filter-row">
+            <select [(ngModel)]="transferFilters.branch"><option value="0">All Branches</option><option *ngFor="let b of branches" [value]="b.id">{{ b.name }}</option></select>
+            <input type="date" [(ngModel)]="transferFilters.from_date" />
+            <input type="date" [(ngModel)]="transferFilters.to_date" />
+            <input type="text" [(ngModel)]="transferFilters.product" placeholder="Product..." />
+            <button class="btn-apply" (click)="loadTab()"><i class="fa fa-search"></i> Apply</button>
+        </div>
+        <app-skeleton-loader *ngIf="loading" type="table" [count]="5"></app-skeleton-loader>
+        <div class="section-card" *ngIf="!loading">
+            <div class="table-responsive" *ngIf="(data?.transfers ?? []).length > 0">
+                <table class="dt"><thead><tr><th>Invoice No</th><th>From</th><th>To</th><th>Date</th><th>Actions</th></tr></thead>
+                    <tbody><tr *ngFor="let t of (data?.transfers ?? [])"><td>{{ t.invoice_no }}</td><td>{{ t.from }}</td><td>{{ t.to }}</td><td>{{ t.date | dateFormat }}</td><td><button class="btn-icon" (click)="viewTransferBill(t)"><i class="fa fa-eye"></i></button></td></tr></tbody>
+                </table>
+            </div>
+            <app-empty-state *ngIf="(data?.transfers ?? []).length === 0" title="No transfers"></app-empty-state>
+        </div>
+    </ng-container>
+</div>
+
+<!-- Transfer Bill Modal -->
+<div class="modal-overlay" *ngIf="showTransferBill" (click)="$event.target === $event.currentTarget && (showTransferBill = false)">
+    <div class="modal-box">
+        <div class="modal-header"><h3>Transfer Bill</h3><button (click)="showTransferBill = false"><i class="fa fa-times"></i></button></div>
+        <div class="modal-body">
+            <table class="dt" *ngIf="transferBillItems.length > 0">
+                <thead><tr><th>Product</th><th class="tr">Qty</th></tr></thead>
+                <tbody><tr *ngFor="let i of transferBillItems"><td>{{ i.product ?? i.product_name }}</td><td class="tr">{{ i.quantity ?? i.qty }}</td></tr></tbody>
+            </table>
+            <p *ngIf="transferBillItems.length === 0" class="text-muted">No items.</p>
+        </div>
+    </div>
+</div>

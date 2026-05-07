@@ -1,36 +1,66 @@
 <div class="profile-page">
-    <div class="profile-nav">
-        <button class="nav-icon" aria-label="Back" (click)="goBack()"><i class="fa-solid fa-arrow-left"></i></button>
-        <h2>Profile</h2>
+    <div class="page-header">
+        <h2 class="page-title"><i class="fa fa-user"></i> Profile</h2>
     </div>
 
-    <ng-container *ngIf="user; else noUser">
-        <section class="profile-card">
-            <div class="profile-avatar">
-                <img [src]="imgUrl || (user?.avatar || user?.logo || 'assets/no-avatar.png')" alt="avatar" />
-            </div>
-            <div class="profile-main">
-                <h2>{{ user.name || user.full_name || user.username }}</h2>
+    <app-skeleton-loader *ngIf="loading" type="line" [count]="6"></app-skeleton-loader>
 
-                <p *ngIf="user.email"><span class="label">Email</span><span class="value">{{ user.email }}</span></p>
-                <p *ngIf="user.phone"><span class="label">Phone</span><span class="value">{{ user.phone }}</span></p>
-                <p *ngIf="user.company"><span class="label">Company</span><span class="value">{{ user.company }}</span>
-                </p>
-                <p *ngIf="user.user_detail.address"><span class="label">Address</span><span class="value">{{
-                        user.user_detail.address }}</span></p>
-                <p *ngIf="user.user_detail.plan_end"><span class="label">Next Payment</span><span class="value">{{
-                        user.user_detail.plan_end }}</span></p>
-                <!-- <div class="profile-actions">
-                    <button class="button-primary" (click)="editProfile()"><i
-                            class="fa-solid fa-pen-to-square"></i>&nbsp;Edit</button>
-                    <button class="button-outline" (click)="goBack()"><i
-                            class="fa-solid fa-home"></i>&nbsp;Home</button>
-                </div> -->
+    <ng-container *ngIf="!loading && user">
+        <div class="profile-grid">
+            <!-- Left: User Info -->
+            <div class="profile-card">
+                <div class="avatar-wrap">
+                    <div class="avatar">{{ initials }}</div>
+                    <span class="role-badge">{{ roleBadge }}</span>
+                </div>
+                <div class="user-details">
+                    <h3>{{ user.name ?? user.username }}</h3>
+                    <div class="detail-row"><i class="fa fa-envelope"></i><span>{{ user.email ?? '-' }}</span></div>
+                    <div class="detail-row"><i class="fa fa-phone"></i><span>{{ user.phone ?? '-' }}</span></div>
+                    <div class="detail-row"><i class="fa fa-id-badge"></i><span>{{ user.slug_name ?? user.unique_id ??
+                            '-' }}</span></div>
+                    <div class="detail-row" *ngIf="user.created_at"><i class="fa fa-calendar"></i><span>Joined: {{
+                            user.created_at | date:'mediumDate' }}</span></div>
+                </div>
             </div>
-        </section>
+
+            <!-- Right: Business + Bank -->
+            <div class="right-col">
+                <!-- Business Details -->
+                <div class="section-card" *ngIf="userDetail">
+                    <h3 class="section-title"><i class="fa fa-building"></i> Business Details</h3>
+                    <div class="detail">
+                        <!-- <div class="detail-item"><span>Shop Name</span><strong>{{ userDetail.shop_name ?? userDetail.name ?? '-' }}</strong></div> -->
+                        <div class="detail-item mb-1"><span>GST Number</span><strong>{{ userDetail.gst ??
+                                userDetail.gst_number ?? '-' }}</strong></div>
+                        <div class="detail-item mb-1"><span>Address</span><strong>{{ userDetail.address ?? '-'
+                                }}</strong>
+                        </div>
+                        <div class="detail-item" *ngIf="userDetail.plan_end"><span>Plan Expires</span><strong>{{
+                                userDetail.plan_end | date:'mediumDate' }}</strong></div>
+                    </div>
+                    <div class="logo-wrap" *ngIf="logoUrl()">
+                        <img [src]="logoUrl()!" alt="logo" />
+                    </div>
+                </div>
+
+                <!-- Bank Details -->
+                <div class="section-card" *ngIf="bankDetail && (bankDetail.bank_name || bankDetail.account_number)">
+                    <h3 class="section-title"><i class="fa fa-university"></i> Bank Details</h3>
+                    <div class="detail-grid">
+                        <div class="detail-item"><span>Bank Name</span><strong>{{ bankDetail.bank_name ?? '-'
+                                }}</strong></div>
+                        <div class="detail-item"><span>Account Number</span><strong>{{ bankDetail.account_number ?? '-'
+                                }}</strong></div>
+                        <div class="detail-item"><span>IFSC Code</span><strong>{{ bankDetail.ifsc_code ??
+                                bankDetail.ifsc ?? '-' }}</strong></div>
+                        <div class="detail-item"><span>Branch</span><strong>{{ bankDetail.branch ?? '-' }}</strong>
+                        </div>
+                        <div class="detail-item"><span>Account Holder</span><strong>{{ bankDetail.account_holder_name ??
+                                bankDetail.holder_name ?? '-' }}</strong></div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </ng-container>
-
-    <ng-template #noUser>
-        <div class="no-user">Not logged in</div>
-    </ng-template>
 </div>

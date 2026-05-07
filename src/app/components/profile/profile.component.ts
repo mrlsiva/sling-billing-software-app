@@ -1,46 +1,59 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule, Router } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../services/auth.service';
 import { environment } from '../../../environments/environment';
-
+import { SkeletonLoaderComponent } from '../../shared/components/skeleton-loader/skeleton-loader.component';
 
 @Component({
     selector: 'app-profile',
     standalone: true,
-    imports: [CommonModule, RouterModule],
+    imports: [CommonModule, SkeletonLoaderComponent],
     templateUrl: './profile.component.html',
     styleUrls: ['./profile.component.scss']
 })
-export class ProfileComponent {
+export class ProfileComponent implements OnInit {
     user: any = null;
-    imgUrl = '';
-    constructor(private auth: AuthService, private router: Router) {
-        this.auth.user$.subscribe(u => {
-            this.user = u;
-            // Prefer fav_icon / favicon if provided by API, then avatar, then logo variants
-            const candidate = (u && (u.fav_icon || u.favicon || u.avatar || u.logo || u.logo_url)) || '';
-            this.imgUrl = this.resolveImage(candidate) || 'assets/no-avatar.png';
+    userDetail: any = null;
+    bankDetail: any = null;
+    loading = true;
+    assetsBase = environment.assetsBase;
+
+    constructor(private auth: AuthService, private http: HttpClient) {}
+
+    ngOnInit() {
+        this.http.get(`${environment.apiBase}/profile`).subscribe({
+            next: (res: any) => {
+                const d = res?.data ?? res;
+                this.user = d?.user ?? d;
+                this.userDetail = d?.user?.user_detail ?? d?.user_detail ?? {};
+                this.bankDetail = d?.user?.bank_detail ?? d?.bank_detail ?? {};
+                this.loading = false;
+            },
+            error: () => {
+                this.auth.user$.subscribe(u => { this.user = u; this.userDetail = u?.user_detail ?? {}; this.bankDetail = u?.bank_detail ?? {}; });
+                this.loading = false;
+            }
         });
     }
 
-    goBack() {
-        try { this.router.navigate(['/pos']); } catch { history.back(); }
+    get initials(): string {
+        const name = this.user?.name ?? this.user?.username ?? 'U';
+        return name.split(' ').map((w: string) => w[0]).slice(0, 2).join('').toUpperCase();
     }
 
-    editProfile() {
-        // placeholder for edit action
-        // you can navigate to /profile/edit if implemented
-        try { this.router.navigate(['/profile/edit']); } catch { }
+    get roleBadge(): string {
+        const id = this.user?.role_id;
+        if (id === 1) return 'Super Admin';
+        if (id === 2) return 'HO';
+        if (id === 3) return 'Branch';
+        return 'User';
     }
-    private resolveImage(path: string | undefined | null): string | null {
-        if (!path) return null;
-        const p = String(path).trim();
-        if (!p) return null;
-        // return data URLs or absolute URLs as-is
-        if (/^(data:|https?:)\/\//i.test(p)) return p;
-        // otherwise prefix with assetsBase
-        const base = (environment.assetsBase || '').replace(/\/$/, '');
-        return base ? `${base}/${p.replace(/^\//, '')}` : p;
+
+    logoUrl(): string | null {
+        const logo = this.userDetail?.logo ?? this.user?.logo;
+        if (!logo) return null;
+        if (/^https?:\/\//i.test(logo)) return logo;
+        return `${this.assetsBase.replace(/\/$/, '')}/${logo.replace(/^\//, '')}`;
     }
 }

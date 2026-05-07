@@ -1,0 +1,276 @@
+<div class="page">
+
+    <!-- Tabs -->
+    <div class="page-tabs">
+        <button class="page-tab" [class.active]="activeTab === 'stock'" (click)="activeTab = 'stock'">
+            <i class="fa fa-layer-group"></i> Stock
+        </button>
+        <button class="page-tab" [class.active]="activeTab === 'transfer'" (click)="activeTab = 'transfer'">
+            <i class="fa fa-exchange-alt"></i> Transfers
+        </button>
+    </div>
+
+    <!-- ══ STOCK TAB ══ -->
+    <ng-container *ngIf="activeTab === 'stock'">
+        <div class="page-header">
+            <h2 class="page-title"><i class="fa fa-boxes"></i> Stock</h2>
+        </div>
+        <div class="filter-row">
+            <div class="search-box">
+                <i class="fa fa-search"></i>
+                <input type="text" [(ngModel)]="stockFilters.product"
+                    placeholder="Search product..." (keyup.enter)="loadStock()" />
+            </div>
+            <label class="check-label">
+                <input type="checkbox" [(ngModel)]="stockFilters.stock_in" (change)="loadStock()" />
+                In Stock Only
+            </label>
+            <button class="btn-apply" (click)="loadStock()">
+                <i class="fa fa-search"></i> Search
+            </button>
+        </div>
+        <div class="section-card">
+            <app-skeleton-loader *ngIf="stockLoading" type="table" [count]="8"></app-skeleton-loader>
+            <div class="table-responsive" *ngIf="!stockLoading && stockItems.length > 0">
+                <table class="dt">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Category</th>
+                            <th>Sub-Category</th>
+                            <th class="tc">Qty</th>
+                            <th class="tc">IMEI</th>
+                            <th class="tc">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let item of stockItems">
+                            <td>
+                                <strong>{{ item.product?.name ?? item.product_name ?? '-' }}</strong>
+                                <br *ngIf="item.product?.code" />
+                                <small *ngIf="item.product?.code" class="code-chip">{{ item.product.code }}</small>
+                            </td>
+                            <td>{{ item.product?.category?.name ?? item.category?.name ?? '-' }}</td>
+                            <td>{{ item.product?.sub_category?.name ?? item.sub_category?.name ?? '-' }}</td>
+                            <td class="tc">
+                                <span class="qty-pill" [class.in]="(item.quantity ?? item.qty ?? 0) > 0"
+                                    [class.out]="(item.quantity ?? item.qty ?? 0) === 0">
+                                    {{ item.quantity ?? item.qty ?? 0 }}
+                                </span>
+                            </td>
+                            <td class="tc">{{ item.imei_count ?? (item.imei ? 1 : 0) || '-' }}</td>
+                            <td class="tc">
+                                <button class="btn-icon" title="View variations" (click)="viewVariations(item)">
+                                    <i class="fa fa-eye"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <app-empty-state *ngIf="!stockLoading && stockItems.length === 0"
+                title="No stock found" icon="fa fa-boxes">
+            </app-empty-state>
+        </div>
+    </ng-container>
+
+    <!-- ══ TRANSFER TAB ══ -->
+    <ng-container *ngIf="activeTab === 'transfer'">
+        <div class="page-header">
+            <h2 class="page-title"><i class="fa fa-exchange-alt"></i> Transfers</h2>
+            <button class="btn-primary" (click)="showCreatePanel = true">
+                <i class="fa fa-plus"></i> New Transfer
+            </button>
+        </div>
+        <div class="filter-row">
+            <div class="search-box">
+                <i class="fa fa-search"></i>
+                <input type="text" [(ngModel)]="transferFilters.product"
+                    placeholder="Search product..." (keyup.enter)="loadTransfers()" />
+            </div>
+            <button class="btn-apply" (click)="loadTransfers()">
+                <i class="fa fa-search"></i> Search
+            </button>
+        </div>
+        <div class="section-card">
+            <app-skeleton-loader *ngIf="transferLoading" type="table" [count]="6"></app-skeleton-loader>
+            <div class="table-responsive" *ngIf="!transferLoading && transfers.length > 0">
+                <table class="dt">
+                    <thead>
+                        <tr>
+                            <th>Invoice</th>
+                            <th>From</th>
+                            <th>To</th>
+                            <th>Date</th>
+                            <th class="tc">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let t of transfers">
+                            <td><strong>{{ t.invoice ?? t.invoice_no ?? '-' }}</strong></td>
+                            <td>{{ t.from ?? t.from_branch ?? '-' }}</td>
+                            <td>{{ t.to ?? t.to_branch ?? '-' }}</td>
+                            <td>{{ t.created_at | dateFormat }}</td>
+                            <td class="tc">
+                                <button class="btn-icon" title="View bill" (click)="viewBill(t)">
+                                    <i class="fa fa-eye"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <app-empty-state *ngIf="!transferLoading && transfers.length === 0"
+                title="No transfers found" icon="fa fa-exchange-alt">
+            </app-empty-state>
+        </div>
+    </ng-container>
+</div>
+
+<!-- ══ CREATE TRANSFER PANEL ══ -->
+<div class="modal-overlay" *ngIf="showCreatePanel"
+    (click)="$event.target === $event.currentTarget && (showCreatePanel = false)">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h3>New Transfer</h3>
+            <button class="modal-close" (click)="showCreatePanel = false"><i class="fa fa-times"></i></button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label>Transfer To</label>
+                <div class="radio-row">
+                    <label class="radio-opt" [class.sel]="transferTo === '2'">
+                        <input type="radio" name="tto" [(ngModel)]="transferTo" value="2" /> Send to HO
+                    </label>
+                    <label class="radio-opt" [class.sel]="transferTo === '1'">
+                        <input type="radio" name="tto" [(ngModel)]="transferTo" value="1" /> Another Branch
+                    </label>
+                </div>
+            </div>
+            <div class="form-group" *ngIf="transferTo === '1'">
+                <label>Branch</label>
+                <select [(ngModel)]="createForm.branch_id">
+                    <option value="">Select branch</option>
+                    <option *ngFor="let b of branches" [value]="b.id">{{ b.name }}</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Category</label>
+                <select [(ngModel)]="createForm.category" (change)="onCategoryChange()">
+                    <option value="">Select category</option>
+                    <option *ngFor="let c of categories" [value]="c.id">{{ c.name }}</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Sub-Category</label>
+                <select [(ngModel)]="createForm.sub_category" (change)="onSubCategoryChange()"
+                    [disabled]="!createForm.category">
+                    <option value="">Select sub-category</option>
+                    <option *ngFor="let s of subCategories" [value]="s.id">{{ s.name }}</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Product</label>
+                <select [(ngModel)]="createForm.product" (change)="onProductChange()"
+                    [disabled]="!createForm.sub_category">
+                    <option value="">Select product</option>
+                    <option *ngFor="let p of products" [value]="p.id">{{ p.name }}</option>
+                </select>
+            </div>
+            <ng-container *ngIf="productDetail">
+                <div class="stock-info-box">
+                    <i class="fa fa-cubes"></i>
+                    Available: <strong>{{ productDetail.stock ?? productDetail.quantity ?? 0 }}</strong> units
+                </div>
+                <div class="form-group">
+                    <label>Quantity</label>
+                    <input type="number" [(ngModel)]="createForm.quantity" min="1"
+                        [max]="productDetail.stock ?? productDetail.quantity" />
+                </div>
+                <ng-container *ngIf="productDetail.imeis?.length">
+                    <label class="section-sub-label">Select IMEIs</label>
+                    <div class="imei-list">
+                        <label *ngFor="let imei of productDetail.imeis"
+                            class="imei-tag" [class.sel]="selectedImeis.includes(imei)">
+                            <input type="checkbox" [value]="imei" (change)="toggleImei(imei)" hidden />
+                            {{ imei }}
+                        </label>
+                    </div>
+                </ng-container>
+                <ng-container *ngIf="productDetail.variations?.length">
+                    <label class="section-sub-label" style="margin-top:10px;display:block">Variations</label>
+                    <table class="dt" style="margin-top:4px">
+                        <thead>
+                            <tr><th>Size</th><th>Colour</th><th>Available</th><th>Transfer Qty</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let v of productDetail.variations">
+                                <td>{{ v.size ?? '-' }}</td>
+                                <td>{{ v.colour ?? '-' }}</td>
+                                <td>{{ v.quantity ?? 0 }}</td>
+                                <td><input type="number" [(ngModel)]="v.transfer_qty" min="0"
+                                    [max]="v.quantity ?? 0" class="qty-input" /></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </ng-container>
+            </ng-container>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-cancel" (click)="showCreatePanel = false">Cancel</button>
+            <button class="btn-primary" (click)="saveTransfer()" [disabled]="saving">
+                <i class="fa fa-spinner fa-spin" *ngIf="saving"></i>
+                {{ saving ? 'Creating...' : 'Create Transfer' }}
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ══ VARIATIONS MODAL ══ -->
+<div class="modal-overlay" *ngIf="showVariations"
+    (click)="$event.target === $event.currentTarget && (showVariations = false)">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h3>Stock Variations</h3>
+            <button class="modal-close" (click)="showVariations = false"><i class="fa fa-times"></i></button>
+        </div>
+        <div class="modal-body">
+            <table class="dt" *ngIf="variations.length > 0">
+                <thead><tr><th>Size</th><th>Colour</th><th class="tc">Qty</th><th class="tc">Price</th></tr></thead>
+                <tbody>
+                    <tr *ngFor="let v of variations">
+                        <td>{{ v.size ?? '-' }}</td>
+                        <td>{{ v.colour ?? '-' }}</td>
+                        <td class="tc">{{ v.quantity ?? v.qty ?? 0 }}</td>
+                        <td class="tc">{{ (v.price ?? 0) | amount }}</td>
+                    </tr>
+                </tbody>
+            </table>
+            <app-empty-state *ngIf="variations.length === 0" title="No variations"></app-empty-state>
+        </div>
+    </div>
+</div>
+
+<!-- ══ BILL MODAL ══ -->
+<div class="modal-overlay" *ngIf="showBill"
+    (click)="$event.target === $event.currentTarget && (showBill = false)">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h3>Transfer Bill</h3>
+            <button class="modal-close" (click)="showBill = false"><i class="fa fa-times"></i></button>
+        </div>
+        <div class="modal-body">
+            <table class="dt" *ngIf="billItems.length > 0">
+                <thead><tr><th>Product</th><th class="tc">Qty</th><th class="tc">Value</th></tr></thead>
+                <tbody>
+                    <tr *ngFor="let b of billItems">
+                        <td>{{ b.product ?? b.product_name }}</td>
+                        <td class="tc">{{ b.quantity ?? b.qty }}</td>
+                        <td class="tc">{{ (b.value ?? b.amount ?? 0) | amount }}</td>
+                    </tr>
+                </tbody>
+            </table>
+            <app-empty-state *ngIf="billItems.length === 0" title="No items"></app-empty-state>
+        </div>
+    </div>
+</div>

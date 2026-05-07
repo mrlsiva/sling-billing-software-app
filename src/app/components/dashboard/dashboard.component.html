@@ -1,136 +1,56 @@
 <div class="dashboard-page">
-    <div class="dashboard-header">
-        <h1>Dashboard</h1>
-        <p class="welcome-text" *ngIf="user">Welcome, {{ user.name }}</p>
+    <div class="page-header">
+        <h2 class="page-title"><i class="fa fa-tachometer-alt"></i> Dashboard</h2>
+        <div class="date-filter">
+            <div class="filter-field">
+                <label>From</label>
+                <input type="date" [(ngModel)]="fromDate" />
+            </div>
+            <div class="filter-field">
+                <label>To</label>
+                <input type="date" [(ngModel)]="toDate" />
+            </div>
+            <button class="btn-apply" (click)="load()">
+                <i class="fa fa-search"></i> Apply
+            </button>
+        </div>
     </div>
 
-    <div *ngIf="loading" class="loading-container">
-        <div class="loading-spinner">Loading dashboard...</div>
-    </div>
+    <app-skeleton-loader *ngIf="loading" type="cards" [count]="4"></app-skeleton-loader>
 
-    <div *ngIf="!loading" class="dashboard-content">
-        <!-- Quick Actions -->
-        <div class="quick-actions">
-            <h2>Quick Actions</h2>
-            <div class="action-buttons">
-                <button class="action-btn" routerLink="/categories">
-                    <i class="fa-solid fa-layer-group"></i>
-                    <span>Categories</span>
-                </button>
-                <button class="action-btn" routerLink="/subcategories">
-                    <i class="fa-solid fa-tags"></i>
-                    <span>Subcategories</span>
-                </button>
-                <button class="action-btn" routerLink="/products">
-                    <i class="fa-solid fa-box"></i>
-                    <span>Products</span>
-                </button>
-            </div>
-        </div>
-        <!-- Quick Actions -->
-        <div class="quick-actions">
-            <h2>Settings</h2>
-            <div class="action-buttons">
-                <button class="action-btn" routerLink="/metric">
-                    <i class="fa-solid fa-ruler"></i>
-                    <span>Metrics</span>
-                </button>
-                <button class="action-btn" routerLink="/tax">
-                    <i class="fa-solid fa-percent"></i>
-                    <span>Tax</span>
-                </button>
-                <button class="action-btn" routerLink="/settings/finance">
-                    <i class="fa-solid fa-chart-line"></i>
-                    <span>Finance</span>
-                </button>
-                <button class="action-btn" routerLink="/settings/payment-list">
-                    <i class="fa-solid fa-credit-card"></i>
-                    <span>Payment Method</span>
-                </button>
-                <button class="action-btn" routerLink="/settings">
-                    <i class="fa-solid fa-file-invoice"></i>
-                    <span>Settings</span>
-                </button>
-            </div>
-        </div>
-        <!-- Dashboard Stats Grid -->
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-icon">
-                    <i class="fa-solid fa-store"></i>
-                </div>
-                <div class="stat-info">
-                    <h3 class="stat-title">Total Branches</h3>
-                    <p class="stat-value">-</p>
-                    <span class="stat-label">Active branches</span>
-                </div>
-            </div>
-
-            <div class="stat-card">
-                <div class="stat-icon">
-                    <i class="fa-solid fa-users"></i>
-                </div>
-                <div class="stat-info">
-                    <h3 class="stat-title">Total Staff</h3>
-                    <p class="stat-value">-</p>
-                    <span class="stat-label">Active staff members</span>
-                </div>
-            </div>
-
-            <div class="stat-card">
-                <div class="stat-icon">
-                    <i class="fa-solid fa-receipt"></i>
-                </div>
-                <div class="stat-info">
-                    <h3 class="stat-title">Today's Orders</h3>
-                    <p class="stat-value">-</p>
-                    <span class="stat-label">Orders processed today</span>
-                </div>
-            </div>
-
-            <div class="stat-card">
-                <div class="stat-icon">
-                    <i class="fa-solid fa-indian-rupee-sign"></i>
-                </div>
-                <div class="stat-info">
-                    <h3 class="stat-title">Today's Revenue</h3>
-                    <p class="stat-value">₹ -</p>
-                    <span class="stat-label">Total revenue today</span>
-                </div>
-            </div>
+    <ng-container *ngIf="!loading && data">
+        <div class="stat-cards">
+            <app-stat-card label="Date Orders"     [value]="data.date_orders  ?? 0"               icon="fa fa-shopping-bag"  color="primary"></app-stat-card>
+            <app-stat-card label="Date Sales"      [value]="(data.date_sales  ?? 0) | amount"     icon="fa fa-rupee-sign"    color="success"></app-stat-card>
+            <app-stat-card label="Total Orders"    [value]="data.total_orders ?? 0"               icon="fa fa-list"          color="secondary"></app-stat-card>
+            <app-stat-card label="Total Sales"     [value]="(data.total_sales ?? 0) | amount"     icon="fa fa-chart-line"    color="warning"></app-stat-card>
         </div>
 
-        <!-- User Information -->
-        <div class="info-section" *ngIf="user">
-            <h2>Business Information</h2>
-            <div class="info-grid">
-                <div class="info-item">
-                    <span class="info-label">Business Name:</span>
-                    <span class="info-value">{{ user.name || '-' }}</span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">Email:</span>
-                    <span class="info-value">{{ user.email || '-' }}</span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">Phone:</span>
-                    <span class="info-value">{{ user.phone || '-' }}</span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">Unique ID:</span>
-                    <span class="info-value">{{ user.unique_id || '-' }}</span>
-                </div>
-                <div class="info-item" *ngIf="user.user_detail?.address">
-                    <span class="info-label">Address:</span>
-                    <span class="info-value">{{ user.user_detail.address }}</span>
-                </div>
-                <div class="info-item" *ngIf="user.user_detail?.plan_end">
-                    <span class="info-label">Plan Expires:</span>
-                    <span class="info-value">{{ user.user_detail.plan_end | date:'mediumDate' }}</span>
-                </div>
+        <div class="section-card">
+            <h3 class="section-title"><i class="fa fa-building"></i> Branch Performance</h3>
+            <div class="table-responsive" *ngIf="branches.length > 0">
+                <table class="dt">
+                    <thead>
+                        <tr>
+                            <th>Branch Name</th>
+                            <th class="tr">Date Orders</th>
+                            <th class="tr">Date Sales</th>
+                            <th class="tr">Total Orders</th>
+                            <th class="tr">Total Sales</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let b of branches">
+                            <td><strong>{{ b.name ?? b.branch_name ?? '-' }}</strong></td>
+                            <td class="tr">{{ b.date_orders ?? 0 }}</td>
+                            <td class="tr">{{ (b.date_sales ?? 0) | amount }}</td>
+                            <td class="tr">{{ b.total_orders ?? 0 }}</td>
+                            <td class="tr">{{ (b.total_sales ?? 0) | amount }}</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
+            <app-empty-state *ngIf="branches.length === 0" title="No branch data" icon="fa fa-building"></app-empty-state>
         </div>
-
-
-    </div>
+    </ng-container>
 </div>

@@ -1,24 +1,56 @@
 <nav class="app-footer" role="navigation" aria-label="Footer navigation">
-    <!-- Super Admin button -->
-    <a class="btn" *ngIf="isSuperAdmin" routerLink="/super-admin" routerLinkActive="active" aria-label="Super Admin">
-        <i class="fa-solid fa-crown fa-lg" aria-hidden="true"></i>
-    </a>
-    <!-- HO Dashboard button -->
-    <a class="btn" *ngIf="isHO" routerLink="/dashboard" routerLinkActive="active" aria-label="Dashboard">
-        <i class="fa-solid fa-chart-line fa-lg" aria-hidden="true"></i>
-    </a>
-    <!-- POS button - for branch users AND HO users with billing enabled -->
-    <a class="btn" *ngIf="shouldShowPOS" routerLink="/pos" routerLinkActive="active" aria-label="POS">
-        <i class="fa-solid fa-desktop fa-lg" aria-hidden="true"></i>
-    </a>
-    <a class="btn" routerLink="/profile" routerLinkActive="active" aria-label="Profile">
-        <i class="fa-solid fa-user fa-lg" aria-hidden="true"></i>
+
+    <!-- Super Admin -->
+    <ng-container *ngIf="isSuperAdmin">
+        <a class="btn" routerLink="/super-admin" routerLinkActive="active" title="Super Admin">
+            <i class="fa-solid fa-crown"></i><span>Admin</span>
+        </a>
+    </ng-container>
+
+    <!-- HO Footer -->
+    <ng-container *ngIf="isHO">
+        <a class="btn" routerLink="/dashboard"        routerLinkActive="active" title="Dashboard">
+            <i class="fa-solid fa-tachometer-alt"></i><span>Home</span>
+        </a>
+        <a class="btn" routerLink="/order"            routerLinkActive="active" title="Orders">
+            <i class="fa-solid fa-receipt"></i><span>Orders</span>
+        </a>
+        <a class="btn" routerLink="/purchase-orders"  routerLinkActive="active" title="Purchase">
+            <i class="fa-solid fa-file-invoice"></i><span>Purchase</span>
+        </a>
+        <a class="btn" routerLink="/inventory/stock"  routerLinkActive="active" title="Stock">
+            <i class="fa-solid fa-boxes"></i><span>Stock</span>
+        </a>
+        <a class="btn" routerLink="/reports"          routerLinkActive="active" title="Reports">
+            <i class="fa-solid fa-chart-bar"></i><span>Reports</span>
+        </a>
+        <a class="btn" routerLink="/settings"         routerLinkActive="active" title="Settings">
+            <i class="fa-solid fa-gear"></i><span>Settings</span>
+        </a>
+    </ng-container>
+
+    <!-- Branch Footer -->
+    <ng-container *ngIf="isBranch">
+        <a class="btn" routerLink="/branch/dashboard" routerLinkActive="active" title="Dashboard">
+            <i class="fa-solid fa-tachometer-alt"></i><span>Home</span>
+        </a>
+        <a class="btn" routerLink="/pos"              routerLinkActive="active" title="POS">
+            <i class="fa-solid fa-desktop"></i><span>POS</span>
+        </a>
+        <a class="btn" routerLink="/branch/orders"    routerLinkActive="active" title="Orders">
+            <i class="fa-solid fa-receipt"></i><span>Orders</span>
+        </a>
+        <a class="btn" routerLink="/branch/stock"     routerLinkActive="active" title="Stock">
+            <i class="fa-solid fa-boxes"></i><span>Stock</span>
+        </a>
+        <a class="btn" routerLink="/branch/reports"   routerLinkActive="active" title="Reports">
+            <i class="fa-solid fa-chart-bar"></i><span>Reports</span>
+        </a>
+    </ng-container>
+
+    <!-- Common -->
+    <a class="btn" routerLink="/profile" routerLinkActive="active" title="Profile">
+        <i class="fa-solid fa-user"></i><span>Profile</span>
     </a>
 
-    <a class="btn" routerLink="/settings" routerLinkActive="active" aria-label="Settings">
-        <i class="fa-solid fa-gear fa-lg" aria-hidden="true"></i>
-    </a>
-    <a class="btn" routerLink="/order" routerLinkActive="active" aria-label="Orders">
-        <i class="fa-solid fa-receipt fa-lg" aria-hidden="true"></i>
-    </a>
 </nav>

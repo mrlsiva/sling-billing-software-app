@@ -2,7 +2,7 @@
 :host {
     display: block;
     background-color: color-mix(in srgb, var(--color-primary-bg) 5%, white 95%);
-    font-size: 13px;
+    font-size: 9.75px;
     line-height: 1.35;
 }
 
@@ -14,8 +14,8 @@
     .search-container {
         background: white;
         border-radius: 8px;
-        padding: 1rem 0;
-        margin-bottom: 1.5rem;
+        padding: 0.75rem 0;
+        margin-bottom: 1.125rem;
 
         .search-input-wrapper {
             display: flex;
@@ -47,10 +47,10 @@
 
                 .search-input {
                     width: 100%;
-                    padding: 0.75rem 2.5rem 0.75rem 2.25rem;
+                    padding: 0.5625rem 1.875rem 0.5625rem 1.6875rem;
                     border: none;
                     border-radius: 6px;
-                    font-size: 14px;
+                    font-size: 10.5px;
                     background: transparent;
                     color: var(--color-neutral-800);
 
@@ -70,7 +70,7 @@
                     border: none;
                     color: var(--color-neutral-600);
                     cursor: pointer;
-                    padding: 0.25rem;
+                    padding: 0.1875rem;
                     border-radius: 4px;
                     width: 24px;
                     height: 24px;
@@ -84,15 +84,15 @@
                     }
 
                     .clear-icon {
-                        font-size: 12px;
+                        font-size: 9px;
                     }
                 }
             }
         }
 
         .search-results-info {
-            margin-top: 1rem;
-            padding-top: 1rem;
+            margin-top: 0.75rem;
+            padding-top: 0.75rem;
             border-top: 1px solid var(--color-neutral-200);
 
             .results-summary {
@@ -104,7 +104,7 @@
 
                 .results-text {
                     color: var(--color-neutral-600);
-                    font-size: 13px;
+                    font-size: 9.75px;
                     font-weight: 500;
                 }
             }
@@ -113,10 +113,10 @@
 
     // Page Header
     .page-header {
-        margin-bottom: 1.5rem;
+        margin-bottom: 1.125rem;
 
         .page-title {
-            font-size: 1.75rem;
+            font-size: 1.3125rem;
             font-weight: 600;
             color: var(--color-neutral-800);
             margin: 0;
@@ -133,7 +133,7 @@
     }
 
     .loading-spinner {
-        font-size: 1.1rem;
+        font-size: 0.825rem;
         color: var(--color-neutral-600);
     }
 
@@ -141,37 +141,37 @@
         display: flex;
         align-items: center;
         gap: 0.5rem;
-        padding: 1rem;
+        padding: 0.75rem;
         background-color: var(--color-error-bg, #fed7d7);
         border: 1px solid var(--color-error-border, #feb2b2);
         border-radius: 8px;
         color: var(--color-error-text, #c53030);
 
         .error-icon {
-            font-size: 1.2rem;
+            font-size: 0.9rem;
         }
     }
 
     // Empty State
     .empty-state {
         text-align: center;
-        padding: 3rem 1rem;
+        padding: 2.25rem 0.75rem;
         color: var(--color-neutral-600);
 
         .empty-icon {
-            font-size: 3rem;
-            margin-bottom: 1rem;
+            font-size: 2.25rem;
+            margin-bottom: 0.75rem;
         }
 
         h3 {
-            font-size: 1.25rem;
-            margin-bottom: 0.5rem;
+            font-size: 0.9375rem;
+            margin-bottom: 0.375rem;
             color: var(--color-neutral-700);
             font-weight: 500;
         }
 
         p {
-            font-size: 0.9rem;
+            font-size: 0.675rem;
         }
     }
 
@@ -180,14 +180,14 @@
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
         gap: 1rem;
-        margin-bottom: 2rem;
+        margin-bottom: 1.5rem;
     }
 
     .order-card {
         background: white;
         border: 1px solid var(--color-neutral-300);
         border-radius: 8px;
-        padding: 1.25rem;
+        padding: 0.9375rem;
         transition: all 0.2s ease;
         cursor: pointer;
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
@@ -202,18 +202,18 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 1rem;
+            margin-bottom: 0.75rem;
 
             .order-id {
-                font-size: 1rem;
+                font-size: 0.75rem;
                 font-weight: 600;
                 color: var(--color-neutral-800);
             }
 
             .order-status {
-                padding: 0.25rem 0.75rem;
+                padding: 0.1875rem 0.5625rem;
                 border-radius: 20px;
-                font-size: 0.75rem;
+                font-size: 0.5625rem;
                 font-weight: 500;
 
                 &.status-completed {
@@ -229,14 +229,14 @@
         }
 
         .order-info {
-            margin-bottom: 1rem;
+            margin-bottom: 0.75rem;
 
             >div {
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
-                margin-bottom: 0.5rem;
-                font-size: 0.85rem;
+                margin-bottom: 0.375rem;
+                font-size: 0.6375rem;
 
                 &:last-child {
                     margin-bottom: 0;
@@ -253,7 +253,7 @@
             .amount-value {
                 font-weight: 600;
                 color: var(--color-primary-bg);
-                font-size: 1rem;
+                font-size: 0.75rem;
             }
 
             .date-value,
@@ -266,13 +266,13 @@
         .order-footer {
             .view-details-btn {
                 width: 100%;
-                padding: 0.75rem;
+                padding: 0.5625rem;
                 background-color: var(--color-primary-bg);
                 color: var(--color-primary-text);
                 border: none;
                 border-radius: 6px;
                 font-weight: 500;
-                font-size: 0.9rem;
+                font-size: 0.675rem;
                 cursor: pointer;
                 transition: background-color 0.2s ease;
 
@@ -289,15 +289,15 @@
         flex-direction: column;
         gap: 1rem;
         align-items: center;
-        margin-top: 2rem;
-        padding: 1rem;
+        margin-top: 1.5rem;
+        padding: 0.75rem;
         background: white;
         border-radius: 8px;
 
         .pagination-info {
             .pagination-text {
                 color: var(--color-neutral-600);
-                font-size: 0.85rem;
+                font-size: 0.6375rem;
                 font-weight: 500;
             }
         }
@@ -308,7 +308,7 @@
             align-items: center;
 
             .pagination-btn {
-                padding: 0.5rem 0.75rem;
+                padding: 0.375rem 0.5625rem;
                 border: 1px solid var(--color-neutral-300);
                 background-color: white;
                 color: var(--color-neutral-600);
@@ -316,7 +316,7 @@
                 cursor: pointer;
                 transition: all 0.2s ease;
                 min-width: 36px;
-                font-size: 0.85rem;
+                font-size: 0.6375rem;
                 font-weight: 500;
 
                 &:hover:not(:disabled) {
@@ -354,7 +354,7 @@
         justify-content: center;
         align-items: center;
         z-index: 1000;
-        padding: 1rem;
+        padding: 0.75rem;
     }
 
     .modal-content {
@@ -371,12 +371,12 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 1.5rem 2rem;
+        padding: 1.125rem 1.5rem;
         border-bottom: 1px solid var(--color-neutral-200);
         background: var(--color-primary-bg-light);
 
         h3 {
-            font-size: 1.25rem;
+            font-size: 0.9375rem;
             font-weight: 600;
             color: var(--color-primary-bg);
             margin: 0;
@@ -385,10 +385,10 @@
         .modal-close-btn {
             background: none;
             border: none;
-            font-size: 1.5rem;
+            font-size: 1.125rem;
             cursor: pointer;
             color: var(--color-neutral-600);
-            padding: 0.25rem;
+            padding: 0.1875rem;
             border-radius: 4px;
             width: 32px;
             height: 32px;
@@ -412,14 +412,14 @@
         display: flex;
         gap: 0.5rem;
         align-items: center;
-        margin-bottom: 1.5rem;
+        margin-bottom: 1.125rem;
 
         .nav-icon {
             cursor: pointer;
             color: var(--color-neutral-700);
             background-color: transparent;
             border: 1px solid var(--color-neutral-500);
-            padding: 8px;
+            padding: 6px;
             border-radius: 50%;
             width: 36px;
             height: 36px;
@@ -435,12 +435,12 @@
             }
 
             i {
-                font-size: 14px;
+                font-size: 10.5px;
             }
         }
 
         h2 {
-            font-size: 1.5rem;
+            font-size: 1.125rem;
             font-weight: 600;
             color: var(--color-neutral-800);
             margin: 0;
@@ -461,19 +461,19 @@
 
     .modal-body,
     .order-detail-content {
-        padding: 1rem 0rem;
+        padding: 0.75rem 0rem;
     }
 
     .loading-detail {
         text-align: center;
-        padding: 2rem;
+        padding: 1.5rem;
         color: var(--color-neutral-600);
     }
 
     .order-detail-page .order-detail-content,
     .modal-body .order-detail-content {
         >div {
-            margin-bottom: 2rem;
+            margin-bottom: 1.5rem;
 
             &:last-child {
                 margin-bottom: 0;
@@ -481,11 +481,11 @@
         }
 
         h4 {
-            font-size: 1.1rem;
+            font-size: 0.825rem;
             font-weight: 600;
             color: var(--color-neutral-800);
-            margin-bottom: 1rem;
-            padding-bottom: 0.5rem;
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.375rem;
             border-bottom: 2px solid var(--color-primary-bg-light);
         }
     }
@@ -500,7 +500,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0.75rem;
+            padding: 0.5625rem;
             background-color: var(--color-neutral-50);
             border-radius: 6px;
             border-left: 3px solid var(--color-primary-bg);
@@ -508,17 +508,17 @@
             .label {
                 color: var(--color-neutral-600);
                 font-weight: 500;
-                font-size: 0.85rem;
+                font-size: 0.6375rem;
             }
 
             .value {
                 font-weight: 600;
                 color: var(--color-neutral-800);
-                font-size: 0.9rem;
+                font-size: 0.675rem;
 
                 &.amount {
                     color: var(--color-primary-bg);
-                    font-size: 1rem;
+                    font-size: 0.75rem;
                 }
 
                 &.status-completed {
@@ -543,7 +543,7 @@
             display: grid;
             grid-template-columns: 2fr 80px 100px 120px 100px;
             gap: 1rem;
-            padding: 0.75rem;
+            padding: 0.5625rem;
             align-items: center;
         }
 
@@ -552,12 +552,12 @@
             font-weight: 600;
             color: var(--color-primary-bg);
             border-bottom: 1px solid var(--color-neutral-200);
-            font-size: 0.85rem;
+            font-size: 0.6375rem;
         }
 
         .table-row {
             border-bottom: 1px solid var(--color-neutral-200);
-            font-size: 0.85rem;
+            font-size: 0.6375rem;
 
             &:last-child {
                 border-bottom: none;
@@ -572,11 +572,11 @@
             .item-name {
                 font-weight: 500;
                 color: var(--color-neutral-800);
-                margin-bottom: 0.25rem;
+                margin-bottom: 0.1875rem;
             }
 
             .item-id {
-                font-size: 0.75rem;
+                font-size: 0.5625rem;
                 color: var(--color-neutral-600);
             }
         }
@@ -593,7 +593,7 @@
             small {
                 display: block;
                 color: var(--color-neutral-600);
-                font-size: 12px;
+                font-size: 9px;
                 line-height: 16px;
             }
         }
@@ -606,8 +606,8 @@
 
     // Order Totals
     .order-totals {
-        margin-top: 1rem;
-        padding: 1rem;
+        margin-top: 0.75rem;
+        padding: 0.75rem;
         background-color: var(--color-primary-bg-light);
         border-radius: 6px;
 
@@ -615,16 +615,16 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0.5rem 0;
-            font-size: 0.9rem;
+            padding: 0.375rem 0;
+            font-size: 0.675rem;
 
             &.final-total {
-                font-size: 1.1rem;
+                font-size: 0.825rem;
                 font-weight: 600;
                 color: var(--color-primary-bg);
                 border-top: 2px solid var(--color-primary-bg);
-                margin-top: 0.5rem;
-                padding-top: 1rem;
+                margin-top: 0.375rem;
+                padding-top: 0.75rem;
             }
         }
 
@@ -641,10 +641,10 @@
 
     // Payment Details
     .payment-item {
-        padding: 1rem;
+        padding: 0.75rem;
         background-color: var(--color-neutral-50);
         border-radius: 6px;
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.375rem;
         border-left: 3px solid var(--color-primary-bg);
 
         &:last-child {
@@ -655,8 +655,8 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 0.5rem;
-            font-size: 0.9rem;
+            margin-bottom: 0.375rem;
+            font-size: 0.675rem;
 
             &:last-child {
                 margin-bottom: 0;
@@ -676,10 +676,10 @@
 
     // Responsive Design
     @media (max-width: 768px) {
-        padding: 0.5rem;
+        padding: 0.375rem;
 
         .search-container {
-            padding: 0.75rem;
+            padding: 0.5625rem;
         }
 
         .orders-grid {
@@ -688,13 +688,13 @@
         }
 
         .modal-content {
-            margin: 0.5rem;
+            margin: 0.375rem;
             max-height: 95vh;
         }
 
         .modal-header,
         .modal-body {
-            padding: 1rem;
+            padding: 0.75rem;
         }
 
         .items-table {
@@ -719,10 +719,10 @@
 
             .table-row {
                 display: block;
-                padding: 1rem;
+                padding: 0.75rem;
 
                 >div {
-                    margin-bottom: 0.5rem;
+                    margin-bottom: 0.375rem;
                     display: flex;
                     justify-content: space-between;
                     align-items: center;
@@ -731,7 +731,7 @@
                         content: attr(data-label);
                         font-weight: 600;
                         color: var(--color-neutral-600);
-                        margin-right: 1rem;
+                        margin-right: 0.75rem;
                     }
                 }
 

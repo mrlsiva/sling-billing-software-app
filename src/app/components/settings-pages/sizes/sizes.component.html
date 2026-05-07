@@ -1,0 +1,70 @@
+<div class="settings-page">
+    <div class="settings-header">
+        <h2 class="page-title"><i class="fa fa-ruler"></i> Sizes</h2>
+        <div class="header-actions">
+            <div class="search-box">
+                <i class="fa fa-search"></i>
+                <input type="text" placeholder="Search sizes..." [(ngModel)]="search" (keyup.enter)="load()" />
+            </div>
+            <button class="btn-primary" (click)="openAdd()">
+                <i class="fa fa-plus"></i> Add Size
+            </button>
+        </div>
+    </div>
+
+    <div class="settings-card">
+        <app-skeleton-loader *ngIf="loading" type="table" [count]="6"></app-skeleton-loader>
+
+        <ng-container *ngIf="!loading">
+            <table class="settings-table" *ngIf="items.length > 0">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Name</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let item of items; let i = index">
+                        <td>{{ i + 1 }}</td>
+                        <td><strong>{{ item.name }}</strong></td>
+                        <td>
+                            <app-status-badge [status]="item.is_active" (click)="toggleStatus(item)" style="cursor:pointer"></app-status-badge>
+                        </td>
+                        <td>
+                            <button class="btn-icon" title="Edit" (click)="openEdit(item)">
+                                <i class="fa fa-pencil-alt"></i>
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <app-empty-state *ngIf="items.length === 0" title="No sizes found" icon="fa fa-ruler"></app-empty-state>
+        </ng-container>
+    </div>
+</div>
+
+<!-- Add/Edit Modal -->
+<div class="modal-overlay" *ngIf="showModal" (click)="$event.target === $event.currentTarget && (showModal = false)">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h3>{{ editMode ? 'Edit Size' : 'Add Size' }}</h3>
+            <button class="btn-close" (click)="showModal = false"><i class="fa fa-times"></i></button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label>Name <span class="required">*</span></label>
+                <input type="text" [(ngModel)]="form.name" placeholder="e.g. Small, Medium, Large" [class.error]="errors.name" />
+                <span class="error-msg" *ngIf="errors.name">{{ errors.name }}</span>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-cancel" (click)="showModal = false">Cancel</button>
+            <button class="btn-primary" (click)="save()" [disabled]="saving">
+                <i class="fa fa-spinner fa-spin" *ngIf="saving"></i>
+                {{ saving ? 'Saving...' : 'Save' }}
+            </button>
+        </div>
+    </div>
+</div>

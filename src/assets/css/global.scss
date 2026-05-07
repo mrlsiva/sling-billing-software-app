@@ -80,15 +80,15 @@ body {
 }
 
 .mt-3 {
-    margin-top: 1rem;
+    margin-top: 0.75rem;
 }
 
 .ft-10 {
-    font-size: 10px;
+    font-size: 7.5px;
 }
 
 .pa-1 {
-    padding: 8px;
+    padding: 6px;
 }
 
 .warning-bg {
@@ -112,12 +112,11 @@ app-header {
     top: 0;
     z-index: 900;
     /* keep header above content but below overlays like side-menu (which uses 1000+) */
-    background: var(--color-primary-bg, #fff);
 }
 
 /* Ensure the main area doesn't hide under the sticky header; add top padding equal to header height */
 .app-main {
-    padding-top: 0.75rem;
+    padding-top: 0.5625rem;
     /* small padding retained; header space is reserved via top offset if necessary */
 }
 

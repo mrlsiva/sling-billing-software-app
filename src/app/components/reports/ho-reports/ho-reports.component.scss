@@ -1,0 +1,4 @@
+@use '../../inventory/inventory-shared.scss';
+.tabs { display: flex; gap: 2px; margin-bottom: 14px; border-bottom: 2px solid #e8e8e8; }
+.tabs button { padding: 8px 18px; border: none; background: none; font-size: 13px; font-weight: 600; color: #888; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; text-transform: capitalize; }
+.tabs button.active { color: var(--color-primary-bg); border-bottom-color: var(--color-primary-bg); }

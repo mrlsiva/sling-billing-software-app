@@ -1,0 +1,99 @@
+<div class="po-page">
+    <div class="page-header">
+        <h2 class="page-title"><i class="fa fa-file-invoice"></i> Purchase Orders</h2>
+        <div class="header-actions">
+            <div class="search-box">
+                <i class="fa fa-search"></i>
+                <input type="text" [(ngModel)]="search" placeholder="Search vendor..." (keyup.enter)="load()" />
+            </div>
+            <button class="btn-primary" (click)="createNew()">
+                <i class="fa fa-plus"></i> Create Purchase Order
+            </button>
+        </div>
+    </div>
+
+    <div class="section-card">
+        <app-skeleton-loader *ngIf="loading" type="table" [count]="6"></app-skeleton-loader>
+        <ng-container *ngIf="!loading">
+            <div class="table-responsive" *ngIf="orders.length > 0">
+                <table class="dt">
+                    <thead>
+                        <tr>
+                            <th>Invoice No</th>
+                            <th>Vendor</th>
+                            <th>Invoice Date</th>
+                            <th>Due Date</th>
+                            <th class="tr">Gross</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let o of orders">
+                            <td><strong>{{ o.invoice_no ?? o.invoice_number }}</strong></td>
+                            <td>{{ o.vendor?.name ?? o.vendor_name ?? '-' }}</td>
+                            <td>{{ o.invoice_date | dateFormat }}</td>
+                            <td>{{ o.due_date | dateFormat }}</td>
+                            <td class="tr">{{ (o.gross ?? o.bill_amount ?? 0) | amount }}</td>
+                            <td><app-status-badge [status]="o.status ?? o.payment_status"></app-status-badge></td>
+                            <td>
+                                <button class="btn-icon" title="View items" (click)="viewDetail(o)">
+                                    <i class="fa fa-eye"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <app-empty-state *ngIf="orders.length === 0" title="No purchase orders found" icon="fa fa-file-invoice"></app-empty-state>
+        </ng-container>
+    </div>
+</div>
+
+<!-- Detail Slide Over -->
+<div class="slide-overlay" *ngIf="showDetail" (click)="$event.target === $event.currentTarget && (showDetail = false)">
+    <div class="slide-panel">
+        <div class="panel-header">
+            <h3>Invoice: {{ detailOrder?.invoice_no ?? detailOrder?.invoice_number }}</h3>
+            <button (click)="showDetail = false"><i class="fa fa-times"></i></button>
+        </div>
+        <div class="panel-body">
+            <app-skeleton-loader *ngIf="loadingDetail" type="table" [count]="4"></app-skeleton-loader>
+            <ng-container *ngIf="!loadingDetail">
+                <div class="table-responsive" *ngIf="detailItems.length > 0">
+                    <table class="dt-sm">
+                        <thead>
+                            <tr>
+                                <th>Category</th>
+                                <th>Sub-Cat</th>
+                                <th>Product</th>
+                                <th>Unit</th>
+                                <th class="tr">Qty</th>
+                                <th class="tr">Price/Unit</th>
+                                <th class="tr">Tax</th>
+                                <th class="tr">Discount</th>
+                                <th class="tr">Net</th>
+                                <th class="tr">Gross</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let item of detailItems">
+                                <td>{{ item.category ?? '-' }}</td>
+                                <td>{{ item.sub_category ?? '-' }}</td>
+                                <td>{{ item.product ?? item.product_name }}</td>
+                                <td>{{ item.unit ?? '-' }}</td>
+                                <td class="tr">{{ item.quantity ?? item.qty }}</td>
+                                <td class="tr">{{ item.price_per_unit ?? item.price | amount }}</td>
+                                <td class="tr">{{ item.tax ?? 0 }}%</td>
+                                <td class="tr">{{ (item.discount ?? 0) | amount }}</td>
+                                <td class="tr">{{ (item.net ?? item.net_cost ?? 0) | amount }}</td>
+                                <td class="tr">{{ (item.gross ?? item.gross_cost ?? 0) | amount }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <app-empty-state *ngIf="detailItems.length === 0" title="No items found"></app-empty-state>
+            </ng-container>
+        </div>
+    </div>
+</div>

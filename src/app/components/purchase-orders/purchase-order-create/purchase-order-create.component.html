@@ -1,0 +1,162 @@
+<div class="create-page">
+    <div class="page-header">
+        <h2 class="page-title"><i class="fa fa-plus-circle"></i> Create Purchase Order</h2>
+        <button class="btn-secondary" routerLink="/purchase-orders">
+            <i class="fa fa-arrow-left"></i> Back
+        </button>
+    </div>
+
+    <!-- Step 1: Header -->
+    <div class="section-card">
+        <h3 class="section-title">Order Details</h3>
+        <div class="form-grid">
+            <div class="form-group">
+                <label>Vendor *</label>
+                <select [(ngModel)]="header.vendor_id" [class.error]="errors.vendor_id">
+                    <option value="">Select vendor</option>
+                    <option *ngFor="let v of vendors" [value]="v.id">{{ v.name }}</option>
+                </select>
+                <span class="error-msg" *ngIf="errors.vendor_id">{{ errors.vendor_id }}</span>
+            </div>
+            <div class="form-group">
+                <label>Payment Method *</label>
+                <select [(ngModel)]="header.payment_id">
+                    <option value="">Select method</option>
+                    <option *ngFor="let p of payments" [value]="p.id">{{ p.name }}</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Invoice No *</label>
+                <input type="text" [(ngModel)]="header.invoice_no" placeholder="e.g. INV-001" [class.error]="errors.invoice_no" />
+                <span class="error-msg" *ngIf="errors.invoice_no">{{ errors.invoice_no }}</span>
+            </div>
+            <div class="form-group">
+                <label>Invoice Date *</label>
+                <input type="date" [(ngModel)]="header.invoice_date" [class.error]="errors.invoice_date" />
+                <span class="error-msg" *ngIf="errors.invoice_date">{{ errors.invoice_date }}</span>
+            </div>
+            <div class="form-group">
+                <label>Due Date</label>
+                <input type="date" [(ngModel)]="header.due_date" />
+            </div>
+        </div>
+    </div>
+
+    <!-- Step 2: Product Rows -->
+    <div class="section-card">
+        <div class="section-title-row">
+            <h3 class="section-title">Products</h3>
+            <button class="btn-primary" (click)="addRow()">
+                <i class="fa fa-plus"></i> Add Product
+            </button>
+        </div>
+
+        <div class="product-row" *ngFor="let row of rows; let i = index">
+            <div class="row-header">
+                <span class="row-num">Product {{ i + 1 }}</span>
+                <button class="btn-icon-danger" (click)="removeRow(i)"><i class="fa fa-trash"></i></button>
+            </div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Category</label>
+                    <select [(ngModel)]="row.category" (change)="onCategoryChange(row)">
+                        <option value="">Select</option>
+                        <option *ngFor="let c of row.categories" [value]="c.id">{{ c.name }}</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Sub-Category</label>
+                    <select [(ngModel)]="row.subCategory" (change)="onSubCategoryChange(row)">
+                        <option value="">Select</option>
+                        <option *ngFor="let s of row.subCategories" [value]="s.id">{{ s.name }}</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Product</label>
+                    <select [(ngModel)]="row.product" (change)="onProductChange(row)">
+                        <option value="">Select</option>
+                        <option *ngFor="let p of row.products" [value]="p.id">{{ p.name }}</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Unit</label>
+                    <input type="text" [value]="row.unit" readonly class="readonly-input" />
+                </div>
+                <div class="form-group">
+                    <label>Current Stock</label>
+                    <div class="stock-chip">{{ row.stock }}</div>
+                </div>
+                <div class="form-group">
+                    <label>Qty *</label>
+                    <input type="number" [(ngModel)]="row.qty" min="1" (input)="recalc(row)" />
+                </div>
+                <div class="form-group">
+                    <label>Price/Unit *</label>
+                    <input type="number" [(ngModel)]="row.price" min="0" (input)="recalc(row)" />
+                </div>
+                <div class="form-group">
+                    <label>Tax %</label>
+                    <input type="number" [(ngModel)]="row.taxPercent" min="0" (input)="recalc(row)" />
+                </div>
+                <div class="form-group">
+                    <label>Discount</label>
+                    <input type="number" [(ngModel)]="row.discount" min="0" (input)="recalc(row)" />
+                </div>
+                <div class="form-group">
+                    <label>Net Cost</label>
+                    <div class="calc-value">{{ row.netCost | amount }}</div>
+                </div>
+                <div class="form-group">
+                    <label>Gross Cost</label>
+                    <div class="calc-value highlight">{{ row.grossCost | amount }}</div>
+                </div>
+            </div>
+
+            <!-- IMEI sub-section -->
+            <div class="imei-section" *ngIf="row.imeiType">
+                <h4>IMEI Numbers</h4>
+                <div class="imei-input-row">
+                    <input type="text" [(ngModel)]="row.imeiInput" placeholder="Enter 15-digit IMEI" maxlength="15"
+                        (keyup.enter)="addImei(row)" />
+                    <button class="btn-add" (click)="addImei(row)">Add</button>
+                </div>
+                <div class="imei-chips">
+                    <span class="imei-chip" *ngFor="let imei of row.imeis; let j = index">
+                        {{ imei }} <button (click)="removeImei(row, j)"><i class="fa fa-times"></i></button>
+                    </span>
+                </div>
+            </div>
+
+            <!-- Variations -->
+            <div class="variation-section" *ngIf="row.variations.length > 0">
+                <h4>Variations</h4>
+                <table class="var-table">
+                    <thead>
+                        <tr><th>Size</th><th>Colour</th><th>Current Qty</th><th>Transfer Qty</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let v of row.variations">
+                            <td>{{ v.size ?? '-' }}</td>
+                            <td>{{ v.colour ?? '-' }}</td>
+                            <td>{{ v.quantity ?? v.qty ?? 0 }}</td>
+                            <td><input type="number" [(ngModel)]="v.transfer_qty" min="0" class="qty-input" /></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="empty-rows" *ngIf="rows.length === 0">
+            <i class="fa fa-box"></i> Click "Add Product" to add items
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer-bar">
+        <div class="grand-total">Grand Total: <strong>{{ grandTotal | amount }}</strong></div>
+        <button class="btn-primary" (click)="save()" [disabled]="saving">
+            <i class="fa fa-spinner fa-spin" *ngIf="saving"></i>
+            {{ saving ? 'Saving...' : 'Save Purchase Order' }}
+        </button>
+    </div>
+</div>

@@ -1,0 +1,206 @@
+@use '../inventory/inventory-shared.scss';
+
+// ── Tabs ─────────────────────────────────────────────────
+.page-tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 14px;
+}
+.page-tab {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid var(--color-neutral-400);
+    border-radius: 6px;
+    background: #fff;
+    color: var(--color-neutral-600);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+    i { font-size: 11px; }
+    &.active {
+        background: var(--color-primary-bg);
+        color: #fff;
+        border-color: var(--color-primary-bg);
+    }
+}
+
+// ── Check label ──────────────────────────────────────────
+.check-label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--color-neutral-600);
+    cursor: pointer;
+    white-space: nowrap;
+    input { accent-color: var(--color-primary-bg); cursor: pointer; }
+}
+
+// ── Qty pill ────────────────────────────────────────────
+.qty-pill {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    &.in  { background: #c6f6d5; color: #22543d; }
+    &.out { background: #fed7d7; color: #c53030; }
+}
+
+// ── Code chip ───────────────────────────────────────────
+.code-chip {
+    font-size: 10px;
+    font-family: monospace;
+    color: #999;
+    background: #f4f4f4;
+    padding: 1px 6px;
+    border-radius: 4px;
+}
+
+.tc { text-align: center; }
+
+// ── Modal ───────────────────────────────────────────────
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.5);
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 12px;
+}
+.modal-box {
+    background: #fff;
+    border-radius: 8px;
+    width: 100%;
+    max-width: 520px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 40px rgba(0,0,0,.15);
+}
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--color-neutral-200);
+    background: var(--color-primary-bg-light);
+    h3 { margin: 0; font-size: 14px; font-weight: 600; color: var(--color-primary-bg); }
+}
+.modal-close {
+    background: none;
+    border: none;
+    color: var(--color-neutral-600);
+    cursor: pointer;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    font-size: 13px;
+    &:hover { background: var(--color-neutral-200); }
+}
+.modal-body { padding: 16px 18px; }
+.modal-footer {
+    display: flex;
+    gap: 10px;
+    padding: 12px 18px;
+    border-top: 1px solid var(--color-neutral-200);
+    justify-content: flex-end;
+}
+.btn-cancel {
+    padding: 7px 18px;
+    border: 1px solid var(--color-neutral-300);
+    border-radius: 6px;
+    background: #fff;
+    color: var(--color-neutral-600);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+// ── Form ────────────────────────────────────────────────
+.form-group {
+    margin-bottom: 12px;
+    label { display: block; font-size: 11px; font-weight: 600; color: var(--color-neutral-700); margin-bottom: 4px; }
+    input, select {
+        width: 100%;
+        height: 34px;
+        padding: 0 10px;
+        border: 1px solid var(--color-neutral-400);
+        border-radius: 6px;
+        font-size: 12px;
+        color: var(--color-neutral-800);
+        outline: none;
+        box-sizing: border-box;
+        &:focus { border-color: var(--color-primary-bg); }
+        &:disabled { background: var(--color-neutral-200); color: var(--color-neutral-500); }
+    }
+}
+.radio-row { display: flex; gap: 8px; }
+.radio-opt {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 10px;
+    border: 1px solid var(--color-neutral-300);
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--color-neutral-600);
+    cursor: pointer;
+    transition: all .15s;
+    input { accent-color: var(--color-primary-bg); }
+    &.sel { border-color: var(--color-primary-bg); color: var(--color-primary-bg); background: var(--color-primary-bg-light); }
+}
+.stock-info-box {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    background: #c6f6d5;
+    color: #22543d;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    margin-bottom: 12px;
+    i { color: #38a169; }
+    strong { font-size: 16px; margin: 0 2px; }
+}
+.section-sub-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--color-neutral-700);
+}
+.imei-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+.imei-tag {
+    padding: 3px 10px;
+    border: 1px solid var(--color-neutral-300);
+    border-radius: 20px;
+    font-size: 10px;
+    font-family: monospace;
+    cursor: pointer;
+    color: var(--color-neutral-600);
+    transition: all .15s;
+    &.sel { border-color: var(--color-primary-bg); background: var(--color-primary-bg-light); color: var(--color-primary-bg); }
+}
+.qty-input {
+    width: 64px;
+    height: 28px;
+    padding: 0 6px;
+    border: 1px solid var(--color-neutral-300);
+    border-radius: 5px;
+    font-size: 12px;
+    text-align: center;
+    outline: none;
+    &:focus { border-color: var(--color-primary-bg); }
+}
